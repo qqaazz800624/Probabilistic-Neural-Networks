@@ -48,8 +48,8 @@ class MontgomeryDataset(Dataset):
 
         if self.transform:
             transformed = self.transform(data_list)
-            image = transformed['image'].unsqueeze(0)
-            target = transformed['target'].unsqueeze(0)
+            image = transformed['image']
+            target = transformed['target']
 
         return {'image': image, 'target': target}
 
@@ -57,44 +57,54 @@ class MontgomeryDataset(Dataset):
 #%%
 
 
-'''
+# import json 
+# from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
+# from monai.transforms import ConcatItemsd, RandAffined, DeleteItemsd, EnsureTyped
+# from manafaln.transforms import LoadJSONd, ParseXAnnotationSegmentationLabeld, Interpolated, Filld, OverlayMaskd
 
-import json 
-from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-from monai.transforms import ConcatItemsd, RandAffined, DeleteItemsd, EnsureTyped
-from manafaln.transforms import LoadJSONd, ParseXAnnotationSegmentationLabeld, Interpolated, Filld, OverlayMaskd
-
-train_transforms = Compose([
-                        LoadImaged(keys=['image', 'target']),
-                                ])
-
-
-data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet'
-datalist_path = os.path.join(data_root, 'datalist_fold_montgomery.json')
-
-with open(datalist_path) as f:
-     data_list = json.load(f)
-
-sample = data_list['fold_0'][0]
-
-image_path = os.path.join(data_root, sample['image'])
-target_path = os.path.join(data_root, sample['target'])
-
-data_dict = {
-    'image': image_path, 
-    'target': target_path
-}
-
-transformed = train_transforms(data_dict)
-transformed['image'].shape, transformed['target'].shape
-transformed['target']
-
-'''
+# train_transforms = Compose([
+#                         LoadImaged(keys=['image', 'target'], ensure_channel_first=True),
+#                         Resized(keys=['image', 'target'], 
+#                                         spatial_size=[512, 512]),
+#                         ScaleIntensityd(keys=['image', 'target']),
+#                         EnsureTyped(keys=['image', 'target'], dtype='float32')
+#                                 ])
 
 
+# data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet'
+# datalist_path = os.path.join(data_root, 'datalist_fold_montgomery.json')
+
+# with open(datalist_path) as f:
+#      data_list = json.load(f)
+
+# sample = data_list['fold_0'][1]
+
+# image_path = os.path.join(data_root, sample['image'])
+# target_path = os.path.join(data_root, sample['target'])
+
+# data_dict = {
+#     'image': image_path, 
+#     'target': target_path
+# }
+
+# transformed = train_transforms(data_dict)
+# #%%
+
+# transformed
+
+# #%%
+# transformed['image'].shape, transformed['target'].shape
+
+# #%%
+
+# transformed['target']
+
+# #%%
+
+# import matplotlib.pyplot as plt
+
+# plt.imshow(transformed['image'][0].T, cmap='gray')
 
 
 #%%
-
-
 
