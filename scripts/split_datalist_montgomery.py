@@ -29,8 +29,8 @@ def main():
         if os.path.exists(mask_path):
             data_list.append({
                 'filename': filename,
-                'image': image_path,
-                'taget': mask_path
+                'image': os.path.join('CXR_png', filename),
+                'taget': os.path.join('ManualMask/combinedMask', filename)
             })
 
     five_fold_datalist = {}

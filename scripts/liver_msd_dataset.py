@@ -7,14 +7,6 @@ import torch
 import nibabel as nib
 from typing import Dict
 
-'/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MSD/Task03_Liver/dataset.json'
-
-
-
-
-
-
-#%%
 
 
 class MSDLiverDataset(Dataset):
