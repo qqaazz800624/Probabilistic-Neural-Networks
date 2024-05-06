@@ -4,7 +4,6 @@ import os
 import json
 import torch
 from torch.utils.data import Dataset
-from PIL import Image
 import torchvision.transforms as transforms
 from typing import List, Dict
 
