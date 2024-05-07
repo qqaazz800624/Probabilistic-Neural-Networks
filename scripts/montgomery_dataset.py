@@ -51,7 +51,7 @@ class MontgomeryDataset(Dataset):
             image = transformed['image']
             target = transformed['target']
 
-        return {'image': image, 'target': target}
+        return {'input': image, 'target': target}
 
 
 #%%
