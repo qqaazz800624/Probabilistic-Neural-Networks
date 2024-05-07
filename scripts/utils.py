@@ -3,7 +3,9 @@ import torch
 import torch.nn as nn
 from torch import Tensor
 from typing import Callable
-
+from manafaln.transforms import LoadJSON
+from monai.transforms import LoadImage, Resize, ScaleIntensity
+import os
 
 #%%
 def process_segmentation_prediction(
@@ -34,3 +36,35 @@ def process_segmentation_prediction(
     
     return {"pred": mean, "pred_uct": entropy, "logits": agg_logits, "samples": samples}
 
+#%%
+
+def image_preprocessor(fold_no, img_serial,
+                       data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet',
+                       datalist = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet/datalist_fold_montgomery.json'): 
+    datalist = LoadJSON(json_only=True)(datalist)
+    img_path = datalist[fold_no][img_serial]['image']
+    image_loader = LoadImage(image_only=True, ensure_channel_first= True)
+    resizer = Resize(spatial_size = [512, 512])
+    scaler = ScaleIntensity()
+    img = image_loader(os.path.join(data_root, img_path))
+    img = resizer(img)
+    preprocessed_input_image = scaler(img)
+
+    return preprocessed_input_image
+
+#%%
+
+def label_preprocessor(fold_no, img_serial,
+                       data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet',
+                       datalist = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet/datalist_fold_montgomery.json'):
+    datalist = LoadJSON(json_only=True)(datalist)
+    labelfile = os.path.join(data_root, datalist[fold_no][img_serial]['target'])
+    image_loader = LoadImage(image_only=True, ensure_channel_first= True)
+    resizer = Resize(spatial_size = [512, 512])
+    scaler = ScaleIntensity()
+    label = image_loader(os.path.join(data_root, labelfile))
+    label = resizer(label)
+    label = scaler(label)
+    return label
+
+#%%

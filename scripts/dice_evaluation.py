@@ -9,7 +9,7 @@ import matplotlib.pyplot as plt
 from monai.transforms import LoadImage, Resize, ScaleIntensity
 from instance_seg import InstanceSegmentation
 import json
-
+from utils import image_preprocessor, label_preprocessor
 
 def dice_preprocessor(fold_no, 
                       img_serial,
@@ -19,10 +19,7 @@ def dice_preprocessor(fold_no,
     datalist = "/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet/datalist_fold_montgomery.json"
     data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet'
     datalist = LoadJSON(json_only=True)(datalist)
-
-    image_loader = LoadImage(image_only=True, ensure_channel_first= True)
-    resizer = Resize(spatial_size = [512, 512])
-    scaler = ScaleIntensity()
+    generator_input = image_preprocessor(fold_no, img_serial)
 
     model_weight = f'/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'  
     model_config = {'name': model_name,
@@ -35,19 +32,10 @@ def dice_preprocessor(fold_no,
                         }
     masks_generator = InstanceSegmentation(model_config=model_config, model_weight=model_weight, instance_only=True)
 
-    json_file = open("/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet/datalist_fold_montgomery.json")
-    img_paths = json.load(json_file)
-    img_path = img_paths[fold_no][img_serial]['image']
-    img = image_loader(os.path.join(data_root, img_path))
-    img = resizer(img)
-    generator_input = scaler(img)
     generator_output = masks_generator(generator_input)
     prediction = torch.from_numpy(generator_output.unsqueeze(0).unsqueeze(0).detach().numpy())
 
-    labelfile = os.path.join(data_root, datalist[fold_no][img_serial]['target'])
-    label = image_loader(os.path.join(data_root, labelfile))
-    label = resizer(label)
-    label = scaler(label)
+    label = label_preprocessor(fold_no, img_serial)
     overlayMasker = OverlayMask(colors=['#7f007f'])
     overlaymask=overlayMasker(image=generator_input, masks=label)
     
@@ -68,7 +56,7 @@ dice_scores = []
 from tqdm import tqdm 
 
 for img_serial in tqdm(range(len(img_paths['fold_4']))):
-    overlaymask, filled, prediction, label, generator_output = dice_preprocessor(fold_no=fold_no, img_serial=img_serial)
+    overlaymask, prediction, label, generator_output = dice_preprocessor(fold_no=fold_no, img_serial=img_serial)
     dice_metric(y_pred=prediction, y=label)
     dice_score = dice_metric.aggregate().item()
     dice_scores.append(dice_score)
