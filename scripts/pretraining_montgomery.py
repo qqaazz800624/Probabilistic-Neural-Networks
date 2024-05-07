@@ -8,8 +8,8 @@ from lightning.pytorch.loggers import TensorBoardLogger
 from unet_lightningmodule import UNetModule
 
 # Initialize the model module
-model = DeepLabV3PlusModule()
-#model = UNetModule()
+#model = DeepLabV3PlusModule()
+model = UNetModule()
 montgomery_data_module = MontgomeryDataModule()
 
 

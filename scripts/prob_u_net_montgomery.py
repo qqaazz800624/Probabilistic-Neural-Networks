@@ -13,7 +13,7 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, Mo
 
 from prob_unet import ProbUNet
 
-from montgomery_datamodule import MontgomeryDataModule
+from montgomery_ProbNet_datamodule import MontgomeryDataModule
 
 
 my_temp_dir = 'results/'
@@ -33,18 +33,18 @@ loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss'
 
 
 if model_name == 'Unet':
-    model = Unet(in_channels=3, 
+    model = Unet(in_channels=1, 
                 classes=1, 
                 encoder_name = 'tu-resnest50d', 
                 encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/cardiovascular-calcification/results/lightning_logs/version_0/checkpoints/best_model.ckpt'
+    model_weight = '/home/u/qqaazz800624/cardiovascular-calcification/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
 
 elif model_name == 'DeepLabV3Plus':
-    model = DeepLabV3Plus(in_channels=3, 
+    model = DeepLabV3Plus(in_channels=1, 
                         classes=1, 
                         encoder_name = 'tu-resnest50d', 
                         encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/cardiovascular-calcification/results/lightning_logs/version_2/checkpoints/best_model.ckpt'
+    model_weight = '/home/u/qqaazz800624/cardiovascular-calcification/results/lightning_logs/version_0/checkpoints/best_model.ckpt'
 
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 for k in list(model_weight.keys()):
