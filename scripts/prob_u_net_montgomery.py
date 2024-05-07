@@ -27,7 +27,7 @@ model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
 batch_size_train = 12
-loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss']
+loss_fn = 'DiceLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss']
 
 # =========================================== #
 
@@ -37,14 +37,14 @@ if model_name == 'Unet':
                 classes=1, 
                 encoder_name = 'tu-resnest50d', 
                 encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/cardiovascular-calcification/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
+    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
 
 elif model_name == 'DeepLabV3Plus':
     model = DeepLabV3Plus(in_channels=1, 
                         classes=1, 
                         encoder_name = 'tu-resnest50d', 
                         encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/cardiovascular-calcification/results/lightning_logs/version_0/checkpoints/best_model.ckpt'
+    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_0/checkpoints/best_model.ckpt'
 
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 for k in list(model_weight.keys()):
@@ -62,7 +62,6 @@ Prob_UNet = ProbUNet(
     model=model,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
-    #lr_scheduler=partial(ReduceLROnPlateau),
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
     beta=beta,
     latent_dim=latent_dim,
@@ -89,7 +88,7 @@ trainer = Trainer(
     devices=1,
     max_epochs=max_epochs,  # number of epochs we want to train
     logger=logger,  # log training metrics for later evaluation
-    log_every_n_steps=8,
+    log_every_n_steps=3,
     enable_checkpointing=True,
     enable_progress_bar=True,
     default_root_dir=my_temp_dir,

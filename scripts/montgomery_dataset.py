@@ -57,69 +57,81 @@ class MontgomeryDataset(Dataset):
 #%%
 
 
-import json 
-from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-from monai.transforms import ConcatItemsd, RandAffined, DeleteItemsd, EnsureTyped
-from manafaln.transforms import LoadJSONd, ParseXAnnotationSegmentationLabeld, Interpolated, Filld, OverlayMaskd
+# import json 
+# from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
+# from monai.transforms import EnsureTyped, AsDiscreted
+# from manafaln.transforms import LoadJSONd, ParseXAnnotationSegmentationLabeld, Interpolated, Filld, OverlayMaskd
 
-train_transforms = Compose([
-                        LoadImaged(keys=['image', 'target'], ensure_channel_first=True),
-                        Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                        ScaleIntensityd(keys=['image', 'target']),
-                        RandAffined(keys=['image', 'target'],
-                                            prob=0.5,
-                                            rotate_range=0.25,
-                                            shear_range=0.2,
-                                            translate_range=0.1,
-                                            scale_range=0.2,
-                                            padding_mode='zeros'),
-                        EnsureTyped(keys=['image', 'target'], dtype='float32')
-                                ])
+# train_transforms = Compose([
+#                         LoadImaged(keys=['image', 'target'], ensure_channel_first=True),
+#                         Resized(keys=['image', 'target'], 
+#                                         spatial_size=[512, 512]),
+#                         ScaleIntensityd(keys=['image', 'target']),
+#                         AsDiscreted(keys=['target'], threshold=0.5),
+#                         EnsureTyped(keys=['image', 'target'], dtype='float32')
+#                                 ])
 
 
-data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet'
-datalist_path = os.path.join(data_root, 'datalist_fold_montgomery.json')
+# data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet'
+# datalist_path = os.path.join(data_root, 'datalist_fold_montgomery.json')
 
-with open(datalist_path) as f:
-     data_list = json.load(f)
+# with open(datalist_path) as f:
+#      data_list = json.load(f)
 
-sample = data_list['fold_0'][1]
+# sample = data_list['fold_0'][1]
 
-image_path = os.path.join(data_root, sample['image'])
-target_path = os.path.join(data_root, sample['target'])
+# image_path = os.path.join(data_root, sample['image'])
+# target_path = os.path.join(data_root, sample['target'])
 
-data_dict = {
-    'image': image_path, 
-    'target': target_path
-}
+# data_dict = {
+#     'image': image_path, 
+#     'target': target_path
+# }
 
-transformed = train_transforms(data_dict)
+# transformed = train_transforms(data_dict)
+# #%%
+
+# transformed
+
+# #%%
+# transformed['image'].shape, transformed['target'].shape
+
+# #%%
+
+# transformed['target']
+
+# #%%
+
+# import matplotlib.pyplot as plt
+
+# plt.imshow(transformed['image'][0].T, cmap='gray')
+
+
+# #%%
+
+
+# import matplotlib.pyplot as plt
+
+# plt.imshow(transformed['target'][0].T, cmap='gray')
+
+
+# #%%
+# from monai.transforms import AsDiscrete
+# import torch
+
+# discreter = AsDiscrete(threshold=0.5)
+# torch.unique(discreter(transformed['target'][0]))
+
+# torch.unique(transformed['target'][0].T)
+
+
+# #%%
+
+# import matplotlib.pyplot as plt
+# from monai.transforms import AsDiscrete
+
+# discreter = AsDiscrete(threshold=0.5)
+# plt.imshow(discreter(transformed['target'][0]).T, cmap='gray')
+
+
 #%%
-
-transformed
-
-#%%
-transformed['image'].shape, transformed['target'].shape
-
-#%%
-
-transformed['target']
-
-#%%
-
-import matplotlib.pyplot as plt
-
-plt.imshow(transformed['image'][0].T, cmap='gray')
-
-
-#%%
-
-
-import matplotlib.pyplot as plt
-
-plt.imshow(transformed['target'][0].T, cmap='gray')
-
-
-#%%
-
