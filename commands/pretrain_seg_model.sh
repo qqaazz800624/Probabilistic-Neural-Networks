@@ -1,0 +1,1 @@
+CUDA_VISIBLE_DEVICES=1 python ./scripts/pretraining_montgomery.py
