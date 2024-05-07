@@ -50,6 +50,13 @@ class MontgomeryDataModule(LightningDataModule):
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
+                                RandAffined(keys=['image', 'target'],
+                                            prob=0.5,
+                                            rotate_range=0.25,
+                                            shear_range=0.2,
+                                            translate_range=0.1,
+                                            scale_range=0.2,
+                                            padding_mode='zeros'),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
