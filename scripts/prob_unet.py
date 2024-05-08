@@ -216,8 +216,8 @@ class ProbUNet(BaseModule):
         rec_loss_sum = torch.sum(rec_loss)
         rec_loss_mean = torch.mean(rec_loss)
 
-        #loss = -(rec_loss_sum + self.beta * kl_loss) # original version
-        loss = (rec_loss_sum + self.beta * kl_loss) # version 2
+        loss = -(rec_loss_sum + self.beta * kl_loss) # original version
+        #loss = (rec_loss_sum + self.beta * kl_loss) # version 2
 
         return {
             "loss": loss,

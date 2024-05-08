@@ -39,10 +39,7 @@ def dice_preprocessor(fold_no,
     overlayMasker = OverlayMask(colors=['#7f007f'])
     overlaymask=overlayMasker(image=generator_input, masks=label)
     
-    return overlaymask, prediction, label.unsqueeze(0), generator_output
-
-## good: 1, 2, 3, 4, 5, 6, 7
-## bad: 0
+    return overlaymask, prediction, label.unsqueeze(0), generator_output, generator_input
 
 #%%
 
@@ -56,7 +53,7 @@ dice_scores = []
 from tqdm import tqdm 
 
 for img_serial in tqdm(range(len(img_paths['fold_4']))):
-    overlaymask, prediction, label, generator_output = dice_preprocessor(fold_no=fold_no, img_serial=img_serial)
+    overlaymask, prediction, label, generator_output, original_image = dice_preprocessor(fold_no=fold_no, img_serial=img_serial)
     dice_metric(y_pred=prediction, y=label)
     dice_score = dice_metric.aggregate().item()
     dice_scores.append(dice_score)
@@ -85,17 +82,22 @@ np.array(dice_scores)
 
 #%%
 
-model_version_dict = {'DeepLabV3Plus': 'version_0'}
+model_version_dict = {'DeepLabV3Plus': 'version_0',
+                      'Unet': 'version_1'}
 
 model_name = 'DeepLabV3Plus'
 version_no = model_version_dict[model_name]
 
 fold_no = 'fold_4'
 img_serial = 1
-overlaymask, prediction, label, generator_output = dice_preprocessor(fold_no=fold_no, img_serial=img_serial, version_no=version_no, model_name=model_name)
+overlaymask, prediction, label, generator_output, original_image = dice_preprocessor(fold_no=fold_no, img_serial=img_serial, version_no=version_no, model_name=model_name)
 
 
-#%% Original image and label contour
+#%% Original image 
+
+plt.imshow(original_image.T, cmap='gray', aspect='auto')
+
+#%% Original image and target mask
 
 plt.imshow(overlaymask.T, cmap='plasma', aspect='auto')
 
