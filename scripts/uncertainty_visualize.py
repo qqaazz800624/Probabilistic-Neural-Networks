@@ -20,7 +20,7 @@ batch_size_train = 12
 #                       'DeepLabV3Plus': 'version_7'}
 
 # ============ Inference setting ============= #
-num_samples = 100
+num_samples = 200
 loss_fn = 'DiceLoss'  # Valid loss_fn: ['BCEWithLogitsLoss','DiceLoss']
 
 if model_name == 'Unet':
@@ -47,20 +47,22 @@ Prob_UNet = ProbUNet(
     max_epochs=max_epochs,
     model_name= model_name,
     batch_size_train=batch_size_train,
-    loss_fn=loss_fn
+    loss_fn=loss_fn,
+    num_samples=num_samples
     )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_4'
+version_no = 'version_2'
 model_weight = f'/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 Prob_UNet.load_state_dict(model_weight)
 Prob_UNet.eval()
 
 
+#%%
 
 fold_no = 'fold_4'
-img_serial = 1
+img_serial = 0
 preprocessed_input_image = image_preprocessor(fold_no, img_serial)
 prediction_outputs = Prob_UNet.predict_step(preprocessed_input_image.unsqueeze(0))
 
@@ -98,7 +100,8 @@ plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
 import matplotlib.pyplot as plt
 
-plt.imshow(stacked_samples[3].detach().numpy().T, cmap='plasma', aspect='auto')
+plt.imshow(stacked_samples[139].detach().numpy().T, cmap='plasma', aspect='auto', 
+           vmin=0, vmax=4)
 plt.colorbar()
 plt.title(f'Segmentation samples: {fold_no}_{img_serial}')
 

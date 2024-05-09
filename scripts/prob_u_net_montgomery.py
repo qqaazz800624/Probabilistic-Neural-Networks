@@ -22,7 +22,7 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 32
+max_epochs = 64
 model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
