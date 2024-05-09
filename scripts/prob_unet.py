@@ -65,7 +65,7 @@ class ProbUNet(BaseModule):
         num_convs_fcomb: int = 4,
         fcomb_filter_size: int = 32,
         beta: float = 10.0,
-        num_samples: int = 5,
+        num_samples: int = 100,
         max_epochs: int = 32,
         task: str = "multiclass",
         optimizer: OptimizerCallable = torch.optim.Adam,
