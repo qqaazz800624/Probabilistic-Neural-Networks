@@ -216,8 +216,8 @@ class ProbUNet(BaseModule):
         rec_loss_sum = torch.sum(rec_loss)
         rec_loss_mean = torch.mean(rec_loss)
 
-        loss = -(rec_loss_sum + self.beta * kl_loss) # original version
-        #loss = (rec_loss_sum + self.beta * kl_loss) # version 2
+        #loss = -(rec_loss_sum + self.beta * kl_loss) # original version
+        loss = (rec_loss_sum + self.beta * kl_loss) # version 2
 
         return {
             "loss": loss,
@@ -384,7 +384,7 @@ class ProbUNet(BaseModule):
             [self.sample(testing=True) for _ in range(self.num_samples)], dim=-1
         )  # shape: (batch_size, num_classes, height, width, num_samples)
 
-        return process_segmentation_prediction(samples)
+        return process_segmentation_prediction(samples), self.prior_mu, self.prior_sigma
 
 
     def configure_optimizers(self) -> dict[str, Any]:
