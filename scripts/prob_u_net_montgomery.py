@@ -22,9 +22,9 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 64
+max_epochs = 128
 model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
-latent_dim = 6
+latent_dim = 4
 beta = 10
 batch_size_train = 12
 loss_fn = 'DiceLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss']
