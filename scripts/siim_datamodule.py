@@ -44,7 +44,6 @@ class SIIMDataModule(LightningDataModule):
                                 LoadImaged(keys=['image', 'target'], 
                                         ensure_channel_first=True
                                         ),
-                                GrayscaleToRGBd(keys=['image']),
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
@@ -62,7 +61,6 @@ class SIIMDataModule(LightningDataModule):
                                 LoadImaged(keys=['image', 'target'], 
                                         ensure_channel_first=True
                                         ),
-                                GrayscaleToRGBd(keys=['image']),
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
@@ -73,7 +71,6 @@ class SIIMDataModule(LightningDataModule):
                                 LoadImaged(keys=['image', 'target'], 
                                         ensure_channel_first=True
                                         ),
-                                GrayscaleToRGBd(keys=['image']),
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
