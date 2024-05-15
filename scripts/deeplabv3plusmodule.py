@@ -9,11 +9,15 @@ from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, ReduceLROnPlat
 
 
 class DeepLabV3PlusModule(LightningModule):
-    def __init__(self):
+    def __init__(self,
+                 in_channels: int = 1,
+                 num_classes: int = 1):
         super().__init__()
+        self.in_channels = in_channels
+        self.num_classes = num_classes
         self.model = DeepLabV3Plus(
-            in_channels=1,
-            classes=1,
+            in_channels=self.in_channels,
+            classes=self.num_classes,
             encoder_name='tu-resnest50d',
             encoder_weights='imagenet'
         )

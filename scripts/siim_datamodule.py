@@ -6,6 +6,7 @@ from siim_dataset import SIIMDataset
 
 from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
 from monai.transforms import RandAffined, EnsureTyped
+from transforms import GrayscaleToRGBd
 
 class SIIMDataModule(LightningDataModule):
     def __init__(
@@ -43,6 +44,7 @@ class SIIMDataModule(LightningDataModule):
                                 LoadImaged(keys=['image', 'target'], 
                                         ensure_channel_first=True
                                         ),
+                                GrayscaleToRGBd(keys=['image']),
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
@@ -60,6 +62,7 @@ class SIIMDataModule(LightningDataModule):
                                 LoadImaged(keys=['image', 'target'], 
                                         ensure_channel_first=True
                                         ),
+                                GrayscaleToRGBd(keys=['image']),
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
@@ -70,6 +73,7 @@ class SIIMDataModule(LightningDataModule):
                                 LoadImaged(keys=['image', 'target'], 
                                         ensure_channel_first=True
                                         ),
+                                GrayscaleToRGBd(keys=['image']),
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),

@@ -8,10 +8,10 @@ from lightning.pytorch.loggers import TensorBoardLogger
 from unet_lightningmodule import UNetModule
 
 # Initialize the model module
-model = DeepLabV3PlusModule()
+model = DeepLabV3PlusModule(in_channels=3)
 #model = UNetModule()
 siim_data_module = SIIMDataModule()
-
+max_epochs = 64
 
 my_temp_dir = 'results/'
 logger = TensorBoardLogger(my_temp_dir)
@@ -27,7 +27,7 @@ model_summarizer = ModelSummary(max_depth=2)
 trainer = Trainer(
     accelerator='gpu',
     devices=1,
-    max_epochs=32,  # number of epochs we want to train
+    max_epochs=max_epochs,  # number of epochs we want to train
     logger=logger,  # log training metrics for later evaluation
     log_every_n_steps=8,
     enable_checkpointing=True,
