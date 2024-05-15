@@ -13,7 +13,7 @@ from utils import image_preprocessor
 
 max_epochs = 128
 model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
-latent_dim = 4
+latent_dim = 6
 beta = 10
 batch_size_train = 12
 # model_version_dict = {'Unet': 'version_6',
@@ -52,7 +52,7 @@ Prob_UNet = ProbUNet(
     )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_10'
+version_no = 'version_6'
 model_weight = f'/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 Prob_UNet.load_state_dict(model_weight)
@@ -93,17 +93,20 @@ print('Prior sigma: ', prior_sigma)
 
 stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
 
+#%%
 
-#uncertainty_heatmap = torch.var(stacked_samples, dim=0, unbiased=False)
-#uncertainty_heatmap.shape
+stacked_samples = torch.sigmoid(stacked_samples)
 
+#%%
 
 uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
+
+#%%
 
 import matplotlib.pyplot as plt
 
 plt.imshow(uncertainty_heatmap.detach().numpy().T, cmap='plasma', aspect='auto',
-           vmin = 0, vmax = 1
+           #vmin = 0, vmax = 1
            )
 plt.colorbar()
 plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
