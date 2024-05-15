@@ -56,9 +56,10 @@ def image_preprocessor(fold_no, img_serial,
 
 def label_preprocessor(fold_no, img_serial,
                        data_root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet',
-                       datalist = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet/datalist_fold_montgomery.json'):
+                       datalist = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/MontgomerySet/datalist_fold_montgomery.json',
+                       keyword = 'target'):
     datalist = LoadJSON(json_only=True)(datalist)
-    labelfile = os.path.join(data_root, datalist[fold_no][img_serial]['target'])
+    labelfile = os.path.join(data_root, datalist[fold_no][img_serial][keyword])
     image_loader = LoadImage(image_only=True, ensure_channel_first= True)
     resizer = Resize(spatial_size = [512, 512])
     scaler = ScaleIntensity()
