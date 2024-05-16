@@ -65,8 +65,8 @@ class ProbUNet(BaseModule):
         num_convs_fcomb: int = 4,
         fcomb_filter_size: int = 32,
         beta: float = 10.0,
-        gamma: float = 2,
-        lambd: float = 0.5,
+        gamma: float = -1,
+        lambd: float = 10,
         num_samples: int = 100,
         max_epochs: int = 32,
         task: str = "multiclass",
@@ -219,9 +219,9 @@ class ProbUNet(BaseModule):
         rec_loss_y2_sum = torch.sum(rec_loss_y2)
         rec_loss_y1 = self.criterion(reconstruction, seg_mask_target)
         rec_loss_y1_sum = torch.sum(rec_loss_y1)
-        increment = rec_loss_y1_sum - rec_loss_y2_sum + self.gamma
+        penalty = rec_loss_y1_sum - rec_loss_y2_sum - self.gamma
 
-        loss = self.beta*kl_loss + rec_loss_y2_sum + self.lambd*increment 
+        loss = self.beta*kl_loss + rec_loss_y1_sum + rec_loss_y2_sum + self.lambd*penalty 
 
         # rec_loss = self.criterion(reconstruction, seg_mask_target)
         # rec_loss_sum = torch.sum(rec_loss)
@@ -235,7 +235,8 @@ class ProbUNet(BaseModule):
             "rec_loss_y2_sum": rec_loss_y2_sum,
             "rec_loss_y1_sum": rec_loss_y1_sum,
             "kl_loss": kl_loss,
-            "increment": reconstruction,
+            "penalty": penalty,
+            "reconstruction": reconstruction
         }
 
     def kl_divergence(
@@ -316,13 +317,21 @@ class ProbUNet(BaseModule):
         """
         loss_dict = self.compute_loss(batch)
 
-        self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"])
-        self.log("train_kl_loss", loss_dict["kl_loss"])
+        self.log("train_loss", loss_dict["loss"], on_epoch=True, prog_bar=True, logger=True)
+        self.log("train_rec_loss_y1_sum", loss_dict["rec_loss_y1_sum"], on_epoch=True, logger=True)
+        self.log("train_rec_loss_y2_sum", loss_dict["rec_loss_y2_sum"], on_epoch=True, logger=True)
+        self.log("train_kl_loss", loss_dict["kl_loss"], on_epoch=True, logger=True)
+        self.log("train_penalty", loss_dict["penalty"], on_epoch=True, logger=True, prog_bar=True)
+
+        self.train_metrics(loss_dict["reconstruction"], batch[self.target_key])
+
+        # self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True)
+        # self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"])
+        # self.log("train_kl_loss", loss_dict["kl_loss"])
 
         # compute metrics with reconstruction
-        self.train_metrics(loss_dict["reconstruction"], batch[self.target_key])
+        #self.train_metrics(loss_dict["reconstruction"], batch[self.target_key])
 
         # return loss to optimize
         return loss_dict["loss"]
@@ -343,8 +352,8 @@ class ProbUNet(BaseModule):
         loss_dict = self.compute_loss(batch)
 
         self.log("val_loss", loss_dict["loss"])
-        self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"])
-        self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"])
+        self.log("val_rec_loss_y1_sum", loss_dict["rec_loss_y1_sum"])
+        self.log("val_rec_loss_y2_sum", loss_dict["rec_loss_y2_sum"])
         self.log("val_kl_loss", loss_dict["kl_loss"])
         # compute metrics with reconstruction
         self.val_metrics(loss_dict["reconstruction"], batch[self.target_key])

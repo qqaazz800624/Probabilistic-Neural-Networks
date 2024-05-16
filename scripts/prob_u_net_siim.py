@@ -25,7 +25,7 @@ max_epochs = 128
 model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
-batch_size_train = 32
+batch_size_train = 16
 loss_fn = 'DiceLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss']
 
 # =========================================== #

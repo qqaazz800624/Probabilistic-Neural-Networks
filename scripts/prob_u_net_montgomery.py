@@ -11,7 +11,8 @@ from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 
-from prob_unet import ProbUNet
+#from prob_unet import ProbUNet
+from prob_unet_proposed import ProbUNet
 
 from montgomery_ProbNet_datamodule import MontgomeryDataModule
 
@@ -22,9 +23,9 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 128
+max_epochs = 64
 model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
-latent_dim = 4
+latent_dim = 6
 beta = 10
 batch_size_train = 12
 loss_fn = 'DiceLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss']

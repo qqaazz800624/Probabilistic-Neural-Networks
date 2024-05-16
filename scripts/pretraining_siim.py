@@ -1,6 +1,7 @@
 #%%
 
 from siim_datamodule import SIIMDataModule
+from siim_datamodule_segformer import SIIMDataModuleSegFormer
 from lightning.pytorch import Trainer
 from deeplabv3plusmodule import DeepLabV3PlusModule
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
@@ -8,9 +9,10 @@ from lightning.pytorch.loggers import TensorBoardLogger
 from unet_lightningmodule import UNetModule
 
 # Initialize the model module
-model = DeepLabV3PlusModule(in_channels=3)
+model = DeepLabV3PlusModule(in_channels=1)
 #model = UNetModule()
 siim_data_module = SIIMDataModule()
+#siim_data_module = SIIMDataModuleSegFormer()
 max_epochs = 64
 
 my_temp_dir = 'results/'

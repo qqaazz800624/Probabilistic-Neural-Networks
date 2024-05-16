@@ -5,17 +5,17 @@ from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
 from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-from monai.transforms import RandAffined, EnsureTyped
+from monai.transforms import EnsureTyped, AsDiscreted
 from transforms import GrayscaleToRGBd
 
 class SIIMDataModule(LightningDataModule):
     def __init__(
         self,
-        batch_size_train = 32,
-        num_workers_train = 4,
-        batch_size_val = 16,
-        num_workers_val = 4,
-        batch_size_test = 8,
+        batch_size_train = 8,
+        num_workers_train = 2,
+        batch_size_val = 4,
+        num_workers_val = 2,
+        batch_size_test = 4,
         num_workers_test = 2):
         """Initialize an image segmentation datamodule.
 
@@ -47,6 +47,7 @@ class SIIMDataModule(LightningDataModule):
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
+                                AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
@@ -57,6 +58,7 @@ class SIIMDataModule(LightningDataModule):
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
+                                AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
@@ -67,6 +69,7 @@ class SIIMDataModule(LightningDataModule):
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
+                                AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
 
