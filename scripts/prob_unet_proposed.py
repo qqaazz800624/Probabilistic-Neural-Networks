@@ -65,8 +65,9 @@ class ProbUNet(BaseModule):
         num_convs_fcomb: int = 4,
         fcomb_filter_size: int = 32,
         beta: float = 10.0,
-        gamma: float = -1,
-        lambd: float = 10,
+        gamma: float = 0.2,
+        lambd: float = 2,
+        dice_baseline: float = 0.4,
         num_samples: int = 100,
         max_epochs: int = 32,
         task: str = "multiclass",
@@ -100,6 +101,7 @@ class ProbUNet(BaseModule):
         self.num_convs_fcomb = num_convs_fcomb
         self.beta = beta
         self.gamma = gamma
+        self.dice_baseline = dice_baseline
         self.lambd = lambd
         self.num_filters = num_filters
         self.fcomb_filter_size = fcomb_filter_size
@@ -215,13 +217,14 @@ class ProbUNet(BaseModule):
         # print('Part 3')
         # print('The shape of seg_mask_target: ', seg_mask_target.shape)
         # print('The shape of reconstruction: ', reconstruction.shape)
-        rec_loss_y2 = self.criterion(self.unet_features, seg_mask_target)
-        rec_loss_y2_sum = torch.sum(rec_loss_y2)
-        rec_loss_y1 = self.criterion(reconstruction, seg_mask_target)
-        rec_loss_y1_sum = torch.sum(rec_loss_y1)
-        penalty = rec_loss_y1_sum - rec_loss_y2_sum - self.gamma
+        rec_loss_baseline = self.criterion(self.unet_features, seg_mask_target)
+        rec_loss_baseline_sum = torch.sum(rec_loss_baseline)
+        rec_loss = self.criterion(reconstruction, seg_mask_target)
+        rec_loss_sum = torch.sum(rec_loss)
+        penalty = max(0, rec_loss_sum - rec_loss_baseline_sum + self.gamma)**2
+        penalty2 = max(0, rec_loss_baseline_sum - self.dice_baseline)**2
 
-        loss = self.beta*kl_loss + rec_loss_y1_sum + rec_loss_y2_sum + self.lambd*penalty 
+        loss = self.beta*kl_loss + rec_loss_baseline_sum + self.lambd*penalty + self.lambd*penalty2
 
         # rec_loss = self.criterion(reconstruction, seg_mask_target)
         # rec_loss_sum = torch.sum(rec_loss)
@@ -232,8 +235,8 @@ class ProbUNet(BaseModule):
 
         return {
             "loss": loss,
-            "rec_loss_y2_sum": rec_loss_y2_sum,
-            "rec_loss_y1_sum": rec_loss_y1_sum,
+            "rec_loss_baseline_sum": rec_loss_baseline_sum,
+            "rec_loss_sum": rec_loss_sum,
             "kl_loss": kl_loss,
             "penalty": penalty,
             "reconstruction": reconstruction
@@ -318,8 +321,8 @@ class ProbUNet(BaseModule):
         loss_dict = self.compute_loss(batch)
 
         self.log("train_loss", loss_dict["loss"], on_epoch=True, prog_bar=True, logger=True)
-        self.log("train_rec_loss_y1_sum", loss_dict["rec_loss_y1_sum"], on_epoch=True, logger=True)
-        self.log("train_rec_loss_y2_sum", loss_dict["rec_loss_y2_sum"], on_epoch=True, logger=True)
+        self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_epoch=True, logger=True)
+        self.log("train_rec_loss_baseline_sum", loss_dict["rec_loss_baseline_sum"], on_epoch=True, logger=True)
         self.log("train_kl_loss", loss_dict["kl_loss"], on_epoch=True, logger=True)
         self.log("train_penalty", loss_dict["penalty"], on_epoch=True, logger=True, prog_bar=True)
 
@@ -352,8 +355,8 @@ class ProbUNet(BaseModule):
         loss_dict = self.compute_loss(batch)
 
         self.log("val_loss", loss_dict["loss"])
-        self.log("val_rec_loss_y1_sum", loss_dict["rec_loss_y1_sum"])
-        self.log("val_rec_loss_y2_sum", loss_dict["rec_loss_y2_sum"])
+        self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"])
+        self.log("val_rec_loss_baseline_sum", loss_dict["rec_loss_baseline_sum"])
         self.log("val_kl_loss", loss_dict["kl_loss"])
         # compute metrics with reconstruction
         self.val_metrics(loss_dict["reconstruction"], batch[self.target_key])

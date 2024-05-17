@@ -11,7 +11,8 @@ from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 
-from prob_unet import ProbUNet
+#from prob_unet import ProbUNet
+from prob_unet_proposed import ProbUNet
 
 from siim_ProbNet_datamodule import SIIMDataModule
 

@@ -20,7 +20,7 @@ batch_size_train = 12
 #                       'DeepLabV3Plus': 'version_7'}
 
 # ============ Inference setting ============= #
-num_samples = 200
+num_samples = 30
 loss_fn = 'DiceLoss'  # Valid loss_fn: ['BCEWithLogitsLoss','DiceLoss']
 
 if model_name == 'Unet':
@@ -52,7 +52,7 @@ Prob_UNet = ProbUNet(
     )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_6'
+version_no = 'version_15'
 model_weight = f'/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 Prob_UNet.load_state_dict(model_weight)
@@ -60,15 +60,65 @@ Prob_UNet.eval()
 
 #%%
 
-fold_no = 'fold_4'
-img_serial = 0
-preprocessed_input_image = image_preprocessor(fold_no, img_serial)
-prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(preprocessed_input_image.unsqueeze(0))
+import os
+
+#fold_no = 'fold_4'
+fold_no = 'testing'
+json_file = 'datalist.json'
+data_root = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax'
+json_path = os.path.join(data_root, json_file)
+#%%
+
+# img_serial = 9    # 6, 11
+# preprocessed_input_image = image_preprocessor(fold_no, img_serial, data_root, datalist=json_path)
+# prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(preprocessed_input_image.unsqueeze(0))
+
+
+#%%
+from utils import label_preprocessor
+from monai.metrics import DiceMetric
+from monai.transforms import AsDiscrete
+from tqdm import tqdm
+
+dice_metric = DiceMetric(include_background=True, reduction='mean')
+discreter = AsDiscrete(threshold=0.5)
+dice_scores = []
+
+for img_serial in tqdm(range(535)):
+    preprocessed_input_image = image_preprocessor(fold_no, img_serial, data_root, datalist=json_path)
+    prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(preprocessed_input_image.unsqueeze(0))
+    stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+    stacked_samples = torch.sigmoid(stacked_samples)
+    prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+    label = label_preprocessor(fold_no, img_serial, data_root, datalist=json_path, keyword='label')
+    dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
+    dice_score = dice_metric.aggregate().item()
+    dice_scores.append(dice_score)
+    dice_metric.reset()
+
+import json
+
+# 將列表保存為 JSON 文件
+with open('results/dice_scores_ProbUnet.json', 'w') as file:
+    json.dump(dice_scores, file)
+
+#%%
+    
+# import json
+
+# # 從 JSON 文件中讀取列表
+# with open('../results/dice_scores_ProbUnet.json', 'r') as file:
+#     dice_scores = json.load(file)
+
+# import numpy as np
+
+# np.array(dice_scores)
+
 
 #%%
 
-print('Prior mu: ', prior_mu)
-print('Prior sigma: ', prior_sigma)
+# print('Prior mu: ', prior_mu)
+# print('Prior sigma: ', prior_sigma)
 
 
 #%%
@@ -91,74 +141,75 @@ print('Prior sigma: ', prior_sigma)
 
 #%%
 
-stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+# stacked_samples = torch.sigmoid(stacked_samples)
+# uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
 
-#%%
+# import matplotlib.pyplot as plt
 
-stacked_samples = torch.sigmoid(stacked_samples)
-
-#%%
-
-uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
-
-#%%
-
-import matplotlib.pyplot as plt
-
-plt.imshow(uncertainty_heatmap.detach().numpy().T, cmap='plasma', aspect='auto',
-           #vmin = 0, vmax = 1
-           )
-plt.colorbar()
-plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
+# plt.imshow(uncertainty_heatmap.detach().numpy().T, cmap='plasma', aspect='auto',
+#            #vmin = 0, vmax = 1
+#            )
+# plt.colorbar()
+# plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
 
 #%% segmentation samples
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-sample_no = 3
-plt.imshow(stacked_samples[sample_no].detach().numpy().T, cmap='plasma', aspect='auto', 
-           #vmin=-3, vmax=6
-           )
-plt.colorbar()
-plt.title(f'Segmentation samples: {fold_no}_{img_serial}_sample{sample_no}')
-
-
-#%%
-
-import matplotlib.pyplot as plt
-
-for i in range(200):
-    plt.imshow(stacked_samples[i].detach().numpy().T, cmap='plasma', aspect='auto', 
-               #vmin=0, vmax=4
-               )
-    plt.colorbar()
-    plt.title(f'Sample {i}')
-    plt.savefig(f'../results/image_samples/{fold_no}_{img_serial}_sample{i}.png')
-    plt.close()
+# sample_no = 3
+# plt.imshow(stacked_samples[sample_no].detach().numpy().T, cmap='plasma', aspect='auto', 
+#            #vmin=-3, vmax=6
+#            )
+# plt.colorbar()
+# plt.title(f'Segmentation samples: {fold_no}_{img_serial}_sample{sample_no}')
 
 
 #%%
 
-import torch
+# import matplotlib.pyplot as plt
 
-torch.equal(stacked_samples[2], stacked_samples[3])
+# for i in range(200):
+#     plt.imshow(stacked_samples[i].detach().numpy().T, cmap='plasma', aspect='auto', 
+#                #vmin=0, vmax=4
+#                )
+#     plt.colorbar()
+#     plt.title(f'Sample {i}')
+#     plt.savefig(f'../results/image_samples/{fold_no}_{img_serial}_sample{i}.png')
+#     plt.close()
+
+# import torch
+
+# torch.equal(stacked_samples[2], stacked_samples[3])
 
 
 #%% Prediction heatmap (Revised)
 
-prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+# prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-plt.imshow(prediction_heatmap.detach().numpy().T, cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
-
-
-#%%
+# plt.imshow(prediction_heatmap.detach().numpy().T, cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
 
 
+# #%%
+
+# import os
+# from utils import label_preprocessor
+
+# label = label_preprocessor(fold_no, img_serial, data_root, datalist=json_path, keyword='label')
+# prediction_heatmap.unsqueeze(0).unsqueeze(0).shape, label.unsqueeze(0).shape
+
+
+# from monai.metrics import DiceMetric
+# from monai.transforms import AsDiscrete
+# discreter = AsDiscrete(threshold=0.5)
+# dice_metric = DiceMetric(include_background=True, reduction='mean')
+
+# dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
 
 
 #%%
