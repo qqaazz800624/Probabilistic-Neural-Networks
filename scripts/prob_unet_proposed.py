@@ -67,7 +67,7 @@ class ProbUNet(BaseModule):
         beta: float = 10.0,
         gamma: float = 0.2,
         lambd: float = 2,
-        dice_baseline: float = 0.4,
+        dice_baseline: float = 0.3,
         num_samples: int = 100,
         max_epochs: int = 32,
         task: str = "multiclass",
@@ -174,9 +174,6 @@ class ProbUNet(BaseModule):
         img, seg_mask = batch[self.input_key], batch[self.target_key]
         # check dimensions, add channel dimension to seg_mask under assumption
         # that it is a binary mask
-        # print('Part 1')
-        # print('The shape of seg_mask: ', seg_mask.shape)
-        # print('The shape of img: ', img.shape)
         # The shape of seg_mask: [batch_size, height, weight] --> [6, 512, 512]
         if len(seg_mask.shape) == 3:
             seg_mask_target = seg_mask.long()
@@ -192,23 +189,19 @@ class ProbUNet(BaseModule):
         else:
             seg_mask_target = seg_mask
 
-        # print('Part 2')
-        # print('The shape of seg_mask: ', seg_mask.shape)
-        # print('The shape of seg_mask_target: ', seg_mask_target.shape)
-
         self.posterior_latent_space, self.posterior_mu, self.posterior_sigma = self.posterior.forward(img, seg_mask)
         self.prior_latent_space, self.prior_mu, self.prior_sigma = self.prior.forward(img)
-        print('prior net mu: ', self.prior_mu)
-        print('prior net sigma: ', self.prior_sigma)
-        print('posterior net mu: ', self.posterior_mu)
-        print('posterior net sigma: ', self.posterior_sigma)
+        # print('prior net mu: ', self.prior_mu)
+        # print('prior net sigma: ', self.prior_sigma)
+        # print('posterior net mu: ', self.posterior_mu)
+        # print('posterior net sigma: ', self.posterior_sigma)
 
         self.unet_features = self.model.forward(img)
 
         z_posterior = self.posterior_latent_space.rsample()
 
         kl_loss = torch.mean(self.kl_divergence(analytic=True, z_posterior=z_posterior))
-        print('KL divergence: ', kl_loss)
+        #print('KL divergence: ', kl_loss)
 
         reconstruction = self.reconstruct(
             use_posterior_mean=False, z_posterior=z_posterior
