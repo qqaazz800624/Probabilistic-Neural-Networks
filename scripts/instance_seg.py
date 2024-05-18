@@ -11,6 +11,7 @@ class InstanceSegmentation(Transform):
         self.instance_only = instance_only
 
         self.model: torch.nn.Module = ModelBuilder()(model_config)
+        self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
         model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
         for k in list(model_weight.keys()):
@@ -20,11 +21,13 @@ class InstanceSegmentation(Transform):
             model_weight[k_new] = model_weight.pop(k)
 
         self.model.load_state_dict(model_weight)
+        self.model.to(self.device)
         self.model.eval()
 
     def __call__(self, data):
         # img shape (C, W, H) => (B, C, W, H)
         img = data.unsqueeze(0)
+        img = img.to(self.device)
         logit = self.model(img)
         discreter = AsDiscrete(threshold=0.5)
         #mask_heart = torch.sigmoid(logit)[0, 2]   # take segmentation mask of heart for 6 channel model
