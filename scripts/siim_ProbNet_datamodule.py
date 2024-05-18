@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
 from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-from monai.transforms import EnsureTyped, AsDiscreted, RandAffined
+from monai.transforms import EnsureTyped, AsDiscreted, RandAffined, RandFlipd, RandRotate90d, RandZoomd
 from transforms import GrayscaleToRGBd
 
 class SIIMDataModule(LightningDataModule):
@@ -47,6 +47,9 @@ class SIIMDataModule(LightningDataModule):
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
+                                RandFlipd(keys=['image', 'target'], prob=0.5, spatial_axis=0),
+                                RandRotate90d(keys=['image', 'target'], prob=0.5),
+                                RandZoomd(keys=['image', 'target'], prob=0.5),
                                 RandAffined(keys=['image', 'target'],
                                             prob=0.5,
                                             rotate_range=0.25,
