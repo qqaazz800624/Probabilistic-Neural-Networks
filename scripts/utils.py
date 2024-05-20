@@ -69,3 +69,16 @@ def label_preprocessor(fold_no, img_serial,
     return label
 
 #%%
+
+def l2_regularisation(m):
+    l2_reg = None
+
+    for W in m.parameters():
+        if l2_reg is None:
+            l2_reg = W.norm(2)
+        else:
+            l2_reg = l2_reg + W.norm(2)
+    return l2_reg
+
+
+#%%
