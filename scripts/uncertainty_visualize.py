@@ -52,11 +52,12 @@ Prob_UNet = ProbUNet(
     )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_16'
+version_no = 'version_15'
 model_weight = f'/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 Prob_UNet.load_state_dict(model_weight)
 Prob_UNet.eval()
+
 
 #%%
 
@@ -67,8 +68,10 @@ fold_no = 'testing'
 json_file = 'datalist.json'
 data_root = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax'
 json_path = os.path.join(data_root, json_file)
-img_serial = 532
 
+
+
+img_serial = 523
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 preprocessed_input_image = image_preprocessor(fold_no, img_serial, data_root, datalist=json_path)
 preprocessed_input_image = preprocessed_input_image.to(device)
@@ -143,7 +146,7 @@ print('dice_scores_ProbUnet: ', np.array(dice_scores_ProbUnet).mean()) # 0.4803
 
 counter = 0
 for i in range(len(dice_scores)):
-    if dice_scores[i] > 0 and dice_scores_ProbUnet[i] == 0:
+    if dice_scores[i] > dice_scores_ProbUnet[i]:
         counter += 1
 
 counter
@@ -234,8 +237,6 @@ import os
 from utils import label_preprocessor
 
 label = label_preprocessor(fold_no, img_serial, data_root, datalist=json_path, keyword='label')
-#prediction_heatmap.unsqueeze(0).unsqueeze(0).shape, label.unsqueeze(0).shape
-
 
 from monai.metrics import DiceMetric
 from monai.transforms import AsDiscrete
