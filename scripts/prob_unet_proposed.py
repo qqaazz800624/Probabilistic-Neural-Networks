@@ -1,6 +1,5 @@
 #%%
 
-
 # Copyright 2019 Stefan Knegt
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -37,7 +36,7 @@ from lightning_uq_box.uq_methods import BaseModule
 
 #from lightning_uq_box.models.prob_unet import AxisAlignedConvGaussian, Fcomb
 from lightning_uq_box.uq_methods.utils import default_segmentation_metrics
-from utils import process_segmentation_prediction
+from utils import process_segmentation_prediction, l2_regularisation
 from segmentation_models_pytorch.losses import DiceLoss
 from torch.nn import BCEWithLogitsLoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
@@ -216,8 +215,11 @@ class ProbUNet(BaseModule):
         rec_loss_sum = torch.sum(rec_loss)
         penalty = max(0, rec_loss_sum - rec_loss_baseline_sum + self.gamma)**2
         penalty2 = max(0, rec_loss_baseline_sum - self.dice_baseline)**2
+        elbo = -(self.beta*kl_loss + rec_loss_sum)
+        reg_loss = l2_regularisation(self.posterior) + l2_regularisation(self.prior) + l2_regularisation(self.fcomb.layers)
+        loss = -elbo + 1e-5*reg_loss + self.lambd*penalty + self.lambd*penalty2
 
-        loss = self.beta*kl_loss + rec_loss_baseline_sum + self.lambd*penalty + self.lambd*penalty2
+        #loss = self.beta*kl_loss + rec_loss_baseline_sum + self.lambd*penalty + self.lambd*penalty2
 
         # rec_loss = self.criterion(reconstruction, seg_mask_target)
         # rec_loss_sum = torch.sum(rec_loss)
@@ -317,7 +319,7 @@ class ProbUNet(BaseModule):
         self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_epoch=True, logger=True)
         self.log("train_rec_loss_baseline_sum", loss_dict["rec_loss_baseline_sum"], on_epoch=True, logger=True)
         self.log("train_kl_loss", loss_dict["kl_loss"], on_epoch=True, logger=True)
-        self.log("train_penalty", loss_dict["penalty"], on_epoch=True, logger=True, prog_bar=True)
+        self.log("train_penalty", loss_dict["penalty"], on_epoch=True, logger=True)
 
         self.train_metrics(loss_dict["reconstruction"], batch[self.target_key])
 

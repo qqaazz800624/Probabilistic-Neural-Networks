@@ -37,7 +37,7 @@ from lightning_uq_box.uq_methods import BaseModule
 
 #from lightning_uq_box.models.prob_unet import AxisAlignedConvGaussian, Fcomb
 from lightning_uq_box.uq_methods.utils import default_segmentation_metrics
-from utils import process_segmentation_prediction
+from utils import process_segmentation_prediction, l2_regularisation
 from segmentation_models_pytorch.losses import DiceLoss
 from torch.nn import BCEWithLogitsLoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
@@ -192,17 +192,17 @@ class ProbUNet(BaseModule):
 
         self.posterior_latent_space, self.posterior_mu, self.posterior_sigma = self.posterior.forward(img, seg_mask)
         self.prior_latent_space, self.prior_mu, self.prior_sigma = self.prior.forward(img)
-        print('prior net mu: ', self.prior_mu)
-        print('prior net sigma: ', self.prior_sigma)
-        print('posterior net mu: ', self.posterior_mu)
-        print('posterior net sigma: ', self.posterior_sigma)
+        # print('prior net mu: ', self.prior_mu)
+        # print('prior net sigma: ', self.prior_sigma)
+        # print('posterior net mu: ', self.posterior_mu)
+        # print('posterior net sigma: ', self.posterior_sigma)
 
         self.unet_features = self.model.forward(img)
 
         z_posterior = self.posterior_latent_space.rsample()
 
         kl_loss = torch.mean(self.kl_divergence(analytic=True, z_posterior=z_posterior))
-        print('KL divergence: ', kl_loss)
+        # print('KL divergence: ', kl_loss)
 
         reconstruction = self.reconstruct(
             use_posterior_mean=False, z_posterior=z_posterior
@@ -216,8 +216,10 @@ class ProbUNet(BaseModule):
         rec_loss_sum = torch.sum(rec_loss)
         rec_loss_mean = torch.mean(rec_loss)
 
-        #loss = -(rec_loss_sum + self.beta * kl_loss) # original version
-        loss = (rec_loss_sum + self.beta * kl_loss) # version 2
+        elbo = -(rec_loss_sum + self.beta * kl_loss) # original version
+        reg_loss = l2_regularisation(self.posterior) + l2_regularisation(self.prior) + l2_regularisation(self.fcomb.layers)
+        loss = -elbo + 1e-5 * reg_loss
+        #loss = (rec_loss_sum + self.beta * kl_loss) # version 2
 
         return {
             "loss": loss,
