@@ -52,7 +52,7 @@ Prob_UNet = ProbUNet(
     )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_15'
+version_no = 'version_17'
 model_weight = f'/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 Prob_UNet.load_state_dict(model_weight)
@@ -71,7 +71,7 @@ json_path = os.path.join(data_root, json_file)
 
 
 
-img_serial = 523
+img_serial = 6   # good example: 6, 500  # bad example: 532, 484
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 preprocessed_input_image = image_preprocessor(fold_no, img_serial, data_root, datalist=json_path)
 preprocessed_input_image = preprocessed_input_image.to(device)
@@ -80,6 +80,7 @@ prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(preprocessed_
 
 
 #%%
+
 # from utils import label_preprocessor
 # from monai.metrics import DiceMetric
 # from monai.transforms import AsDiscrete
@@ -121,7 +122,19 @@ with open('../results/dice_scores_ProbUnet.json', 'r') as file:
 
 import numpy as np
 
-np.round(np.array(dice_scores_ProbUnet), 3)
+np.round(np.array(dice_scores_ProbUnet), 3).mean()
+
+#%%
+
+import matplotlib.pyplot as plt
+
+# Plot histogram of dice_scores
+plt.hist(dice_scores_ProbUnet, bins=10, edgecolor='black')
+plt.xlabel('Dice Score')
+plt.ylabel('Frequency')
+plt.title('Histogram of Dice Scores')
+plt.show()
+
 
 #%%
 
@@ -134,24 +147,40 @@ with open('../results/dice_scores.json', 'r') as file:
 
 import numpy as np
 
-np.round(np.array(dice_scores), 3)
+np.round(np.array(dice_scores), 3).mean()
+#%%
+# Draw histogram for dice_scores_ProbUnet
+plt.hist(dice_scores_ProbUnet, bins=10, edgecolor='black', alpha=0.5, label='ProbUNet')
 
+# Draw histogram for dice_scores
+plt.hist(dice_scores, bins=10, edgecolor='black', alpha=0.5, label='Original')
+
+# Add labels and title
+plt.xlabel('Dice Score')
+plt.ylabel('Frequency')
+plt.title('Histogram of Dice Scores')
+
+# Add legend
+plt.legend()
+
+# Show the histogram
+plt.show()
 
 #%%
 
-print('dice_scores: ', np.array(dice_scores).mean()) # 0.4276
-print('dice_scores_ProbUnet: ', np.array(dice_scores_ProbUnet).mean()) # 0.4803
+# print('dice_scores: ', np.array(dice_scores).mean()) # 0.4276
+# print('dice_scores_ProbUnet: ', np.array(dice_scores_ProbUnet).mean()) # 0.4803
 
-#%%
+# #%%
 
-counter = 0
-for i in range(len(dice_scores)):
-    if dice_scores[i] > dice_scores_ProbUnet[i]:
-        counter += 1
+# counter = 0
+# for i in range(len(dice_scores)):
+#     if dice_scores[i] > dice_scores_ProbUnet[i]:
+#         counter += 1
 
-counter
+# counter
 
-#%%
+# #%%
 
 # print('Prior mu: ', prior_mu)
 # print('Prior sigma: ', prior_sigma)

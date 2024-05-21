@@ -68,62 +68,73 @@ import json
 with open('results/dice_scores.json', 'w') as file:
     json.dump(dice_scores, file)
 
-# #%%
+#%%
     
-# import json
+import json
 
-# # 從 JSON 文件中讀取列表
-# with open('../results/dice_scores.json', 'r') as file:
-#     dice_scores = json.load(file)
+# 從 JSON 文件中讀取列表
+with open('../results/dice_scores.json', 'r') as file:
+    dice_scores = json.load(file)
 
-# import numpy as np
+import numpy as np
 
-# np.array(dice_scores)
 
+np.array(dice_scores).mean()
 
 #%%
 
-# model_version_dict = {'DeepLabV3Plus': 'version_11'}
+import matplotlib.pyplot as plt
 
-# model_name = 'DeepLabV3Plus'
-# version_no = model_version_dict[model_name]
+# Plot histogram of dice_scores
+plt.hist(dice_scores, bins=10, edgecolor='black')
+plt.xlabel('Dice Score')
+plt.ylabel('Frequency')
+plt.title('Histogram of Dice Scores')
+plt.show()
 
-# fold_no = 'testing'
-# img_serial = 532
-# overlaymask, prediction, label, generator_output, original_image = dice_preprocessor(fold_no=fold_no, img_serial=img_serial, version_no=version_no, model_name=model_name)
+#%%
+
+model_version_dict = {'DeepLabV3Plus': 'version_11'}
+
+model_name = 'DeepLabV3Plus'
+version_no = model_version_dict[model_name]
+
+fold_no = 'testing'
+img_serial = 6  # good example: 6, 500  # bad example: 532, 484
+overlaymask, prediction, label, generator_output, original_image = dice_preprocessor(fold_no=fold_no, img_serial=img_serial, version_no=version_no, model_name=model_name)
 
 
-# #%% Original image 
+#%% Original image 
 
-# plt.imshow(original_image.T, cmap='gray', aspect='auto')
+plt.imshow(original_image.T, cmap='gray', aspect='auto')
 
-# #%% Original image and target mask
+#%% Original image and target mask
 
-# plt.imshow(overlaymask.T, cmap='plasma', aspect='auto')
+plt.imshow(overlaymask.T, cmap='plasma', aspect='auto')
 
-# #%% label mask
+#%% label mask
 
-# plt.imshow(label[0].T, cmap='plasma', aspect='auto')
+plt.imshow(label[0].T, cmap='plasma', aspect='auto')
 
-# #%% prediction mask 
+#%% prediction mask 
 
-# plt.imshow(generator_output.cpu().T, cmap='plasma', aspect='auto')
+plt.imshow(generator_output.cpu().T, cmap='plasma', aspect='auto')
 
-# #%% computing dice score
+#%% computing dice score
 
-# # Set include_background to False if you don't want to include the 
-# #background class (class 0) in the Dice calculation
-# from monai.metrics import DiceMetric
-# from monai.transforms import AsDiscrete
-# discreter = AsDiscrete(threshold=0.5)
-# dice_metric = DiceMetric(include_background=True, reduction='mean')
+# Set include_background to False if you don't want to include the 
+#background class (class 0) in the Dice calculation
+from monai.metrics import DiceMetric
+from monai.transforms import AsDiscrete
+discreter = AsDiscrete(threshold=0.5)
+dice_metric = DiceMetric(include_background=True, reduction='mean')
 
-# # Compute Dice score
-# dice_metric(y_pred=discreter(prediction), y=discreter(label))
-# dice_score = dice_metric.aggregate().item()
-# dice_metric.reset()
+# Compute Dice score
+dice_metric(y_pred=discreter(prediction), y=discreter(label))
+dice_score = dice_metric.aggregate().item()
+dice_metric.reset()
 
-# print("Dice Score:", dice_score)
+print("Dice Score:", dice_score)
 
 #%%
 
