@@ -14,12 +14,12 @@ import cv2
 import requests
 import numpy as np
 # from tqdm import tqdm
-import matplotlib.pyplot as plt
+#import matplotlib.pyplot as plt
  
 import torch
-import torch.nn as nn
-import torch.optim as optim
-import torch.nn.functional as F
+# import torch.nn as nn
+# import torch.optim as optim
+# import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
  
  
@@ -36,8 +36,8 @@ from lightning.pytorch.loggers import WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
  
 # Importing torchmetrics modular and functional implementations.
-from torchmetrics import MeanMetric
-from torchmetrics.classification import MulticlassF1Score
+# from torchmetrics import MeanMetric
+# from torchmetrics.classification import MulticlassF1Score
  
 # To print model summary.
 from torchinfo import summary
@@ -65,6 +65,7 @@ class DatasetConfig:
     BACKGROUND_CLS_ID: int = 0
     URL: str = r"https://www.dropbox.com/scl/fi/r0685arupp33sy31qhros/dataset_UWM_GI_Tract_train_valid.zip?rlkey=w4ga9ysfiuz8vqbbywk0rdnjw&dl=1"
     DATASET_PATH: str = os.path.join(os.getcwd(), "dataset_UWM_GI_Tract_train_valid")
+    CHANNELS: int = 3
  
 @dataclass(frozen=True)
 class Paths:
@@ -107,6 +108,8 @@ print("Number of classes", DatasetConfig.NUM_CLASSES)
 # Reverse id2color mapping.
 # Used for converting RGB mask to a single channel (grayscale) representation.
 rev_id2color = {value: key for key, value in id2color.items()}
+
+
 
 
 #%%

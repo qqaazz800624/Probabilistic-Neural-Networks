@@ -10,7 +10,7 @@ from torch.utils.data import DataLoader
 
 #%%
 
-class MedicalSegmentationDataModule(LightningDataModule):
+class UW_SegFormerDataModule(LightningDataModule):
     def __init__(
         self,
         num_classes=10,
