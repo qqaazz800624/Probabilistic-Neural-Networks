@@ -1,7 +1,7 @@
 #%%
 
 from lightning import LightningDataModule
-from uw_dataset_segformer import DatasetConfig, Paths, MedicalDataset
+from uw_dataset_segformer import DatasetConfig, Paths, UW_SegformerDataset
 import os
 import requests
 import zipfile
@@ -63,10 +63,10 @@ class UW_SegFormerDataModule(LightningDataModule):
         valid_imgs = sorted(glob(f"{Paths.DATA_VALID_IMAGES}"))
         valid_msks = sorted(glob(f"{Paths.DATA_VALID_LABELS}"))
  
-        self.train_ds = MedicalDataset(image_paths=train_imgs, mask_paths=train_msks, img_size=self.img_size,  
+        self.train_ds = UW_SegformerDataset(image_paths=train_imgs, mask_paths=train_msks, img_size=self.img_size,  
                                        is_train=True, ds_mean=self.ds_mean, ds_std=self.ds_std)
  
-        self.valid_ds = MedicalDataset(image_paths=valid_imgs, mask_paths=valid_msks, img_size=self.img_size, 
+        self.valid_ds = UW_SegformerDataset(image_paths=valid_imgs, mask_paths=valid_msks, img_size=self.img_size, 
                                        is_train=False, ds_mean=self.ds_mean, ds_std=self.ds_std)
  
     def train_dataloader(self):

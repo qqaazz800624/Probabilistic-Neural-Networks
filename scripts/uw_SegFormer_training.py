@@ -1,13 +1,23 @@
 #%%
 from uw_SegFormer_lightningmodule import UW_SegFormerModule
 from uw_dataset_segformer import DatasetConfig, TrainingConfig
+
 # Seed everything for reproducibility.
 from lightning import seed_everything
 seed_everything(42, workers=True)
+
 from uw_datamodule_segformer import UW_SegFormerDataModule
 import torch 
 
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.loggers import WandbLogger, TensorBoardLogger
+
+from lightning import Trainer
+
 #%%
+
+my_temp_dir = 'results/'
+
 
 # Intialize custom model.
 model = UW_SegFormerModule(
@@ -36,10 +46,6 @@ data_module = UW_SegFormerDataModule(
 
 #%%
 
-
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
-from lightning.pytorch.loggers import WandbLogger
-
 # Creating ModelCheckpoint callback. 
 # We'll save the model on basis on validation f1-score.
 model_checkpoint = ModelCheckpoint(
@@ -54,13 +60,10 @@ lr_rate_monitor = LearningRateMonitor(logging_interval="epoch")
 
 # Initialize logger.
 wandb_logger = WandbLogger(log_model=True, project="UM_medical_segmentation")
-
+tensorboard_logger = TensorBoardLogger(my_temp_dir)
 
 
 #%%
-
-
-from lightning import Trainer
 
 # Initializing the Trainer class object.
 trainer = Trainer(
@@ -71,14 +74,13 @@ trainer = Trainer(
     enable_model_summary=False,  # Disable printing of model summary as we are using torchinfo.
     callbacks=[model_checkpoint, lr_rate_monitor],  # Declaring callbacks to use.
     precision="16-mixed",  # Using Mixed Precision training.
-    logger=wandb_logger
+    logger=wandb_logger,
+    default_root_dir=my_temp_dir,
+    num_sanity_val_steps=2
 )
  
 # Start training
 trainer.fit(model, data_module)
-
-
-
 
 
 #%%

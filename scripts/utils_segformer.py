@@ -1,7 +1,12 @@
 #%%
 
 import torch.nn.functional as F
-
+import numpy as np
+import cv2
+import matplotlib.pyplot as plt
+import torch
+from transformers import SegformerForSemanticSegmentation
+from uw_dataset_segformer import DatasetConfig
 
 #%%
 
@@ -26,12 +31,10 @@ def dice_coef_loss(predictions, ground_truths, num_classes=2, dims=(1, 2), smoot
 
 #%%
 
-from transformers import SegformerForSemanticSegmentation
-from uw_dataset_segformer import TrainingConfig, DatasetConfig
 
-def get_model(*, model_name, num_classes):
+def get_model(*, pretrained_model_name, num_classes):
     model = SegformerForSemanticSegmentation.from_pretrained(
-        model_name,
+        pretrained_model_name,
         num_labels=num_classes,
         ignore_mismatched_sizes=True,
     )
@@ -47,11 +50,6 @@ id2color = {
     2: (0, 255, 0),  # Small Bowel
     3: (255, 0, 0),  # large Bowel
 }
-
-import numpy as np
-import cv2
-import matplotlib.pyplot as plt
-import torch
 
 def num_to_rgb(num_arr, color_map=id2color):
     single_layer = np.squeeze(num_arr)

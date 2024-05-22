@@ -1,54 +1,15 @@
 #%%
 
-from uw_dataset_segformer import DatasetConfig, InferenceConfig
-from uw_datamodule_segformer import UW_SegFormerDataModule
 import torch.nn.functional as F
 import torch 
-
-#%%
-
-# dm = UW_SegFormerDataModule(
-#     num_classes=DatasetConfig.NUM_CLASSES,
-#     img_size=DatasetConfig.IMAGE_SIZE,
-#     ds_mean=DatasetConfig.MEAN,
-#     ds_std=DatasetConfig.STD,
-#     batch_size=InferenceConfig.BATCH_SIZE,
-#     num_workers=2,
-#     shuffle_validation=True,
-# )
-
-# # Donwload dataset.
-# dm.prepare_data()
- 
-# # Create training & validation dataset.
-# dm.setup()
- 
-# train_loader, valid_loader = dm.train_dataloader(), dm.val_dataloader()
-
-
-#%% Display a batch of images and masks.
-
-# from utils_segformer import display_image_and_mask, denormalize
-
-# for batch_images, batch_masks in valid_loader:
- 
-#     batch_images = denormalize(batch_images, mean=DatasetConfig.MEAN, std=DatasetConfig.STD).permute(0, 2, 3, 1).numpy()
-#     batch_masks  = batch_masks.numpy()
- 
-#     print("batch_images shape:", batch_images.shape)
-#     print("batch_masks shape: ", batch_masks.shape)
-     
-#     display_image_and_mask(images=batch_images, masks=batch_masks)
- 
-#     break
-
-#%%
 
 from lightning import LightningModule
 from torchmetrics import MeanMetric
 from torchmetrics.classification import MulticlassF1Score
 from torch import optim
 from utils_segformer import dice_coef_loss, get_model
+
+#%%
 
 class UW_SegFormerModule(LightningModule):
     def __init__(
@@ -66,9 +27,18 @@ class UW_SegFormerModule(LightningModule):
  
         # Save the arguments as hyperparameters.
         self.save_hyperparameters()
+        self.model_name = model_name
+        self.num_classes = num_classes
+        self.init_lr = init_lr
+        self.optimizer_name = optimizer_name
+        self.weight_decay = weight_decay
+        self.use_scheduler = use_scheduler
+        self.scheduler_name = scheduler_name
+        self.num_epochs = num_epochs
  
         # Loading model using the function defined above.
-        self.model = get_model(model_name=self.hparams.model_name, num_classes=self.hparams.num_classes)
+        self.model = get_model(pretrained_model_name=self.hparams.model_name, 
+                               num_classes=self.hparams.num_classes)
  
         # Initializing the required metric objects.
         self.mean_train_loss = MeanMetric()

@@ -22,26 +22,13 @@ import torch
 # import torch.nn.functional as F
 from torch.utils.data import Dataset, DataLoader
  
- 
 # For data augmentation and preprocessing.
 import albumentations as A
 from albumentations.pytorch import ToTensorV2
  
 # Imports required SegFormer classes
 from transformers import SegformerForSemanticSegmentation
- 
-# Importing lighting along with a built-in callback it provides.
-import lightning.pytorch as pl
-from lightning.pytorch.loggers import WandbLogger
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
- 
-# Importing torchmetrics modular and functional implementations.
-# from torchmetrics import MeanMetric
-# from torchmetrics.classification import MulticlassF1Score
- 
-# To print model summary.
-from torchinfo import summary
- 
+   
 # Sets the internal precision of float32 matrix multiplications.
 torch.set_float32_matmul_precision('high')
  
@@ -95,26 +82,7 @@ class InferenceConfig:
 
 #%%
 
-# Create a mapping from class ID to RGB color value. Required for visualization.
-id2color = {
-    0: (0, 0, 0),    # background pixel
-    1: (0, 0, 255),  # Stomach
-    2: (0, 255, 0),  # Small Bowel
-    3: (255, 0, 0),  # large Bowel
-}
- 
-print("Number of classes", DatasetConfig.NUM_CLASSES)
- 
-# Reverse id2color mapping.
-# Used for converting RGB mask to a single channel (grayscale) representation.
-rev_id2color = {value: key for key, value in id2color.items()}
-
-
-
-
-#%%
-
-class MedicalDataset(Dataset):
+class UW_SegformerDataset(Dataset):
     def __init__(self, *, image_paths, mask_paths, img_size, ds_mean, ds_std, is_train=False):
         self.image_paths = image_paths
         self.mask_paths  = mask_paths  
