@@ -5,4 +5,4 @@ split_datalist_tmuh_b.py
 __pycache__
 *.ckpt
 results
-
+dataset_UWM_GI_Tract_train_valid
