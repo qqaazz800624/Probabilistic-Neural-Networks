@@ -129,3 +129,5 @@ class UW_SegformerDataset(Dataset):
         transformed = self.transforms(image=image, mask=mask)
         image, mask = transformed["image"], transformed["mask"].to(torch.long)
         return image, mask
+    
+#%%
