@@ -22,6 +22,12 @@
 
 """Hierarchical Probabilistic U-Net."""
 
+from typing import Any, Callable, Dict, List, Optional, Tuple, Union
+from collections import OrderedDict
+
+from torch.distributions import kl
+from lightning import LightningModule
+
 import os
 from collections.abc import Callable
 from typing import Any
@@ -49,6 +55,7 @@ from lightning_uq_box.uq_methods.utils import (
 
 
 
+
 class HierarchicalProbUNet(BaseModule):
     """Hierarchical Probabilistic U-Net.
 
@@ -63,23 +70,24 @@ class HierarchicalProbUNet(BaseModule):
 
     def __init__(
         self,
-        latent_dims: tuple[int, ...] = (1, 1, 1, 1),
-        channels_per_block: tuple[int, ...] | None = None,
+        #model: nn.Module,
+        latent_dims: Tuple[int, ...] = (1, 1, 1, 1),
+        channels_per_block: Optional[Tuple[int, ...]] = None,
         num_in_channels: int = 3,
         num_classes: int = 2,
-        down_channels_per_block: tuple[int, ...] | None = None,
+        down_channels_per_block: Optional[Tuple[int, ...]] = None,
         activation_fn: Callable[[Tensor], Tensor] = F.relu,
         convs_per_block: int = 3,
         blocks_per_level: int = 3,
         loss_type: str = "geco",
         kappa: int = 10,
-        beta: float | None = 100,
-        top_k_percentage: float | None = None,
-        deterministic_top_k: int | None = None,
+        beta: Optional[float] = 100,
+        top_k_percentage: Optional[float] = None,
+        deterministic_top_k: Optional[int] = None,
         num_samples: int = 5,
         task: str = "multiclass",
         optimizer: OptimizerCallable = torch.optim.Adam,
-        lr_scheduler: LRSchedulerCallable | None = None,
+        lr_scheduler: Optional[LRSchedulerCallable] = None,
     ) -> None:
         """Initialize a new HierarchicalProbUNET.
 
@@ -112,6 +120,7 @@ class HierarchicalProbUNet(BaseModule):
         """
         super().__init__()
 
+        #self.model = model
         self.latent_dims = latent_dims
         self.channels_per_block = channels_per_block
         self.num_classes = num_classes
@@ -254,8 +263,8 @@ class HierarchicalProbUNet(BaseModule):
             return
 
     def compute_loss(
-        self, batch: dict[str, Tensor], loss_mask: Tensor | None = None
-    ) -> Tensor:
+        self, batch: Dict[str, Tensor], loss_mask: Optional[Tensor] = None
+    ) -> Dict[str, Tensor]:
         """Compute the loss from the output of the model.
 
         Args:
@@ -283,6 +292,8 @@ class HierarchicalProbUNet(BaseModule):
 
         # forward pass through model that computes prior and posterior
         # but does not return anything
+        print('Shape of img: ', img.shape)
+        print('Shape of seg_mask: ',seg_mask.shape)
         self.construct_latent_space(img, seg_mask)
 
         # Compute reconstruction loss
@@ -333,14 +344,14 @@ class HierarchicalProbUNet(BaseModule):
             "reconstruction": reconstruction,
         }
 
-    def reconstruct(self, mean: bool = False) -> dict[str, Any]:
+    def reconstruct(self, mean: bool = False) -> Dict[str, Any]:
         """Reconstruct the input.
 
         Args:
             mean (bool, optional): Whether to use the mean. Defaults to False.
 
         Returns:
-            dict[str, Any]: A dictionary containing encoder and decoder features.
+            Dict[str, Any]: A dictionary containing encoder and decoder features.
         """
         if mean:
             prior_out = self._p_sample_z_q_mean
@@ -352,7 +363,7 @@ class HierarchicalProbUNet(BaseModule):
             encoder_features=encoder_features, decoder_features=decoder_features
         )
 
-    def kl(self) -> dict[int, torch.Tensor]:
+    def kl(self) -> Dict[int, torch.Tensor]:
         """Compute the KL divergence.
 
         Returns:
@@ -372,8 +383,8 @@ class HierarchicalProbUNet(BaseModule):
         return kl
 
     def sample(
-        self, img: torch.Tensor, mean: bool = False, z_q: torch.Tensor | None = None
-    ) -> dict[str, Any]:
+        self, img: Tensor, mean: bool = False, z_q: Optional[Tensor] = None
+    ) -> Dict[str, Any]:
         """Sample from the model.
 
         Args:
@@ -567,8 +578,8 @@ def _topk_mask(score: Tensor, k: int) -> Tensor:
 def ce_loss(
     logits: Tensor,
     labels: Tensor,
-    mask: Tensor | None = None,
-    top_k_percentage: float | None = None,
+    mask: Optional[Tensor] = None,
+    top_k_percentage: Optional[float] = None,
     deterministic: bool = False,
 ) -> dict[str, Tensor]:
     """Compute the cross-entropy loss between logits and labels.

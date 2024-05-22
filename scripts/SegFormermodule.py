@@ -7,17 +7,19 @@ from segmentation_models_pytorch.losses import DiceLoss
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 
+#%%
+
 class SegFormerModule(LightningModule):
-    def __init__(self, num_classes=1):
+    def __init__(self):
         super().__init__()
         self.save_hyperparameters()
         
         # Define the SegFormer model
         self.model = SegformerForSemanticSegmentation.from_pretrained(
             "nvidia/segformer-b0-finetuned-ade-512-512",
-            num_labels=num_classes
+            ignore_mismatched_sizes=True
         )
-        
+
         # Define loss function
         self.loss_fn = DiceLoss(mode='binary')
         

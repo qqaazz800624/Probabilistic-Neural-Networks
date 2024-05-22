@@ -5,7 +5,7 @@ from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
 from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-from monai.transforms import RandAffined, EnsureTyped
+from monai.transforms import RandAffined, EnsureTyped, AsDiscreted
 from transforms import GrayscaleToRGBd
 
 class SIIMDataModuleSegFormer(LightningDataModule):
@@ -55,6 +55,7 @@ class SIIMDataModuleSegFormer(LightningDataModule):
                                             translate_range=0.1,
                                             scale_range=0.2,
                                             padding_mode='zeros'),
+                                AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
@@ -66,6 +67,7 @@ class SIIMDataModuleSegFormer(LightningDataModule):
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
+                                AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
@@ -77,6 +79,7 @@ class SIIMDataModuleSegFormer(LightningDataModule):
                                 Resized(keys=['image', 'target'], 
                                         spatial_size=[512, 512]),
                                 ScaleIntensityd(keys=['image', 'target']),
+                                AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
 
@@ -109,12 +112,3 @@ class SIIMDataModuleSegFormer(LightningDataModule):
 #%%
 
 
-
-
-#%%
-
-
-
-
-
-#%%

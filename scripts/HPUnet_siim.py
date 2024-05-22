@@ -14,18 +14,38 @@ from hierarchical_prob_unet import HierarchicalProbUNet
 from siim_ProbNet_datamodule import SIIMDataModule
 
 my_temp_dir = 'results/'
-
+device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 # Hyperparameters
 # ============ Training setting ============= #
 
 max_epochs = 32
 batch_size_train = 16
-loss_type = 'geco'  # valid loss_types = ["elbo", "geco"]
+loss_type = 'elbo'  # valid loss_types = ["elbo", "geco"]
 
 # =========================================== #
 
+model = Unet(in_channels=1, 
+                classes=1, 
+                encoder_name = 'tu-resnest50d', 
+                encoder_weights = 'imagenet')
+
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
+
+model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    model_weight[k_new] = model_weight.pop(k)
+
+model.load_state_dict(model_weight)
+
+
+#%%
+
 HP_UNet = HierarchicalProbUNet(
+    #model=model,
     num_in_channels=1,
     num_classes=1,
     task='binary',
@@ -45,6 +65,7 @@ checkpoint_callback = ModelCheckpoint(filename='best_model',
                                       save_top_k=1)
 model_summarizer = ModelSummary(max_depth=2)
 
+#%%
 
 trainer = Trainer(
     accelerator='gpu',
@@ -61,4 +82,5 @@ trainer = Trainer(
                model_summarizer]
 )
 
-trainer.fit(HP_UNet, data_module)
+trainer.fit(HP_UNet.to(device), data_module)
+# %%
