@@ -4,7 +4,7 @@
 DEFAULT_PYTHON_SCRIPT="./scripts/pretraining_siim.py"
 
 # Allow overriding the default path with a command-line argument
-PYTHON_SCRIPT=${1:-$DEFAULT_PYTHON_SCRIPT}
+PYTHON_SCRIPT=${2:-$DEFAULT_PYTHON_SCRIPT}
 
 # Set default CUDA device to use
 DEFAULT_CUDA_DEVICE="1"
