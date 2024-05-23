@@ -5,10 +5,9 @@ import json
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
 from typing import List, Dict
-from transformers import SegformerFeatureExtractor, SegformerForSemanticSegmentation
-from PIL import Image
 
 import albumentations as A
+from monai.transforms import AsDiscrete
 from albumentations.pytorch import ToTensorV2
 import cv2
 from dataclasses import dataclass
@@ -78,6 +77,7 @@ class SIIMDataset(Dataset):
         self.ds_std = ds_std
         self.is_train = is_train
         self.transforms  = self.setup_transforms(mean=self.ds_mean, std=self.ds_std)
+        self.discreter = AsDiscrete(threshold=0.5)
 
     def __len__(self):
         return len(self.samples)
@@ -118,6 +118,8 @@ class SIIMDataset(Dataset):
 
         transformed = self.transforms(image=image, mask=mask)
         image, mask = transformed["image"], transformed["mask"]
+        #mask = self.discreter(mask.unsqueeze(0))
+        mask = self.discreter(mask).long()
         return image, mask
     
 #%%

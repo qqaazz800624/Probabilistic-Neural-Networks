@@ -8,6 +8,7 @@ from torchmetrics import MeanMetric
 from torchmetrics.classification import MulticlassF1Score
 from torch import optim
 from utils_segformer import dice_coef_loss, get_model
+from segmentation_models_pytorch.losses import DiceLoss
 
 #%%
 
@@ -54,7 +55,10 @@ class SegFormerModule(LightningModule):
     def training_step(self, batch, *args, **kwargs):
         data, target = batch
         logits = self(data)
- 
+        #target = target.long()
+
+        # print('target shape:', target.shape)
+        # print('logits shape:', logits.shape)
         # Calculate Combo loss (Segmentation specific loss (Dice) + cross entropy)
         loss = dice_coef_loss(logits, target, num_classes=self.hparams.num_classes)
          
@@ -74,7 +78,11 @@ class SegFormerModule(LightningModule):
     def validation_step(self, batch, *args, **kwargs):
         data, target = batch
         logits = self(data)
-         
+        #target = target.long()
+        
+        # print('target shape:', target.shape)
+        # print('logits shape:', logits.shape)
+        # print('unique target:', torch.unique(target))
         # Calculate Combo loss (Segmentation specific loss (Dice) + cross entropy)
         loss = dice_coef_loss(logits, target, num_classes=self.hparams.num_classes)
  

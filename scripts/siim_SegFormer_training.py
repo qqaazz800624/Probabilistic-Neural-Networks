@@ -40,8 +40,8 @@ data_module = SIIMDataModuleSegFormer(
     img_size=DatasetConfig.IMAGE_SIZE,
     ds_mean=DatasetConfig.MEAN,
     ds_std=DatasetConfig.STD,
-    batch_size=TrainingConfig.BATCH_SIZE_TRAIN,
-    num_workers=TrainingConfig.NUM_WORKERS_TRAIN,
+    batch_size_train=TrainingConfig.BATCH_SIZE_TRAIN,
+    num_workers_train=TrainingConfig.NUM_WORKERS_TRAIN,
     pin_memory=torch.cuda.is_available(),
 )
 
