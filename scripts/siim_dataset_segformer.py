@@ -88,7 +88,8 @@ class SIIMDataset(Dataset):
         # Augmentation to be applied to the training set.
         if self.is_train:
             transforms.extend([
-                A.HorizontalFlip(p=0.5), A.VerticalFlip(p=0.5),
+                A.HorizontalFlip(p=0.5), 
+                A.VerticalFlip(p=0.5),
                 A.ShiftScaleRotate(scale_limit=0.12, rotate_limit=0.15, shift_limit=0.12, p=0.5),
                 A.RandomBrightnessContrast(p=0.5),
                 A.CoarseDropout(max_holes=8, max_height=self.img_size[1]//20, max_width=self.img_size[0]//20, min_holes=5, fill_value=0, mask_fill_value=0, p=0.5)
@@ -119,6 +120,11 @@ class SIIMDataset(Dataset):
         image, mask = transformed["image"], transformed["mask"]
         return image, mask
     
+#%%
+
+import cv2
+
+cv2.IMREAD_GRAYSCALE
 
 
 #%%

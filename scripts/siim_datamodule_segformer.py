@@ -2,21 +2,24 @@
 
 from lightning import LightningDataModule
 from torch.utils.data import DataLoader
-from siim_dataset import SIIMDataset
+from siim_dataset_segformer import SIIMDataset
 
-from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-from monai.transforms import RandAffined, EnsureTyped, AsDiscreted
-from transforms import GrayscaleToRGBd
 
 class SIIMDataModuleSegFormer(LightningDataModule):
     def __init__(
         self,
+        num_classes: int = 2,
+        img_size: tuple[int,int] = (384, 384),
+        ds_mean = (0.485, 0.456, 0.406),
+        ds_std=(0.229, 0.224, 0.225),
         batch_size_train = 32,
-        num_workers_train = 4,
+        num_workers_train = 2,
         batch_size_val = 16,
-        num_workers_val = 4,
+        num_workers_val = 2,
         batch_size_test = 8,
-        num_workers_test = 2):
+        num_workers_test = 2,
+        pin_memory=False,
+        shuffle_validation=False):
         """Initialize an image segmentation datamodule.
 
         Args:
@@ -28,6 +31,13 @@ class SIIMDataModuleSegFormer(LightningDataModule):
             num_workers_test: number of workers for test dataloader
         """
         super().__init__()
+        self.num_classes = num_classes
+        self.img_size = img_size
+        self.ds_mean = ds_mean
+        self.ds_std = ds_std
+        self.pin_memory = pin_memory
+        self.shuffle_validation = shuffle_validation
+
         self.batch_size_train = batch_size_train
         self.batch_size_val = batch_size_val
         self.batch_size_test = batch_size_test
@@ -40,73 +50,36 @@ class SIIMDataModuleSegFormer(LightningDataModule):
         self.val_folds = ['validation']
         self.test_folds = ['testing']
 
-        self.train_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                GrayscaleToRGBd(keys=['image']),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
-                                RandAffined(keys=['image', 'target'],
-                                            prob=0.5,
-                                            rotate_range=0.25,
-                                            shear_range=0.2,
-                                            translate_range=0.1,
-                                            scale_range=0.2,
-                                            padding_mode='zeros'),
-                                AsDiscreted(keys=['target'], threshold=0.5),
-                                EnsureTyped(keys=['image', 'target'], dtype='float32')
-                                ])
-        
-        self.val_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                GrayscaleToRGBd(keys=['image']),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
-                                AsDiscreted(keys=['target'], threshold=0.5),
-                                EnsureTyped(keys=['image', 'target'], dtype='float32')
-                                ])
-        
-        self.test_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                GrayscaleToRGBd(keys=['image']),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
-                                AsDiscreted(keys=['target'], threshold=0.5),
-                                EnsureTyped(keys=['image', 'target'], dtype='float32')
-                                ])
-
     def train_dataloader(self) -> DataLoader:
         """Return the train dataloader."""
         return DataLoader(
-            SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
+            SIIMDataset(folds=self.train_folds),
             batch_size=self.batch_size_train,
             num_workers=self.num_workers_train,
+            pin_memory=self.pin_memory,
             shuffle=True,
             drop_last=True
         )
 
-    def val_dataloader(self):
+    def val_dataloader(self) -> DataLoader:
         """Return the val dataloader."""
         return DataLoader(
-            SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
+            SIIMDataset(folds=self.val_folds),
             batch_size=self.batch_size_val,
-            num_workers=self.num_workers_val
+            num_workers=self.num_workers_val,
+            pin_memory=self.pin_memory,
+            drop_last=True,
+            shuffle=self.shuffle_validation
         )
 
-    def test_dataloader(self):
+    def test_dataloader(self) -> DataLoader:
         """Return the test dataloader."""
         return DataLoader(
-            SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
+            SIIMDataset(folds=self.test_folds),
             batch_size=self.batch_size_test,
-            num_workers=self.num_workers_test
+            num_workers=self.num_workers_test,
+            pin_memory=self.pin_memory,
+            shuffle=False
         )
 
 #%%
