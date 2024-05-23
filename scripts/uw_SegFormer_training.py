@@ -1,5 +1,5 @@
 #%%
-from uw_SegFormer_lightningmodule import UW_SegFormerModule
+from SegFormer_lightningmodule import SegFormerModule
 from uw_dataset_segformer import DatasetConfig, TrainingConfig
 
 # Seed everything for reproducibility.
@@ -20,7 +20,7 @@ my_temp_dir = 'results/'
 
 
 # Intialize custom model.
-model = UW_SegFormerModule(
+model = SegFormerModule(
     model_name=TrainingConfig.MODEL_NAME,
     num_classes=DatasetConfig.NUM_CLASSES,
     init_lr=TrainingConfig.INIT_LR,
