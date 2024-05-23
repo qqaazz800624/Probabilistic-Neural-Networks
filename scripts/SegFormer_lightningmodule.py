@@ -11,7 +11,7 @@ from utils_segformer import dice_coef_loss, get_model
 
 #%%
 
-class UW_SegFormerModule(LightningModule):
+class SegFormerModule(LightningModule):
     def __init__(
         self,
         model_name: str,
