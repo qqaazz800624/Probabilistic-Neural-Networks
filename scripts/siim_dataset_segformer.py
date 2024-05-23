@@ -25,16 +25,16 @@ class DatasetConfig:
 
 @dataclass
 class TrainingConfig:
-    BATCH_SIZE:      int = 48 # 32. On colab you should be able to use batch size of 32 with T4 GPU.
+    BATCH_SIZE_TRAIN:int = 32 # 32. On colab you should be able to use batch size of 32 with T4 GPU.
     NUM_EPOCHS:      int = 100
     INIT_LR:       float = 3e-4
-    NUM_WORKERS:     int = 0 if platform.system() == "Windows" else 12 # os.cpu_count()
+    NUM_WORKERS_TRAIN:int = 0 if platform.system() == "Windows" else 8 # os.cpu_count()
  
     OPTIMIZER_NAME:  str = "AdamW"
     WEIGHT_DECAY:  float = 1e-4
     USE_SCHEDULER:  bool = True # Use learning rate scheduler?
     SCHEDULER:       str = "MultiStepLR" # Name of the scheduler to use.
-    MODEL_NAME:      str = "nvidia/segformer-b4-finetuned-ade-512-512"
+    MODEL_NAME:      str = "nvidia/segformer-b4-finetuned-ade-512-512"  # pretrained model name.
 
 @dataclass
 class InferenceConfig:
