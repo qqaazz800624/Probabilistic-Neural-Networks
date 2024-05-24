@@ -6,7 +6,8 @@ import cv2
 import matplotlib.pyplot as plt
 import torch
 from transformers import SegformerForSemanticSegmentation
-from uw_dataset_segformer import DatasetConfig
+from uw_dataset_segformer import DatasetConfig, InferenceConfig
+import wandb, os
 
 #%%
 
@@ -118,5 +119,69 @@ def denormalize(tensors, *, mean, std):
         tensors[:, c, :, :].mul_(std[c]).add_(mean[c])
  
     return torch.clamp(tensors, min=0.0, max=1.0)
+
+#%%
+
+@torch.inference_mode()
+def inference(model, loader, img_size, device="cpu"):
+    num_batches_to_process = InferenceConfig.NUM_BATCHES
+ 
+    for idx, (batch_img, batch_mask) in enumerate(loader):
+        predictions = model(batch_img.to(device))
+ 
+        pred_all = predictions.argmax(dim=1).cpu().numpy()
+ 
+        batch_img = denormalize(batch_img.cpu(), mean=DatasetConfig.MEAN, std=DatasetConfig.STD)
+        batch_img = batch_img.permute(0, 2, 3, 1).numpy()
+ 
+        if idx == num_batches_to_process:
+            break
+ 
+        for i in range(0, len(batch_img)):
+            fig = plt.figure(figsize=(20, 8))
+ 
+            # Display the original image.
+            ax1 = fig.add_subplot(1, 4, 1)
+            ax1.imshow(batch_img[i])
+            ax1.title.set_text("Actual frame")
+            plt.axis("off")
+ 
+            # Display the ground truth mask.
+            true_mask_rgb = num_to_rgb(batch_mask[i], color_map=id2color)
+            ax2 = fig.add_subplot(1, 4, 2)
+            ax2.set_title("Ground truth labels")
+            ax2.imshow(true_mask_rgb)
+            plt.axis("off")
+ 
+            # Display the predicted segmentation mask.
+            pred_mask_rgb = num_to_rgb(pred_all[i], color_map=id2color)
+            ax3 = fig.add_subplot(1, 4, 3)
+            ax3.set_title("Predicted labels")
+            ax3.imshow(pred_mask_rgb)
+            plt.axis("off")
+ 
+            # Display the predicted segmentation mask overlayed on the original image.
+            overlayed_image = image_overlay(batch_img[i], pred_mask_rgb)
+            ax4 = fig.add_subplot(1, 4, 4)
+            ax4.set_title("Overlayed image")
+            ax4.imshow(overlayed_image)
+            plt.axis("off")
+            plt.show()
+             
+            # Upload predictions to WandB.
+            images = wandb.Image(fig, caption=f"Prediction Sample {idx}_{i}")
+             
+            if os.environ.get("LOCAL_RANK", None) is None:
+                wandb.log({"Predictions": images})
+
+
+#%%
+
+
+
+
+
+
+
 
 #%%

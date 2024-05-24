@@ -11,10 +11,11 @@ seed_everything(42, workers=True)
 from siim_datamodule_segformer import SIIMDataModuleSegFormer
 import torch 
 
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 from lightning.pytorch.loggers import WandbLogger, TensorBoardLogger
-
 from lightning import Trainer
+
+import wandb
 
 #%%
 
@@ -61,9 +62,14 @@ model_checkpoint = ModelCheckpoint(
 lr_rate_monitor = LearningRateMonitor(logging_interval="epoch")
 
 # Initialize logger.
-wandb_logger = WandbLogger(log_model=True, project="SIIM_pneumothorax_segmentation")
+wandb_logger = WandbLogger(log_model=True, 
+                           project="SIIM_pneumothorax_segmentation",
+                           save_dir=my_temp_dir,
+                           version='version_0',
+                           name='SegFormer')
 tensorboard_logger = TensorBoardLogger(my_temp_dir)
 
+model_summarizer = ModelSummary(max_depth=2)
 
 #%%
 
@@ -74,7 +80,7 @@ trainer = Trainer(
     strategy="auto",  # Auto select the distributed training strategy.
     max_epochs=TrainingConfig.NUM_EPOCHS,  # Maximum number of epoch to train for.
     enable_model_summary=False,  # Disable printing of model summary as we are using torchinfo.
-    callbacks=[model_checkpoint, lr_rate_monitor],  # Declaring callbacks to use.
+    callbacks=[model_checkpoint, lr_rate_monitor, model_summarizer],  # Declaring callbacks to use.
     precision="16-mixed",  # Using Mixed Precision training.
     logger=wandb_logger,
     default_root_dir=my_temp_dir,
@@ -84,7 +90,7 @@ trainer = Trainer(
 # Start training
 trainer.fit(model, data_module)
 
-
+wandb.finish()
 #%%
 
 
