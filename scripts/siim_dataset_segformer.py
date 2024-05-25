@@ -16,7 +16,7 @@ import platform
 @dataclass(frozen=True)
 class DatasetConfig:
     NUM_CLASSES:   int = 2 # including background.
-    IMAGE_SIZE: tuple[int,int] = (288, 288) # W, H
+    IMAGE_SIZE: tuple[int,int] = (512, 512) # W, H
     MEAN: tuple = (0.485, 0.456, 0.406)
     STD:  tuple = (0.229, 0.224, 0.225)
     CHANNELS: int = 3

@@ -65,8 +65,8 @@ lr_rate_monitor = LearningRateMonitor(logging_interval="epoch")
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_0',
-                           name='SegFormer')
+                           version='version_1',
+                           name='SegFormer_imgsize_512_512')
 tensorboard_logger = TensorBoardLogger(my_temp_dir)
 
 model_summarizer = ModelSummary(max_depth=2)
