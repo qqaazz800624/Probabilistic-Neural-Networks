@@ -148,12 +148,34 @@ with open('../results/dice_scores.json', 'r') as file:
 import numpy as np
 
 np.round(np.array(dice_scores), 3).mean()
+
 #%%
+
+ 
+import json
+
+# 從 JSON 文件中讀取列表
+with open('../results/dice_scores_segformer.json', 'r') as file:
+    dice_scores_segformer = json.load(file)
+
+import numpy as np
+
+np.round(np.array(dice_scores_segformer), 3).mean()
+
+
+
+#%%
+import matplotlib.pyplot as plt
+
 # Draw histogram for dice_scores_ProbUnet
 plt.hist(dice_scores_ProbUnet, bins=10, edgecolor='black', alpha=0.5, label='ProbUNet')
 
 # Draw histogram for dice_scores
 plt.hist(dice_scores, bins=10, edgecolor='black', alpha=0.5, label='Original')
+
+# Draw histogram for dice_scores_segformer
+plt.hist(dice_scores_segformer, bins=10, edgecolor='black', alpha=0.5, label='Segformer')
+
 
 # Add labels and title
 plt.xlabel('Dice Score')

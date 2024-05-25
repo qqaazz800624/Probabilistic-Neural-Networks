@@ -39,6 +39,7 @@ def dice_preprocessor(fold_no,
     
     return overlaymask, prediction, label.unsqueeze(0), generator_output, generator_input
 
+
 #%%
 
 json_file = 'datalist.json'
