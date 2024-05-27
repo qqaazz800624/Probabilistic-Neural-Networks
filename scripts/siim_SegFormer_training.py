@@ -11,7 +11,7 @@ seed_everything(42, workers=True)
 from siim_datamodule_segformer import SIIMDataModuleSegFormer
 import torch 
 
-from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
+from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary, EarlyStopping
 from lightning.pytorch.loggers import WandbLogger, TensorBoardLogger
 from lightning import Trainer
 
@@ -50,13 +50,13 @@ data_module = SIIMDataModuleSegFormer(
 #%%
 
 # Creating ModelCheckpoint callback. 
-# We'll save the model on basis on validation f1-score.
+# We'll save the model on basis of minimum validation loss.
 model_checkpoint = ModelCheckpoint(
-    monitor="valid/f1",
-    mode="max",
-    filename="ckpt_{epoch:03d}-vloss_{valid/loss:.4f}_vf1_{valid/f1:.4f}",
-    auto_insert_metric_name=False,
-)
+                    monitor="valid/loss",
+                    mode="min",
+                    filename="ckpt_{epoch:03d}-vloss_{valid/loss:.4f}",
+                    auto_insert_metric_name=False,
+                    )
  
 # Creating a learning rate monitor callback which will be plotted/added in the default logger.
 lr_rate_monitor = LearningRateMonitor(logging_interval="epoch")
@@ -65,10 +65,10 @@ lr_rate_monitor = LearningRateMonitor(logging_interval="epoch")
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_1',
-                           name='SegFormer_imgsize_512_512')
+                           version='version_7',
+                           name='SegFormer_b0_augmentation')
 tensorboard_logger = TensorBoardLogger(my_temp_dir)
-
+early_stopper = EarlyStopping(monitor="valid/loss", patience=10, mode="min")
 model_summarizer = ModelSummary(max_depth=2)
 
 #%%
@@ -80,7 +80,10 @@ trainer = Trainer(
     strategy="auto",  # Auto select the distributed training strategy.
     max_epochs=TrainingConfig.NUM_EPOCHS,  # Maximum number of epoch to train for.
     enable_model_summary=False,  # Disable printing of model summary as we are using torchinfo.
-    callbacks=[model_checkpoint, lr_rate_monitor, model_summarizer],  # Declaring callbacks to use.
+    callbacks=[model_checkpoint, 
+               lr_rate_monitor, 
+               model_summarizer,
+                early_stopper],  # Declaring callbacks to use.
     precision="16-mixed",  # Using Mixed Precision training.
     logger=wandb_logger,
     default_root_dir=my_temp_dir,

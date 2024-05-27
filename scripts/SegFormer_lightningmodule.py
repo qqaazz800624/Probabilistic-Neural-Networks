@@ -46,6 +46,8 @@ class SegFormerModule(LightningModule):
         self.mean_train_f1 = MulticlassF1Score(num_classes=self.hparams.num_classes, average="macro")
         self.mean_valid_loss = MeanMetric()
         self.mean_valid_f1 = MulticlassF1Score(num_classes=self.hparams.num_classes, average="macro")
+
+        self.criterion = DiceLoss(mode='multiclass')
  
     def forward(self, data):
         outputs = self.model(pixel_values=data, return_dict=True)
@@ -55,22 +57,22 @@ class SegFormerModule(LightningModule):
     def training_step(self, batch, *args, **kwargs):
         data, target = batch
         logits = self(data)
-        #target = target.long()
+        #target = F.one_hot(target, num_classes=self.hparams.num_classes).permute(0, 3, 1, 2).float()
 
-        # print('target shape:', target.shape)
-        # print('logits shape:', logits.shape)
         # Calculate Combo loss (Segmentation specific loss (Dice) + cross entropy)
         loss = dice_coef_loss(logits, target, num_classes=self.hparams.num_classes)
-         
+        
         self.mean_train_loss(loss, weight=data.shape[0])
         self.mean_train_f1(logits.detach(), target)
  
+        # self.log("train/batch_loss", self.train_loss_mean, prog_bar=True, logger=False)
         self.log("train/batch_loss", self.mean_train_loss, prog_bar=True, logger=False)
         self.log("train/batch_f1", self.mean_train_f1, prog_bar=True, logger=False)
         return loss
  
     def on_train_epoch_end(self):
         # Computing and logging the training mean loss & mean f1.
+        #self.log("train/loss", self.train_loss_mean, prog_bar=True)
         self.log("train/loss", self.mean_train_loss, prog_bar=True)
         self.log("train/f1", self.mean_train_f1, prog_bar=True)
         self.log("epoch", self.current_epoch)
@@ -78,20 +80,24 @@ class SegFormerModule(LightningModule):
     def validation_step(self, batch, *args, **kwargs):
         data, target = batch
         logits = self(data)
-        #target = target.long()
+        #target = F.one_hot(target, num_classes=self.hparams.num_classes).permute(0, 3, 1, 2).float()
         
-        # print('target shape:', target.shape)
-        # print('logits shape:', logits.shape)
-        # print('unique target:', torch.unique(target))
         # Calculate Combo loss (Segmentation specific loss (Dice) + cross entropy)
+        #predictions = torch.argmax(F.softmax(logits, dim=1), dim=1)
+        # diceloss = self.criterion(logits, target)
+        # loss = torch.sum(diceloss)
+        # self.valid_loss_mean = torch.mean(diceloss)
+        #self.log("valid/batch_loss", self.valid_loss_mean, prog_bar=True, logger=False)
         loss = dice_coef_loss(logits, target, num_classes=self.hparams.num_classes)
  
         self.mean_valid_loss.update(loss, weight=data.shape[0])
         self.mean_valid_f1.update(logits, target)
+        return loss
  
     def on_validation_epoch_end(self):
          
         # Computing and logging the validation mean loss & mean f1.
+        #self.log("valid/loss", self.valid_loss_mean, prog_bar=True)
         self.log("valid/loss", self.mean_valid_loss, prog_bar=True)
         self.log("valid/f1", self.mean_valid_f1, prog_bar=True)
         self.log("epoch", self.current_epoch)

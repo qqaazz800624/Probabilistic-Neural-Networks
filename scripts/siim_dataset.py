@@ -55,23 +55,11 @@ class SIIMDataset(Dataset):
         return {'input': image, 'target': target}
 
 
+
 #%%
 
-
 # import json 
-# from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-# from monai.transforms import EnsureTyped, AsDiscreted
-# from manafaln.transforms import LoadJSONd, ParseXAnnotationSegmentationLabeld, Interpolated, Filld, OverlayMaskd
-
-# train_transforms = Compose([
-#                         LoadImaged(keys=['image', 'target'], ensure_channel_first=True),
-#                         Resized(keys=['image', 'target'], 
-#                                         spatial_size=[512, 512]),
-#                         ScaleIntensityd(keys=['image', 'target']),
-#                         AsDiscreted(keys=['target'], threshold=0.5),
-#                         EnsureTyped(keys=['image', 'target'], dtype='float32')
-#                                 ])
-
+# import os
 
 # data_root = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax'
 # datalist_path = os.path.join(data_root, 'datalist.json')
@@ -79,6 +67,19 @@ class SIIMDataset(Dataset):
 # with open(datalist_path) as f:
 #      data_list = json.load(f)
 
+# #%%
+
+# len(data_list['training']), len(data_list['validation']), len(data_list['testing'])
+
+# #%%
+
+# num_training_samples = 7226
+# num_validation_samples = 2410
+# num_testing_samples = 2411
+
+
+
+#%%
 
 # sample = data_list['training'][0]
 

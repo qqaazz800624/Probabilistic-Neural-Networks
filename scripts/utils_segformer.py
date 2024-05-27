@@ -23,10 +23,13 @@ def dice_coef_loss(predictions, ground_truths, num_classes=2, dims=(1, 2), smoot
  
     dice = (2.0 * intersection + smooth) / (summation + smooth)
     dice_mean = dice.mean()
+    dice_loss = 1.0 - dice_mean
  
     CE = F.cross_entropy(predictions, ground_truths)
- 
-    return (1.0 - dice_mean) + CE
+    
+    return dice_loss
+    #return (1.0 - dice_mean) + CE
+
 
 
 

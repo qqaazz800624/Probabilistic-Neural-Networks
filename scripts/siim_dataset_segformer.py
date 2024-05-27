@@ -3,7 +3,7 @@ import torch
 import os
 import json
 from torch.utils.data import Dataset
-import torchvision.transforms as transforms
+from torchvision.transforms.transforms import RandomRotation, ColorJitter, RandomResizedCrop
 from typing import List, Dict
 
 import albumentations as A
@@ -33,7 +33,8 @@ class TrainingConfig:
     WEIGHT_DECAY:  float = 1e-4
     USE_SCHEDULER:  bool = True # Use learning rate scheduler?
     SCHEDULER:       str = "MultiStepLR" # Name of the scheduler to use.
-    MODEL_NAME:      str = "nvidia/segformer-b4-finetuned-ade-512-512"  # pretrained model name.
+    MODEL_NAME:      str = "nvidia/segformer-b0-finetuned-ade-512-512"  # pretrained model name.
+    #MODEL_NAME:      str = "nvidia/segformer-b4-finetuned-ade-512-512"  # pretrained model name.
 
 @dataclass
 class InferenceConfig:
@@ -90,6 +91,9 @@ class SIIMDataset(Dataset):
             transforms.extend([
                 A.HorizontalFlip(p=0.5), 
                 A.VerticalFlip(p=0.5),
+                RandomRotation(degrees=15, p=0.5),
+                ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1, p=0.5),
+                RandomResizedCrop(224, scale=(0.8, 1.0), p=0.5),
                 A.ShiftScaleRotate(scale_limit=0.12, rotate_limit=0.15, shift_limit=0.12, p=0.5),
                 A.RandomBrightnessContrast(p=0.5),
                 A.CoarseDropout(max_holes=8, max_height=self.img_size[1]//20, max_width=self.img_size[0]//20, min_holes=5, fill_value=0, mask_fill_value=0, p=0.5)

@@ -160,7 +160,7 @@ with open('../results/dice_scores_segformer.json', 'r') as file:
 
 import numpy as np
 
-np.round(np.array(dice_scores_segformer), 3).mean()
+np.round(np.array(dice_scores_segformer), 3)
 
 
 
