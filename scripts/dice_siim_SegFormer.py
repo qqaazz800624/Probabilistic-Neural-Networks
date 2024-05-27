@@ -27,13 +27,27 @@ model = SegFormerModule(
 )
 
 root = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/'
-model_weight = 'results/SIIM_pneumothorax_segmentation/version_5/checkpoints/ckpt_005-vloss_0.3311_vf1_0.7664.ckpt'
+model_weight = 'results/SIIM_pneumothorax_segmentation/version_8/checkpoints/ckpt_014-vloss_0.1118.ckpt'
 weight_path = os.path.join(root, model_weight)
 
 model_weight = torch.load(weight_path, map_location="cpu")["state_dict"]
 model.load_state_dict(model_weight)
 model.eval()
 model.to(device)
+
+
+#%%
+
+
+# from siim_dataset_segformer import SIIMDataset
+# train_dataset = SIIMDataset(folds=['training'])
+# valid_dataset = SIIMDataset(folds=['validation'])
+# test_dataset = SIIMDataset(folds=['testing'])
+
+# #%%
+
+# 2669/12047
+
 
 
 #%%
@@ -92,40 +106,40 @@ np.array(dice_scores_segformer)
 
 #%%
 
-from siim_dataset_segformer import SIIMDataset
+# from siim_dataset_segformer import SIIMDataset
 
-fold_no = 'testing'
-dataset_test = SIIMDataset(folds=[fold_no])
-img_serial = 484  # good example: 6, 500  # bad example: 532, 484
-image, mask = dataset_test[img_serial]
-image = image.unsqueeze(0).to(device)
-logits = model(image)
-predictions = torch.argmax(F.softmax(logits, dim=1), dim=1).cpu()
-
-
-#%%
+# fold_no = 'testing'
+# dataset_test = SIIMDataset(folds=[fold_no])
+# img_serial = 484  # good example: 6, 500  # bad example: 532, 484
+# image, mask = dataset_test[img_serial]
+# image = image.unsqueeze(0).to(device)
+# logits = model(image)
+# predictions = torch.argmax(F.softmax(logits, dim=1), dim=1).cpu()
 
 
-from monai.metrics import DiceMetric
-from monai.transforms import AsDiscrete
-discreter = AsDiscrete(threshold=0.5)
-dice_metric = DiceMetric(include_background=True, reduction='mean')
-
-# Compute Dice score
-dice_metric(y_pred=discreter(predictions), y=discreter(mask.unsqueeze(0)))
-dice_score = dice_metric.aggregate().item()
-dice_metric.reset()
-
-print("Dice Score:", dice_score)
+# #%%
 
 
-#%%
+# from monai.metrics import DiceMetric
+# from monai.transforms import AsDiscrete
+# discreter = AsDiscrete(threshold=0.5)
+# dice_metric = DiceMetric(include_background=True, reduction='mean')
 
-import matplotlib.pyplot as plt
+# # Compute Dice score
+# dice_metric(y_pred=discreter(predictions), y=discreter(mask.unsqueeze(0)))
+# dice_score = dice_metric.aggregate().item()
+# dice_metric.reset()
 
-plt.imshow(predictions.squeeze(0).detach().numpy(), 
-           cmap='plasma',
-           aspect='auto')
+# print("Dice Score:", dice_score)
+
+
+# #%%
+
+# import matplotlib.pyplot as plt
+
+# plt.imshow(predictions.squeeze(0).detach().numpy(), 
+#            cmap='plasma',
+#            aspect='auto')
 
 
 #%%

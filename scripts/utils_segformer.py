@@ -27,8 +27,8 @@ def dice_coef_loss(predictions, ground_truths, num_classes=2, dims=(1, 2), smoot
  
     CE = F.cross_entropy(predictions, ground_truths)
     
-    return dice_loss
-    #return (1.0 - dice_mean) + CE
+    #return dice_loss
+    return (1.0 - dice_mean) + CE
 
 
 
