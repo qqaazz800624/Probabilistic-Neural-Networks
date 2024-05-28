@@ -5,6 +5,7 @@ import json
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
+from monai.transforms import Compose, LoadImaged, Resized, ScaleIntensityd
 from typing import List, Dict
 
 class SIIMDataset(Dataset):
@@ -33,6 +34,15 @@ class SIIMDataset(Dataset):
         for fold in folds:
             self.samples.extend(self.data_list[fold])
 
+        self.image_loader = Compose([
+                            LoadImaged(keys=['image', 'target'], 
+                                        ensure_channel_first=True
+                                        ),
+                            Resized(keys=['image', 'target'], 
+                                        spatial_size=[512, 512]),
+                            ScaleIntensityd(keys=['image', 'target'])
+                                    ])
+
     def __len__(self):
         """Return the total number of samples."""
         return len(self.samples)
@@ -47,93 +57,23 @@ class SIIMDataset(Dataset):
             'target': target_path
         }
 
+        data = self.image_loader(data_list)
+        image = data['image']
+        target = data['target']
+        
         if self.transform:
-            transformed = self.transform(data_list)
+            transformed = self.transform(data)
             image = transformed['image']
             target = transformed['target']
 
         return {'input': image, 'target': target}
 
-
-
 #%%
 
-# import json 
-# import os
-
-# data_root = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax'
-# datalist_path = os.path.join(data_root, 'datalist.json')
-
-# with open(datalist_path) as f:
-#      data_list = json.load(f)
-
-# #%%
-
-# len(data_list['training']), len(data_list['validation']), len(data_list['testing'])
-
-# #%%
-
-# num_training_samples = 7226
-# num_validation_samples = 2410
-# num_testing_samples = 2411
 
 
 
-#%%
 
-# sample = data_list['training'][0]
-
-# image_path = os.path.join(data_root, sample['image'])
-# target_path = os.path.join(data_root, sample['label'])
-
-
-# data_dict = {
-#     'image': image_path, 
-#     'target': target_path
-# }
-
-# transformed = train_transforms(data_dict)
-
-# # #%%
-
-# transformed
-
-# # #%%
-# transformed['image'].shape, transformed['target'].shape
-
-
-# # #%%
-
-# import matplotlib.pyplot as plt
-
-# plt.imshow(transformed['image'][0].T, cmap='gray')
-
-
-# # #%%
-
-
-# import matplotlib.pyplot as plt
-
-# plt.imshow(transformed['target'][0].T, cmap='gray')
-
-
-# # #%%
-# from monai.transforms import AsDiscrete
-# import torch
-
-# # discreter = AsDiscrete(threshold=0.5)
-# # torch.unique(discreter(transformed['target'][0]))
-
-# torch.unique(transformed['target'][0].T)
-
-
-# #%%
-
-# import matplotlib.pyplot as plt
-# from monai.transforms import AsDiscrete
-
-# discreter = AsDiscrete(threshold=0.5)
-# plt.imshow(discreter(transformed['target'][0]).T, cmap='gray')
 
 
 #%%

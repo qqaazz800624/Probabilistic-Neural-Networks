@@ -41,12 +41,12 @@ class SIIMDataModule(LightningDataModule):
         self.test_folds = ['testing']
 
         self.train_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
+                                # LoadImaged(keys=['image', 'target'], 
+                                #         ensure_channel_first=True
+                                #         ),
+                                # Resized(keys=['image', 'target'], 
+                                #         spatial_size=[512, 512]),
+                                # ScaleIntensityd(keys=['image', 'target']),
                                 RandAffined(keys=['image', 'target'],
                                             prob=0.5,
                                             rotate_range=0.25,
@@ -58,22 +58,22 @@ class SIIMDataModule(LightningDataModule):
                                 ])
         
         self.val_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
+                                # LoadImaged(keys=['image', 'target'], 
+                                #         ensure_channel_first=True
+                                #         ),
+                                # Resized(keys=['image', 'target'], 
+                                #         spatial_size=[512, 512]),
+                                # ScaleIntensityd(keys=['image', 'target']),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
         self.test_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
+                                # LoadImaged(keys=['image', 'target'], 
+                                #         ensure_channel_first=True
+                                #         ),
+                                # Resized(keys=['image', 'target'], 
+                                #         spatial_size=[512, 512]),
+                                # ScaleIntensityd(keys=['image', 'target']),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
 
