@@ -4,8 +4,9 @@ from siim_datamodule import SIIMDataModule
 from lightning.pytorch import Trainer
 from deeplabv3plusmodule import DeepLabV3PlusModule
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
-from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from unet_lightningmodule import UNetModule
+import wandb
 
 
 # Initialize the model module
@@ -18,6 +19,13 @@ max_epochs = 64
 
 my_temp_dir = 'results/'
 logger = TensorBoardLogger(my_temp_dir)
+
+wandb_logger = WandbLogger(log_model=True, 
+                           project="SIIM_pneumothorax_segmentation",
+                           save_dir=my_temp_dir,
+                           version='version_13',
+                           name='Unet_test')
+
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
                                       monitor='val_loss', 
@@ -31,7 +39,8 @@ trainer = Trainer(
     accelerator='gpu',
     devices=1,
     max_epochs=max_epochs,  # number of epochs we want to train
-    logger=logger,  # log training metrics for later evaluation
+    #logger=logger,  # log training metrics for later evaluation
+    logger=wandb_logger,  # log training metrics for later evaluation
     log_every_n_steps=8,
     enable_checkpointing=True,
     enable_progress_bar=True,
