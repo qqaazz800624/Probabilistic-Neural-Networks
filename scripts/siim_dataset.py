@@ -5,7 +5,7 @@ import json
 import torch
 from torch.utils.data import Dataset
 import torchvision.transforms as transforms
-from monai.transforms import Compose, LoadImaged, Resized, ScaleIntensityd
+from monai.transforms import Compose, LoadImaged, Resized, MapLabelValued, EnsureChannelFirstd
 from typing import List, Dict
 
 class SIIMDataset(Dataset):
@@ -36,11 +36,15 @@ class SIIMDataset(Dataset):
 
         self.image_loader = Compose([
                             LoadImaged(keys=['image', 'target'], 
+                                        reader='PILReader',
                                         ensure_channel_first=True
                                         ),
+                            MapLabelValued(keys=['target'],
+                                           orig_labels=[0, 255],
+                                           target_labels=[0, 1]),
                             Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                            ScaleIntensityd(keys=['image', 'target'])
+                                    spatial_size=[512, 512],
+                                    mode = ['bilinear', 'nearest']),
                                     ])
 
     def __len__(self):
@@ -70,9 +74,8 @@ class SIIMDataset(Dataset):
 
 #%%
 
-
-
-
+# test_dataset = SIIMDataset(folds=['testing'])
+# test_dataset[0]['input'].shape, test_dataset[0]['target'].shape
 
 
 

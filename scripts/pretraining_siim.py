@@ -10,9 +10,9 @@ import wandb
 
 
 # Initialize the model module
-model = DeepLabV3PlusModule()
+#model = DeepLabV3PlusModule()
 #model = SegFormerModule(num_classes=1, in_channels=3)
-#model = UNetModule()
+model = UNetModule()
 siim_data_module = SIIMDataModule()
 #siim_data_module = SIIMDataModuleSegFormer()
 max_epochs = 64

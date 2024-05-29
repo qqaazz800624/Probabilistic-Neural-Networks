@@ -11,7 +11,7 @@ class InstanceSegmentation(Transform):
         self.instance_only = instance_only
 
         self.model: torch.nn.Module = ModelBuilder()(model_config)
-        self.device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+        self.device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
         model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
         for k in list(model_weight.keys()):

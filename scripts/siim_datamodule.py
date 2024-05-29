@@ -4,9 +4,9 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
-from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
+from monai.transforms import Compose, RandFlipd
 from monai.transforms import RandAffined, EnsureTyped
-from transforms import GrayscaleToRGBd
+from albumentations import HorizontalFlip
 
 class SIIMDataModule(LightningDataModule):
     def __init__(
@@ -41,39 +41,15 @@ class SIIMDataModule(LightningDataModule):
         self.test_folds = ['testing']
 
         self.train_transforms = Compose([
-                                # LoadImaged(keys=['image', 'target'], 
-                                #         ensure_channel_first=True
-                                #         ),
-                                # Resized(keys=['image', 'target'], 
-                                #         spatial_size=[512, 512]),
-                                # ScaleIntensityd(keys=['image', 'target']),
-                                RandAffined(keys=['image', 'target'],
-                                            prob=0.5,
-                                            rotate_range=0.25,
-                                            shear_range=0.2,
-                                            translate_range=0.1,
-                                            scale_range=0.2,
-                                            padding_mode='zeros'),
+                                RandFlipd(keys=['image', 'target'], prob=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
         self.val_transforms = Compose([
-                                # LoadImaged(keys=['image', 'target'], 
-                                #         ensure_channel_first=True
-                                #         ),
-                                # Resized(keys=['image', 'target'], 
-                                #         spatial_size=[512, 512]),
-                                # ScaleIntensityd(keys=['image', 'target']),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
         self.test_transforms = Compose([
-                                # LoadImaged(keys=['image', 'target'], 
-                                #         ensure_channel_first=True
-                                #         ),
-                                # Resized(keys=['image', 'target'], 
-                                #         spatial_size=[512, 512]),
-                                # ScaleIntensityd(keys=['image', 'target']),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
 

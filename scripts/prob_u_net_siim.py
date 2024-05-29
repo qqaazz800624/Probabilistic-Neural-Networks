@@ -8,13 +8,14 @@ import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
 
 from lightning import Trainer
-from lightning.pytorch.loggers import TensorBoardLogger
+from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 
 #from prob_unet import ProbUNet
 from prob_unet_proposed import ProbUNet
 
 from siim_ProbNet_datamodule import SIIMDataModule
+import wandb
 
 my_temp_dir = 'results/'
 
@@ -23,7 +24,7 @@ my_temp_dir = 'results/'
 # ============ Training setting ============= #
 
 max_epochs = 128
-model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
+model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
@@ -37,14 +38,14 @@ if model_name == 'Unet':
                 classes=1, 
                 encoder_name = 'tu-resnest50d', 
                 encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
+    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_0/checkpoints/best_model.ckpt'
 
 elif model_name == 'DeepLabV3Plus':
     model = DeepLabV3Plus(in_channels=1, 
                         classes=1, 
                         encoder_name = 'tu-resnest50d', 
                         encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_11/checkpoints/best_model.ckpt'
+    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
 
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 for k in list(model_weight.keys()):
@@ -74,6 +75,12 @@ Prob_UNet = ProbUNet(
 data_module = SIIMDataModule(batch_size_train=batch_size_train)
 
 logger = TensorBoardLogger(my_temp_dir)
+wandb_logger = WandbLogger(log_model=True, 
+                           project="SIIM_pneumothorax_segmentation",
+                           save_dir=my_temp_dir,
+                           version='version_12',
+                           name='ProbUNet_Unet')
+
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
                                       monitor='val_loss', 
@@ -88,6 +95,7 @@ trainer = Trainer(
     devices=1,
     max_epochs=max_epochs,  # number of epochs we want to train
     logger=logger,  # log training metrics for later evaluation
+    #logger=wandb_logger,  # log training metrics for later evaluation
     log_every_n_steps=8,
     enable_checkpointing=True,
     enable_progress_bar=True,
@@ -99,3 +107,6 @@ trainer = Trainer(
 )
 
 trainer.fit(Prob_UNet, data_module)
+
+wandb.finish()
+#%%

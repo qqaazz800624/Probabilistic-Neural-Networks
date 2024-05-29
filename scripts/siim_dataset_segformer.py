@@ -7,7 +7,7 @@ from torchvision.transforms.transforms import RandomRotation, ColorJitter, Rando
 from typing import List, Dict
 
 import albumentations as A
-from monai.transforms import AsDiscrete
+from monai.transforms import AsDiscrete, RandAffine
 from albumentations.pytorch import ToTensorV2
 import cv2
 from dataclasses import dataclass
@@ -92,11 +92,17 @@ class SIIMDataset(Dataset):
                 A.HorizontalFlip(p=0.5), 
                 A.VerticalFlip(p=0.5),
                 RandomRotation(degrees=15, p=0.5),
+                # RandAffine(prob=0.5,
+                #             rotate_range=0.25,
+                #             shear_range=0.2,
+                #             translate_range=0.1,
+                #             scale_range=0.2,
+                #             padding_mode='zeros')
                 # ColorJitter(brightness=0.1, contrast=0.1, saturation=0.1, hue=0.1, p=0.5),
                 # RandomResizedCrop(224, scale=(0.8, 1.0), p=0.5),
-                A.ShiftScaleRotate(scale_limit=0.12, rotate_limit=0.15, shift_limit=0.12, p=0.5),
-                A.RandomBrightnessContrast(p=0.5),
-                A.CoarseDropout(max_holes=8, max_height=self.img_size[1]//20, max_width=self.img_size[0]//20, min_holes=5, fill_value=0, mask_fill_value=0, p=0.5)
+                # A.ShiftScaleRotate(scale_limit=0.12, rotate_limit=0.15, shift_limit=0.12, p=0.5),
+                # A.RandomBrightnessContrast(p=0.5),
+                # A.CoarseDropout(max_holes=8, max_height=self.img_size[1]//20, max_width=self.img_size[0]//20, min_holes=5, fill_value=0, mask_fill_value=0, p=0.5)
             ])
  
         # Preprocess transforms - Normalization and converting to PyTorch tensor format (HWC --> CHW).
