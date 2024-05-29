@@ -9,3 +9,4 @@ dataset_UWM_GI_Tract_train_valid
 wandb
 UM_medical_segmentation
 SIIM_pneumothorax_segmentation
+example
