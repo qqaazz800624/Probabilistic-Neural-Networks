@@ -1,6 +1,7 @@
 #%%
 
-from siim_datamodule import SIIMDataModule
+#from siim_datamodule import SIIMDataModule
+from siim_datamodule_balancedSampler import SIIMDataModule
 from lightning.pytorch import Trainer
 from deeplabv3plusmodule import DeepLabV3PlusModule
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
@@ -23,8 +24,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_13',
-                           name='Unet_test')
+                           version='version_14',
+                           name='Unet_BalancedSampler')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
