@@ -74,8 +74,7 @@ class SIIMDataset(Dataset):
 
 #%%
 
-# test_dataset = SIIMDataset(folds=['testing'])
-# test_dataset[0]['input'].shape, test_dataset[0]['target'].shape
+
 
 
 
