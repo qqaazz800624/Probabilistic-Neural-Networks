@@ -5,8 +5,9 @@ from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
 from monai.transforms import Compose, RandFlipd
-from monai.transforms import RandAffined, EnsureTyped
+from monai.transforms import RandAffined, EnsureTyped, NormalizeIntensityd
 from albumentations import HorizontalFlip
+from augmentations import XRayAugs
 
 class SIIMDataModule(LightningDataModule):
     def __init__(
@@ -41,15 +42,18 @@ class SIIMDataModule(LightningDataModule):
         self.test_folds = ['testing']
 
         self.train_transforms = Compose([
-                                RandFlipd(keys=['image', 'target'], prob=0.5),
+                                XRayAugs(img_key='image', seg_key='target'),
+                                NormalizeIntensityd(keys=['image']),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
         self.val_transforms = Compose([
+                                NormalizeIntensityd(keys=['image']),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
         self.test_transforms = Compose([
+                                NormalizeIntensityd(keys=['image']),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
 
