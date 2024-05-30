@@ -7,7 +7,9 @@ from siim_dataset import SIIMDataset
 from monai.transforms import Compose, RandFlipd
 from monai.transforms import RandAffined, EnsureTyped, NormalizeIntensityd
 from albumentations import HorizontalFlip
-from augmentations import XRayAugs
+#from augmentations import XRayAugs
+from custom.augmentations import XRayAugs
+from custom.balanced_data_loader import balanced_data_loader
 
 class SIIMDataModule(LightningDataModule):
     def __init__(
@@ -59,28 +61,27 @@ class SIIMDataModule(LightningDataModule):
 
     def train_dataloader(self) -> DataLoader:
         """Return the train dataloader."""
-        return DataLoader(
+        return balanced_data_loader(
             SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
             batch_size=self.batch_size_train,
             num_workers=self.num_workers_train,
-            shuffle=True,
-            drop_last=True
         )
 
-    def val_dataloader(self):
+    
+    def val_dataloader(self) -> DataLoader:
         """Return the val dataloader."""
-        return DataLoader(
+        return balanced_data_loader(
             SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
             batch_size=self.batch_size_val,
-            num_workers=self.num_workers_val
+            num_workers=self.num_workers_val,
         )
-
-    def test_dataloader(self):
+    
+    def test_dataloader(self) -> DataLoader:
         """Return the test dataloader."""
-        return DataLoader(
+        return balanced_data_loader(
             SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
             batch_size=self.batch_size_test,
-            num_workers=self.num_workers_test
+            num_workers=self.num_workers_test,
         )
 
 #%%
