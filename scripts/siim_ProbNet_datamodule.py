@@ -5,8 +5,9 @@ from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
 from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
-from monai.transforms import EnsureTyped, AsDiscreted, RandAffined, RandFlipd, RandRotate90d, RandZoomd
-from transforms import GrayscaleToRGBd
+from monai.transforms import EnsureTyped, AsDiscreted, NormalizeIntensityd
+from custom.augmentations import XRayAugs
+from custom.balanced_data_loader import balanced_data_loader
 
 class SIIMDataModule(LightningDataModule):
     def __init__(
@@ -41,72 +42,72 @@ class SIIMDataModule(LightningDataModule):
         self.test_folds = ['testing']
 
         self.train_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
-                                RandFlipd(keys=['image', 'target'], prob=0.5, spatial_axis=0),
-                                RandRotate90d(keys=['image', 'target'], prob=0.5),
-                                RandZoomd(keys=['image', 'target'], prob=0.5),
-                                RandAffined(keys=['image', 'target'],
-                                            prob=0.5,
-                                            rotate_range=0.25,
-                                            shear_range=0.2,
-                                            translate_range=0.1,
-                                            scale_range=0.2,
-                                            padding_mode='zeros'),
+                                XRayAugs(img_key='image', seg_key='target'),
+                                NormalizeIntensityd(keys=['image']),
                                 AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
         self.val_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
+                                NormalizeIntensityd(keys=['image']),
                                 AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
         
         self.test_transforms = Compose([
-                                LoadImaged(keys=['image', 'target'], 
-                                        ensure_channel_first=True
-                                        ),
-                                Resized(keys=['image', 'target'], 
-                                        spatial_size=[512, 512]),
-                                ScaleIntensityd(keys=['image', 'target']),
+                                NormalizeIntensityd(keys=['image']),
                                 AsDiscreted(keys=['target'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
 
+    # def train_dataloader(self) -> DataLoader:
+    #     """Return the train dataloader."""
+    #     return DataLoader(
+    #         SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
+    #         batch_size=self.batch_size_train,
+    #         num_workers=self.num_workers_train,
+    #         shuffle=True,
+    #         drop_last=True
+    #     )
+    
     def train_dataloader(self) -> DataLoader:
         """Return the train dataloader."""
-        return DataLoader(
+        return balanced_data_loader(
             SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
             batch_size=self.batch_size_train,
             num_workers=self.num_workers_train,
-            shuffle=True,
-            drop_last=True
         )
 
-    def val_dataloader(self):
+    # def val_dataloader(self):
+    #     """Return the val dataloader."""
+    #     return DataLoader(
+    #         SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
+    #         batch_size=self.batch_size_val,
+    #         num_workers=self.num_workers_val
+    #     )
+    
+    def val_dataloader(self) -> DataLoader:
         """Return the val dataloader."""
-        return DataLoader(
+        return balanced_data_loader(
             SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
             batch_size=self.batch_size_val,
-            num_workers=self.num_workers_val
+            num_workers=self.num_workers_val,
         )
 
-    def test_dataloader(self):
+    # def test_dataloader(self):
+    #     """Return the test dataloader."""
+    #     return DataLoader(
+    #         SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
+    #         batch_size=self.batch_size_test,
+    #         num_workers=self.num_workers_test
+    #     )
+    
+    def test_dataloader(self) -> DataLoader:
         """Return the test dataloader."""
-        return DataLoader(
+        return balanced_data_loader(
             SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
             batch_size=self.batch_size_test,
-            num_workers=self.num_workers_test
+            num_workers=self.num_workers_test,
         )
 
 #%%
