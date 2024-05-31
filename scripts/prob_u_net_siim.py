@@ -11,8 +11,8 @@ from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 
-#from prob_unet import ProbUNet
-from prob_unet_proposed import ProbUNet
+from prob_unet import ProbUNet
+#from prob_unet_proposed import ProbUNet
 
 from siim_ProbNet_datamodule import SIIMDataModule
 import wandb
@@ -28,6 +28,7 @@ model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
+batch_size_val = 16
 loss_fn = 'DiceLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss']
 
 # =========================================== #
@@ -38,7 +39,7 @@ if model_name == 'Unet':
                 classes=1, 
                 encoder_name = 'tu-resnest50d', 
                 encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_0/checkpoints/best_model.ckpt'
+    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
 
 elif model_name == 'DeepLabV3Plus':
     model = DeepLabV3Plus(in_channels=1, 
@@ -72,14 +73,15 @@ Prob_UNet = ProbUNet(
     loss_fn=loss_fn
     )
 
-data_module = SIIMDataModule(batch_size_train=batch_size_train)
+data_module = SIIMDataModule(batch_size_train=batch_size_train,
+                             batch_size_val=batch_size_val)
 
 logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_12',
-                           name='ProbUNet_Unet')
+                           version='version_15',
+                           name='ProbUNet_BalancedSampler')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
@@ -94,8 +96,8 @@ trainer = Trainer(
     accelerator='gpu',
     devices=1,
     max_epochs=max_epochs,  # number of epochs we want to train
-    logger=logger,  # log training metrics for later evaluation
-    #logger=wandb_logger,  # log training metrics for later evaluation
+    #logger=logger,  # log training metrics for later evaluation
+    logger=wandb_logger,  # log training metrics for later evaluation
     log_every_n_steps=8,
     enable_checkpointing=True,
     enable_progress_bar=True,
