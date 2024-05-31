@@ -50,14 +50,13 @@ from segmentation_models_pytorch import Unet, DeepLabV3Plus
 from monai.metrics import DiceMetric
 from monai.transforms import AsDiscrete
 
-model_name = 'Unet'
-model_version_dict = {'Unet': 'version_0',
-                      'DeepLabV3Plus': 'version_1'}
+model_name = 'DeepLabV3Plus'
+model_version_dict = {'Unet': 'version_14',
+                      'DeepLabV3Plus': 'version_16'}
 version_no = model_version_dict[model_name]
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
-#ckpt_path = f'results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
-ckpt_path = 'results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
+ckpt_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
+device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
 
 data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
 test_data_loader = data_module.test_dataloader()
@@ -96,6 +95,7 @@ with torch.no_grad():
         dice_scores.append(dice_score)
         dice_metric.reset()
 
+
 #%%
 
 with open(f'results/dice_scores_{model_name}.json', 'w') as file:
@@ -115,52 +115,63 @@ with open(f'results/dice_scores_{model_name}.json', 'w') as file:
 
 #%%
 
-import json
-import numpy as np
-
-# 從 JSON 文件中讀取列表
-with open('../results/dice_scores_Unet.json', 'r') as file:
-    dice_scores_Unet = json.load(file)
-
-#np.array(dice_scores_Unet)
-np.round(np.array(dice_scores_Unet), 4)
-#np.mean(dice_scores_Unet)
-
-#%%
-
-np.mean(dice_scores_Unet)
-
-
-#%%
-
-# dice_scores_Unet_filtered = np.array(dice_scores_Unet)[~np.isnan(dice_scores_Unet)]
-# dice_scores_Unet_filtered.mean()
-
-# #%%
-
 # import json
 # import numpy as np
 
 # # 從 JSON 文件中讀取列表
-# with open('../results/dice_scores_DeepLabV3Plus.json', 'r') as file:
-#     dice_scores_DeepLabV3Plus = json.load(file)
+# with open('../results/dice_scores_Unet.json', 'r') as file:
+#     dice_scores_Unet = json.load(file)
 
-# np.array(dice_scores_DeepLabV3Plus)
-# np.nanmean(dice_scores_DeepLabV3Plus)
+# #np.array(dice_scores_Unet)
+# #np.round(np.array(dice_scores_Unet), 4)
+# np.mean(dice_scores_Unet)
 
-# #%%
+
+#%%
+
+import json
+import numpy as np
+
+# 從 JSON 文件中讀取列表
+with open('../results/dice_scores_DeepLabV3Plus.json', 'r') as file:
+    dice_scores_DeepLabV3Plus = json.load(file)
+
+#np.array(dice_scores_DeepLabV3Plus)
+np.mean(dice_scores_DeepLabV3Plus)
+
+
+#%%
 
 # import matplotlib.pyplot as plt
 
-# # Plot histogram of dice_scores
+# # Plot histogram of dice_scores_Unet
 # plt.hist(dice_scores_Unet, bins=10, edgecolor='black')
 # plt.xlabel('Dice Score')
 # plt.ylabel('Frequency')
 # plt.title('Histogram of Dice Scores')
 # plt.show()
 
+# #%%
 
-# #%% Single image dice evaluation
+# # Plot histogram of dice_scores_DeepLabV3Plus
+# plt.hist(dice_scores_DeepLabV3Plus, bins=10, edgecolor='black')
+# plt.xlabel('Dice Score')
+# plt.ylabel('Frequency')
+# plt.title('Histogram of Dice Scores')
+# plt.show()
+
+# #%%
+
+# plt.hist(dice_scores_Unet, bins=10, edgecolor='black', alpha=0.5, label='Unet')
+# plt.hist(dice_scores_DeepLabV3Plus, bins=10, edgecolor='black', alpha=0.5, label='DeepLabV3Plus')
+# plt.xlabel('Dice Score')
+# plt.ylabel('Frequency')
+# plt.title('Histogram of Dice Scores')
+# plt.legend()
+# plt.show()
+
+
+#%% Single image dice evaluation
 
 # import os, json, torch
 # from tqdm import tqdm
