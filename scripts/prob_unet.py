@@ -134,7 +134,7 @@ class ProbUNet(BaseModule):
         )
 
         if loss_fn == 'BCEWithLogitsLoss':
-            self.criterion = BCEWithLogitsLoss(reduction="none")  # original setting, version_3
+            self.criterion = BCEWithLogitsLoss(reduction="mean")  # original setting, version_3
         elif loss_fn == 'DiceLoss':
             self.criterion = DiceLoss(mode='binary')            # experimental setting
         elif loss_fn == 'DiceCELoss':

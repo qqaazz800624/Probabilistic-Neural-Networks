@@ -26,10 +26,10 @@ my_temp_dir = 'results/'
 max_epochs = 128
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
-beta = 1
+beta = 10
 batch_size_train = 16
 batch_size_val = 16
-loss_fn = 'DiceCELoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss', 'DiceCELoss']
+loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss', 'DiceCELoss']
 
 # =========================================== #
 
@@ -81,8 +81,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_21',
-                           name='ProbUNet_DiceCELoss_1beta')
+                           version='version_24',
+                           name='ProbUNet_BCEWithLogitsLoss')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
