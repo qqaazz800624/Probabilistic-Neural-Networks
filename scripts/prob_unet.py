@@ -40,6 +40,7 @@ from lightning_uq_box.uq_methods.utils import default_segmentation_metrics
 from utils import process_segmentation_prediction, l2_regularisation
 from segmentation_models_pytorch.losses import DiceLoss
 from torch.nn import BCEWithLogitsLoss
+from monai.losses import DiceCELoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
 
 
@@ -136,6 +137,21 @@ class ProbUNet(BaseModule):
             self.criterion = BCEWithLogitsLoss(reduction="none")  # original setting, version_3
         elif loss_fn == 'DiceLoss':
             self.criterion = DiceLoss(mode='binary')            # experimental setting
+        elif loss_fn == 'DiceCELoss':
+            self.criterion = DiceCELoss(include_background=True, 
+                                        to_onehot_y=False, 
+                                        sigmoid=False, 
+                                        softmax=False, 
+                                        other_act=None, 
+                                        squared_pred=False, 
+                                        jaccard=False, 
+                                        reduction='mean', 
+                                        smooth_nr=1e-5, 
+                                        smooth_dr=1e-5, 
+                                        batch=False, 
+                                        ce_weight=None, 
+                                        lambda_dice=1.0, 
+                                        lambda_ce=1.0)
 
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
@@ -194,8 +210,8 @@ class ProbUNet(BaseModule):
         self.prior_latent_space, self.prior_mu, self.prior_sigma = self.prior.forward(img)
         # print('prior net mu: ', self.prior_mu)
         # print('prior net sigma: ', self.prior_sigma)
-        # print('posterior net mu: ', self.posterior_mu)
-        # print('posterior net sigma: ', self.posterior_sigma)
+        print('posterior net mu: ', self.posterior_mu)
+        print('posterior net sigma: ', self.posterior_sigma)
 
         self.unet_features = self.model.forward(img)
 

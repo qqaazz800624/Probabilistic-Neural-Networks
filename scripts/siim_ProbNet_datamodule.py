@@ -4,7 +4,7 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
-from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd
+from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd, RandAffined
 from monai.transforms import EnsureTyped, AsDiscreted, NormalizeIntensityd
 from custom.augmentations import XRayAugs
 from custom.balanced_data_loader import balanced_data_loader
@@ -42,6 +42,7 @@ class SIIMDataModule(LightningDataModule):
         self.test_folds = ['testing']
 
         self.train_transforms = Compose([
+                                #RandAffined(keys=['image', 'target'], prob=0.5, rotate_range=10, scale_range=0.1),
                                 XRayAugs(img_key='image', seg_key='target'),
                                 NormalizeIntensityd(keys=['image']),
                                 AsDiscreted(keys=['target'], threshold=0.5),

@@ -26,10 +26,10 @@ my_temp_dir = 'results/'
 max_epochs = 128
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
-beta = 10
+beta = 1
 batch_size_train = 16
 batch_size_val = 16
-loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss']
+loss_fn = 'DiceCELoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss', 'DiceCELoss']
 
 # =========================================== #
 
@@ -65,6 +65,7 @@ Prob_UNet = ProbUNet(
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
+    #lr_scheduler=partial(ReduceLROnPlateau, patience=5),
     beta=beta,
     latent_dim=latent_dim,
     max_epochs=max_epochs,
@@ -80,8 +81,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_17',
-                           name='ProbUNet_BCEWithLogitsLoss')
+                           version='version_21',
+                           name='ProbUNet_DiceCELoss_1beta')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 

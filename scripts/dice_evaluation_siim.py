@@ -173,71 +173,71 @@ np.mean(dice_scores_DeepLabV3Plus)
 
 #%% Single image dice evaluation
 
-# import os, json, torch
-# from tqdm import tqdm
-# from siim_datamodule import SIIMDataModule
-# from siim_dataset import SIIMDataset
-# from segmentation_models_pytorch import Unet, DeepLabV3Plus
-# from monai.metrics import DiceMetric
-# from monai.transforms import AsDiscrete
-# from manafaln.transforms import OverlayMask
-# from utils import image_preprocessor, label_preprocessor
+import os, json, torch
+from tqdm import tqdm
+from siim_datamodule import SIIMDataModule
+from siim_dataset import SIIMDataset
+from segmentation_models_pytorch import Unet, DeepLabV3Plus
+from monai.metrics import DiceMetric
+from monai.transforms import AsDiscrete
+from manafaln.transforms import OverlayMask
+from utils import image_preprocessor, label_preprocessor
 
 
-# model_name = 'Unet'
-# model_version_dict = {'Unet': 'version_0',
-#                       'DeepLabV3Plus': 'version_1'}
-# version_no = model_version_dict[model_name]
-# root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
-# #ckpt_path = f'results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
-# ckpt_path = 'results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+model_name = 'Unet'
+model_version_dict = {'Unet': 'version_0',
+                      'DeepLabV3Plus': 'version_1'}
+version_no = model_version_dict[model_name]
+root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
+#ckpt_path = f'results/lightning_logs/{version_no}/checkpoints/best_model.ckpt'
+ckpt_path = 'results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
-# if model_name == 'Unet':
-#     model = Unet(in_channels=1, 
-#                  classes=1, 
-#                  encoder_name = 'tu-resnest50d', 
-#                  encoder_weights = 'imagenet')
+if model_name == 'Unet':
+    model = Unet(in_channels=1, 
+                 classes=1, 
+                 encoder_name = 'tu-resnest50d', 
+                 encoder_weights = 'imagenet')
     
-# elif model_name == 'DeepLabV3Plus':
-#     model = DeepLabV3Plus(in_channels=1, 
-#                           classes=1, 
-#                           encoder_name = 'tu-resnest50d', 
-#                           encoder_weights = 'imagenet')
+elif model_name == 'DeepLabV3Plus':
+    model = DeepLabV3Plus(in_channels=1, 
+                          classes=1, 
+                          encoder_name = 'tu-resnest50d', 
+                          encoder_weights = 'imagenet')
     
-# model_weight = torch.load(os.path.join(root_dir, ckpt_path), map_location="cpu")["state_dict"]
-# for k in list(model_weight.keys()):
-#     k_new = k.replace("model.", "", 1)
-#     model_weight[k_new] = model_weight.pop(k)
-# model.load_state_dict(model_weight)
-# model.eval()
-# model.to(device)
+model_weight = torch.load(os.path.join(root_dir, ckpt_path), map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace("model.", "", 1)
+    model_weight[k_new] = model_weight.pop(k)
+model.load_state_dict(model_weight)
+model.eval()
+model.to(device)
 
 
-# #%%
+#%%
 
-# fold_no = 'testing'
-# img_serial = 484   # Good: 6, 92 Bad: 532, 484
-# test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
-# image = test_dataset[img_serial]['input']
-# mask = test_dataset[img_serial]['target']
+fold_no = 'testing'
+img_serial = 484   # Good: 6, 92 Bad: 532, 484
+test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
+image = test_dataset[img_serial]['input']
+mask = test_dataset[img_serial]['target']
 
-# input_image = image.unsqueeze(0).to(device)
-# prediction = model(input_image)
-# prediction = torch.sigmoid(prediction)
+input_image = image.unsqueeze(0).to(device)
+prediction = model(input_image)
+prediction = torch.sigmoid(prediction)
 
-# discreter = AsDiscrete(threshold=0.5)
+discreter = AsDiscrete(threshold=0.5)
 
-# json_file = 'datalist.json'
-# data_root = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax'
-# json_path = os.path.join(data_root, json_file)
+json_file = 'datalist.json'
+data_root = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax'
+json_path = os.path.join(data_root, json_file)
 
-# overlay_image = image_preprocessor(fold_no, img_serial, data_root, datalist=json_path)
-# overlay_label = label_preprocessor(fold_no, img_serial, data_root, datalist=json_path, keyword='label')
-# overlayMasker = OverlayMask(colors=['#7f007f'])
-# overlaymask=overlayMasker(image = overlay_image, masks = overlay_label)
+overlay_image = image_preprocessor(fold_no, img_serial, data_root, datalist=json_path)
+overlay_label = label_preprocessor(fold_no, img_serial, data_root, datalist=json_path, keyword='label')
+overlayMasker = OverlayMask(colors=['#7f007f'])
+overlaymask=overlayMasker(image = overlay_image, masks = overlay_label)
 
-# #%%
+#%%
 
 # import matplotlib.pyplot as plt
 
