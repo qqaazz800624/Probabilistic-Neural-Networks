@@ -99,15 +99,15 @@ with open(f'results/dice_scores_ProbUnet.json', 'w') as file:
 
 #%%
 
-# import json
-# with open('../results/dice_scores_ProbUnet.json', 'r') as file:
-#     dice_scores_ProbUnet = json.load(file)
+import json
+with open('../results/dice_scores_ProbUnet.json', 'r') as file:
+    dice_scores_ProbUnet = json.load(file)
 
-# #%%
-# import numpy as np
+#%%
+import numpy as np
 
-# #np.array(dice_scores_ProbUnet)
-# np.array(dice_scores_ProbUnet).mean()
+#np.array(dice_scores_ProbUnet)
+np.array(dice_scores_ProbUnet).mean()
 
 # #%%
 # import matplotlib.pyplot as plt
@@ -122,88 +122,92 @@ with open(f'results/dice_scores_ProbUnet.json', 'w') as file:
 
 #%% Single image dice evaluation
 
-# import os
-# from siim_dataset import SIIMDataset
+import os
+from siim_dataset import SIIMDataset
 
-# fold_no = 'testing'
-# img_serial = 6    # Good: 6, 92 Bad: 532, 484
-# device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+fold_no = 'testing'
+img_serial = 92    # Good: 6, 92 Bad: 532, 484
+device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
-# test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
+test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 
-# image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
-# mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
+image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
+mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
 
-# input_image = image.unsqueeze(0).to(device)
-# Prob_UNet.to(device)
-# prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(input_image)
-# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-# stacked_samples = torch.sigmoid(stacked_samples)
-# prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
-# prediction_heatmap = prediction_heatmap.cpu()
+input_image = image.unsqueeze(0).to(device)
+Prob_UNet.to(device)
+prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(input_image)
+stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+stacked_samples = torch.sigmoid(stacked_samples)
+prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+prediction_heatmap = prediction_heatmap.cpu()
 
-# discreter = AsDiscrete(threshold=0.5)
-# dice_metric = DiceMetric(include_background=True, reduction='mean')
-# dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(mask.unsqueeze(0)))
-# dice_score = dice_metric.aggregate().item()
-# dice_metric.reset()
+discreter = AsDiscrete(threshold=0.5)
+dice_metric = DiceMetric(include_background=True, reduction='mean')
+dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(mask.unsqueeze(0)))
+dice_score = dice_metric.aggregate().item()
+dice_metric.reset()
 
-# print('Dice score: ', dice_score)
+print('Dice score: ', dice_score)
 
 #%% Prediction heatmap
 
-# import matplotlib.pyplot as plt
-# plt.imshow(prediction_heatmap.detach().numpy().T, 
-#            cmap='plasma', aspect='auto')
-# plt.colorbar()
-# plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
+import matplotlib.pyplot as plt
+plt.imshow(prediction_heatmap.detach().numpy().T, 
+           cmap='plasma', aspect='auto')
+plt.colorbar()
+plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
 
-# #%% Uncertainty heatmap
+#%% Uncertainty heatmap
 
-# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-# stacked_samples = torch.sigmoid(stacked_samples)
-# uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
+stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+stacked_samples = torch.sigmoid(stacked_samples)
+uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
-# plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
-#            cmap='plasma', aspect='auto',
-#            )
-# plt.colorbar()
-# plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
+plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
+           cmap='plasma', aspect='auto',
+           )
+plt.colorbar()
+plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
 
 #%%
 
-# import json
+import json
 
-# # 從 JSON 文件中讀取列表
-# with open('../results/dice_scores_Unet.json', 'r') as file:
-#     dice_scores_Unet = json.load(file)
+# 從 JSON 文件中讀取列表
+with open('../results/dice_scores_Unet.json', 'r') as file:
+    dice_scores_Unet = json.load(file)
 
-# #%%
-# import matplotlib.pyplot as plt
+#%%
 
-# # Draw histogram for dice_scores_ProbUnet
-# plt.hist(dice_scores_ProbUnet, bins=10, edgecolor='black', alpha=0.5, label='ProbUNet')
+np.array(dice_scores_ProbUnet).mean()
 
-# # Draw histogram for dice_scores
-# plt.hist(dice_scores_Unet, bins=10, edgecolor='black', alpha=0.5, label='Original')
+#%%
+import matplotlib.pyplot as plt
 
-# # # Draw histogram for dice_scores_segformer
-# # plt.hist(dice_scores_segformer, bins=10, edgecolor='black', alpha=0.5, label='Segformer')
+# Draw histogram for dice_scores_ProbUnet
+plt.hist(dice_scores_ProbUnet, bins=10, edgecolor='black', alpha=0.5, label='ProbUnet')
+
+# Draw histogram for dice_scores
+plt.hist(dice_scores_Unet, bins=10, edgecolor='black', alpha=0.5, label='Unet')
+
+# # Draw histogram for dice_scores_segformer
+# plt.hist(dice_scores_segformer, bins=10, edgecolor='black', alpha=0.5, label='Segformer')
 
 
-# # Add labels and title
-# plt.xlabel('Dice Score')
-# plt.ylabel('Frequency')
-# plt.title('Histogram of Dice Scores')
+# Add labels and title
+plt.xlabel('Dice Score')
+plt.ylabel('Frequency')
+plt.title('Histogram of Dice Scores')
 
-# # Add legend
-# plt.legend()
+# Add legend
+plt.legend()
 
-# # Show the histogram
-# plt.show()
+# Show the histogram
+plt.show()
 
 
 #%%

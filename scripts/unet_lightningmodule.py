@@ -7,9 +7,11 @@ from segmentation_models_pytorch import DeepLabV3Plus, Unet
 from segmentation_models_pytorch.losses import DiceLoss
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts, ReduceLROnPlateau
 from torch.nn import BCEWithLogitsLoss
+from monai.losses import DiceCELoss, FocalLoss, DiceFocalLoss
 
 class UNetModule(LightningModule):
-    def __init__(self):
+    def __init__(self, 
+                 loss_fn_name='DiceLoss'):
         super().__init__()
         self.model = Unet(
             in_channels=1,
@@ -17,8 +19,16 @@ class UNetModule(LightningModule):
             encoder_name='tu-resnest50d',
             encoder_weights='imagenet'
         )
-        self.loss_fn = DiceLoss(mode='binary')
-        #self.loss_fn = BCEWithLogitsLoss(reduction="none")
+        self.loss_fn_name = loss_fn_name
+
+        if self.loss_fn_name == 'DiceLoss':
+            self.loss_fn = DiceLoss(mode='binary')
+        elif self.loss_fn_name == 'BCEWithLogitsLoss':
+            self.loss_fn = BCEWithLogitsLoss(reduction="none")
+        elif self.loss_fn_name == 'DiceCELoss':
+            self.loss_fn = DiceCELoss()
+        elif self.loss_fn_name == 'DiceFocalLoss':
+            self.loss_fn = DiceFocalLoss()
 
     def forward(self, x):
         return self.model(x)
