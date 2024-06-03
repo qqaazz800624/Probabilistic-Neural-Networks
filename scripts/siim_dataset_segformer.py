@@ -13,6 +13,19 @@ import cv2
 from dataclasses import dataclass
 import platform
 
+from albumentations import (
+    OneOf,
+    Compose,
+    HorizontalFlip,
+    RandomGamma,
+    RandomBrightnessContrast,
+    ElasticTransform,
+    GridDistortion,
+    OpticalDistortion,
+    ShiftScaleRotate,
+    Resize
+)
+
 @dataclass(frozen=True)
 class DatasetConfig:
     NUM_CLASSES:   int = 2 # including background.
@@ -89,9 +102,22 @@ class SIIMDataset(Dataset):
         # Augmentation to be applied to the training set.
         if self.is_train:
             transforms.extend([
-                A.HorizontalFlip(p=0.5), 
-                A.VerticalFlip(p=0.5),
-                RandomRotation(degrees=15, p=0.5),
+                HorizontalFlip(p=0.5), 
+                OneOf(
+                    [RandomGamma(),
+                     RandomBrightnessContrast()]
+                    , p=0.3),
+                OneOf([
+                    ElasticTransform(
+                        alpha=120,
+                        sigma=120 * 0.05,
+                        alpha_affine=120 * 0.03,
+                        p=0.5
+                    ),
+                    GridDistortion(p=1.0),
+                    OpticalDistortion(distort_limit=2, shift_limit=0.5, p=1.0)
+                    ], p=0.3),
+                ShiftScaleRotate(),
                 # RandAffine(prob=0.5,
                 #             rotate_range=0.25,
                 #             shear_range=0.2,
@@ -132,11 +158,5 @@ class SIIMDataset(Dataset):
         mask = self.discreter(mask).long()
         return image, mask
     
-#%%
-
-import cv2
-
-cv2.IMREAD_GRAYSCALE
-
 
 #%%
