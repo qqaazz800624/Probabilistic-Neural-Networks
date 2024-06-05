@@ -47,6 +47,7 @@ from segmentation_models_pytorch import Unet
 from functools import partial
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 import os
+from custom.losses import MaskedBCEWithLogitsLoss
 
 class ProbUNet_Proposed(BaseModule):
     """Probabilistic U-Net.
