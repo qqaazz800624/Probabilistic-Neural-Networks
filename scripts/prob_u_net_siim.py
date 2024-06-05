@@ -10,8 +10,10 @@ from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmResta
 from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
+from lightning.pytorch.strategies import DDPStrategy
 
-from prob_unet import ProbUNet
+#from prob_unet import ProbUNet
+from prob_unet_self_correction import ProbUNet_Proposed
 #from prob_unet_proposed import ProbUNet
 
 from siim_ProbNet_datamodule import SIIMDataModule
@@ -29,7 +31,7 @@ latent_dim = 6
 beta = 10
 batch_size_train = 16
 batch_size_val = 16
-loss_fn = 'DiceCELoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss', 'DiceCELoss']
+loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss', 'DiceCELoss']
 
 # =========================================== #
 
@@ -59,13 +61,11 @@ model.load_state_dict(model_weight)
 
 #%%
 
-
-Prob_UNet = ProbUNet(
+Prob_UNet = ProbUNet_Proposed(
     model=model,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
-    #lr_scheduler=partial(ReduceLROnPlateau, patience=5),
     beta=beta,
     latent_dim=latent_dim,
     max_epochs=max_epochs,
@@ -74,6 +74,8 @@ Prob_UNet = ProbUNet(
     loss_fn=loss_fn
     )
 
+#%%
+
 data_module = SIIMDataModule(batch_size_train=batch_size_train,
                              batch_size_val=batch_size_val)
 
@@ -81,8 +83,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_25',
-                           name='ProbUNet_DiceCELoss')
+                           version='version_26',
+                           name='ProbUNet_Self_Correction')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
@@ -96,6 +98,8 @@ model_summarizer = ModelSummary(max_depth=2)
 trainer = Trainer(
     accelerator='gpu',
     devices=1,
+    strategy=DDPStrategy(find_unused_parameters=True),
+    precision=16,
     max_epochs=max_epochs,  # number of epochs we want to train
     #logger=logger,  # log training metrics for later evaluation
     logger=wandb_logger,  # log training metrics for later evaluation

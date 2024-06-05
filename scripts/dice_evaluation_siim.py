@@ -227,7 +227,7 @@ fold_no = 'testing'
 # medium-small mask: 29, 412
 # small mask: 128, 184
 
-img_serial = 132
+img_serial = 417
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 image = test_dataset[img_serial]['input']
 mask = test_dataset[img_serial]['target']

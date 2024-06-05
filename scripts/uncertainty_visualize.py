@@ -129,7 +129,7 @@ fold_no = 'testing'
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 132
+img_serial = 417
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -139,7 +139,9 @@ mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
 
 input_image = image.unsqueeze(0).to(device)
 Prob_UNet.to(device)
-prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(input_image)
+with torch.no_grad():
+    prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(input_image)
+
 stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
 stacked_samples = torch.sigmoid(stacked_samples)
 prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
@@ -173,6 +175,49 @@ plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T,
            cmap='plasma', aspect='auto')
 plt.colorbar()
 plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
+
+#%% uncertainty weighted prediction
+
+uncertainty_weighted_prediction = prediction_heatmap*uncertainty_heatmap.cpu()
+
+import matplotlib.pyplot as plt
+
+plt.imshow(uncertainty_weighted_prediction.detach().numpy().T, 
+           cmap='plasma', aspect='auto')
+plt.colorbar()
+plt.title(f'Uncertainty weighted prediction: {fold_no}_{img_serial}')
+
+#%%
+
+uncertainty_weighted_mask = mask.squeeze(0)*uncertainty_heatmap.cpu()
+
+import matplotlib.pyplot as plt
+
+plt.imshow(uncertainty_weighted_mask.detach().numpy().T, 
+           cmap='plasma', aspect='auto')
+plt.colorbar()
+plt.title(f'Uncertainty weighted mask: {fold_no}_{img_serial}')
+
+#%%
+
+torch.median(uncertainty_heatmap.cpu())
+
+#%%
+quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
+#print("80th quantile of uncertainty_heatmap:", quantile)
+mask_uncertainty = torch.where(uncertainty_heatmap.cpu() > quantile, 
+                               mask.squeeze(0), 
+                               torch.zeros_like(mask.squeeze(0)))
+
+
+#%%
+import torch
+import matplotlib.pyplot as plt
+
+plt.imshow(mask_uncertainty.detach().numpy().T, 
+           cmap='plasma', aspect='auto')
+plt.colorbar()
+plt.title(f'Uncertainty mask: {fold_no}_{img_serial}')
 
 #%%
 

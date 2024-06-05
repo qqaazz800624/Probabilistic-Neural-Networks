@@ -113,12 +113,14 @@ class ProbUNet_Proposed(BaseModule):
             batch_size_train=16,
             loss_fn='BCEWithLogitsLoss',
             num_samples=30)
+        
         self.version = version
         self.root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
         self.weight_path = f'results/SIIM_pneumothorax_segmentation/{self.version}/checkpoints/best_model.ckpt'
-        self.model_wight = torch.load(os.path.join(self.root_dir, self.weight_path))
+        self.model_wight = torch.load(os.path.join(self.root_dir, self.weight_path), map_location="cpu")["state_dict"]
         self.prob_unet.load_state_dict(self.model_wight)
         self.prob_unet.eval()
+        #self.prob_unet = self.prob_unet.requires_grad_(False)
 
         self.batch_size_train = batch_size_train
         self.model_name = model_name
@@ -249,10 +251,11 @@ class ProbUNet_Proposed(BaseModule):
         kl_loss = torch.mean(self.kl_divergence(analytic=True, z_posterior=z_posterior))
         # print('KL divergence: ', kl_loss)
 
-        # generate uncertainty map
-        prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet.predict_step(img)
-        stacked_samples = torch.sigmoid(prediction_outputs['samples'])
-        uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
+        # generate uncertainty map without computing gradients
+        with torch.no_grad():
+            prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet.predict_step(img)
+            stacked_samples = torch.sigmoid(prediction_outputs['samples'])
+            uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
 
         reconstruction = self.reconstruct(
             use_posterior_mean=False, z_posterior=z_posterior
@@ -367,12 +370,12 @@ class ProbUNet_Proposed(BaseModule):
         """
         loss_dict = self.compute_loss(batch)
 
-        self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True)
-        self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"])
-        self.log("train_kl_loss", loss_dict["kl_loss"])
-        self.log("train_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"])
-        self.log("train_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"])
+        self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        self.log("train_kl_loss", loss_dict["kl_loss"], sync_dist=True)
+        self.log("train_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
+        self.log("train_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
 
         # compute metrics with reconstruction
         self.train_metrics(loss_dict["reconstruction"], batch[self.target_key])
@@ -395,12 +398,12 @@ class ProbUNet_Proposed(BaseModule):
         """
         loss_dict = self.compute_loss(batch)
 
-        self.log("val_loss", loss_dict["loss"])
-        self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"])
-        self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"])
-        self.log("val_kl_loss", loss_dict["kl_loss"])
-        self.log("val_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"])
-        self.log("val_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"])
+        self.log("val_loss", loss_dict["loss"], sync_dist=True)
+        self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
+        self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        self.log("val_kl_loss", loss_dict["kl_loss"], sync_dist=True)
+        self.log("val_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
+        self.log("val_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
         # compute metrics with reconstruction
         self.val_metrics(loss_dict["reconstruction"], batch[self.target_key])
 
