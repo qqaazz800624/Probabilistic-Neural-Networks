@@ -48,6 +48,7 @@ from functools import partial
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 import os
 from custom.losses import MaskedBCEWithLogitsLoss
+from monai.losses import MaskedDiceLoss
 
 class ProbUNet_Proposed(BaseModule):
     """Probabilistic U-Net.
@@ -184,6 +185,8 @@ class ProbUNet_Proposed(BaseModule):
                                         ce_weight=None, 
                                         lambda_dice=1.0, 
                                         lambda_ce=1.0)
+        
+        self.masked_criterion = MaskedBCEWithLogitsLoss(reduction="mean")
 
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
@@ -262,14 +265,25 @@ class ProbUNet_Proposed(BaseModule):
             use_posterior_mean=False, z_posterior=z_posterior
         )
 
-        reconstruction_uncertainty_weighted = reconstruction*uncertainty_heatmap
-        seg_mask_uncertainty_weighted = seg_mask_target*uncertainty_heatmap
+        batch_size = uncertainty_heatmap.shape[0]
+        mask_uncertainty = torch.zeros_like(seg_mask_target)
+
+        for i in range(batch_size):
+            heatmap = uncertainty_heatmap[i, 0]
+            mask_i = seg_mask_target[i, 0]
+            quantile = torch.kthvalue(heatmap.flatten(), int(0.975 * heatmap.numel())).values.item()
+            mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
+
+        # reconstruction_uncertainty_weighted = reconstruction*uncertainty_heatmap
+        # seg_mask_uncertainty_weighted = seg_mask_target*uncertainty_heatmap
 
         # print('Part 3')
         # print('The shape of seg_mask_target: ', seg_mask_target.shape)
         # print('The shape of reconstruction: ', reconstruction.shape)
         rec_loss = self.criterion(reconstruction, seg_mask_target)
-        uncertainty_loss = self.criterion(reconstruction_uncertainty_weighted, seg_mask_uncertainty_weighted)
+
+        uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
+        #uncertainty_loss = self.criterion(reconstruction_uncertainty_weighted, seg_mask_uncertainty_weighted)
 
         rec_loss_sum = torch.sum(rec_loss)
         rec_loss_mean = torch.mean(rec_loss)

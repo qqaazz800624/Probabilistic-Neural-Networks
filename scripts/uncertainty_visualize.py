@@ -4,7 +4,8 @@ from segmentation_models_pytorch import DeepLabV3Plus, Unet
 from functools import partial
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
-from prob_unet import ProbUNet
+#from prob_unet import ProbUNet
+from prob_unet_self_correction import ProbUNet_Proposed
 import os
 #from utils import image_preprocessor
 from siim_datamodule import SIIMDataModule
@@ -44,7 +45,7 @@ elif model_name == 'DeepLabV3Plus':
 
 # =========================================== #
 
-Prob_UNet = ProbUNet(
+Prob_UNet = ProbUNet_Proposed(
     model=model,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
@@ -59,9 +60,9 @@ Prob_UNet = ProbUNet(
     )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_24'
+version_no = 'version_26'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
-weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
+weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model-v1.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 Prob_UNet.load_state_dict(model_weight)
 Prob_UNet.eval()
@@ -113,9 +114,6 @@ plt.ylabel('Frequency')
 plt.title('Histogram of Dice Scores')
 plt.show()
 
-#%%
-
-dice_scores_ProbUnet_BCELoss
 
 #%% Single image dice evaluation
 
@@ -199,10 +197,7 @@ plt.colorbar()
 plt.title(f'Uncertainty weighted mask: {fold_no}_{img_serial}')
 
 #%%
-
-torch.median(uncertainty_heatmap.cpu())
-
-#%%
+# Thresholding the uncertainty heatmap
 quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
 #print("80th quantile of uncertainty_heatmap:", quantile)
 mask_uncertainty = torch.where(uncertainty_heatmap.cpu() > quantile, 

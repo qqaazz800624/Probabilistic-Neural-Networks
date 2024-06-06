@@ -69,10 +69,37 @@ with torch.no_grad():
 
 
 stacked_samples = torch.sigmoid(prediction_outputs['samples'])
-uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
+uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False).cpu()
 
 #%%
-uncertainty_heatmap.shape
+uncertainty_heatmap
+
+#%%
+
+import torch
+from tqdm import tqdm
+
+# Assuming uncertainty_heatmap is a tensor of shape [batch_size, 1, height, width]
+# And mask is a tensor of shape [batch_size, 1, height, width]
+
+batch_size = uncertainty_heatmap.shape[0]
+mask_uncertainty = torch.zeros_like(label)
+
+for i in tqdm(range(batch_size)):
+    heatmap = uncertainty_heatmap[i, 0]  # Select the ith heatmap
+    mask_i = label[i, 0]  # Select the ith mask
+    
+    # Compute the 97.5th quantile for the ith heatmap
+    quantile = torch.kthvalue(heatmap.flatten(), int(0.975 * heatmap.numel())).values.item()
+    
+    # Apply the threshold to create the mask for the ith element
+    mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
+
+# Now mask_uncertainty contains the masked values for each batch element
+
+#%%
+
+mask_uncertainty.shape
 
 
 #%%
