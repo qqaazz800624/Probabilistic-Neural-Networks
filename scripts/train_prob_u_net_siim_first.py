@@ -78,7 +78,6 @@ Prob_UNet = ProbUNet_First(
     version_prev=version_prev
     )
 
-
 #%%
 
 data_module = SIIMDataModule(batch_size_train=batch_size_train,
