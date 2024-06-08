@@ -1,7 +1,7 @@
 #!/bin/bash
 
 # Set default path for the Python script
-DEFAULT_PYTHON_SCRIPT="./scripts/prob_u_net_siim.py"
+DEFAULT_PYTHON_SCRIPT="./scripts/train_prob_u_net_siim_first.py"
 
 # Allow overriding the default path with a command-line argument
 PYTHON_SCRIPT=${2:-$DEFAULT_PYTHON_SCRIPT}
