@@ -35,7 +35,6 @@ from torch.distributions import kl
 
 from lightning_uq_box.uq_methods import BaseModule
 
-#from lightning_uq_box.models.prob_unet import AxisAlignedConvGaussian, Fcomb
 from lightning_uq_box.uq_methods.utils import default_segmentation_metrics
 from utils import process_segmentation_prediction, l2_regularisation
 from segmentation_models_pytorch.losses import DiceLoss
