@@ -4,6 +4,7 @@ from segmentation_models_pytorch import Unet, DeepLabV3Plus
 
 from functools import partial
 
+import os
 import torch
 from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
 
@@ -13,8 +14,8 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, Mo
 from lightning.pytorch.strategies import DDPStrategy
 
 #from prob_unet import ProbUNet
-from prob_unet_self_correction import ProbUNet_Proposed
-#from prob_unet_proposed import ProbUNet
+#from prob_unet_self_correction import ProbUNet_Proposed
+from prob_unet_first import ProbUNet_First
 
 from siim_ProbNet_datamodule import SIIMDataModule
 import wandb
@@ -61,7 +62,9 @@ model.load_state_dict(model_weight)
 
 #%%
 
-Prob_UNet = ProbUNet_Proposed(
+version_prev = None
+
+Prob_UNet = ProbUNet_First(
     model=model,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
@@ -71,8 +74,10 @@ Prob_UNet = ProbUNet_Proposed(
     max_epochs=max_epochs,
     model_name= model_name,
     batch_size_train=batch_size_train,
-    loss_fn=loss_fn
+    loss_fn=loss_fn,
+    version_prev=version_prev
     )
+
 
 #%%
 
@@ -83,8 +88,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_27',
-                           name='ProbUNet_Uncertainty_Masked_Loss')
+                           version='version_28',
+                           name='ProbUNet_Adaptive_step1')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
