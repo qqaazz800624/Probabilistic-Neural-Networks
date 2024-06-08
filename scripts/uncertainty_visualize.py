@@ -3,7 +3,7 @@
 from segmentation_models_pytorch import DeepLabV3Plus, Unet
 from functools import partial
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 #from prob_unet import ProbUNet
 from prob_unet_self_correction import ProbUNet_Proposed
 import os
@@ -60,12 +60,36 @@ Prob_UNet = ProbUNet_Proposed(
     )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_26'
+version_no = 'version_27'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
-weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model-v1.ckpt'
+weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 Prob_UNet.load_state_dict(model_weight)
 Prob_UNet.eval()
+
+#%%
+
+from prob_unet import ProbUNet
+
+Prob_UNet_step1 = ProbUNet(
+            model=model,
+            optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
+            task='binary',
+            lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
+            beta=10,
+            latent_dim=6,
+            max_epochs=128,
+            model_name='Unet',
+            batch_size_train=16,
+            loss_fn='BCEWithLogitsLoss',
+            num_samples=30)
+
+version_no = 'version_24'
+root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
+weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
+model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
+Prob_UNet_step1.load_state_dict(model_weight)
+Prob_UNet_step1.eval()
 
 #%%
 
@@ -100,19 +124,19 @@ with open(f'results/dice_scores_ProbUnet_BCELoss.json', 'w') as file:
 
 #%%
 
-import json
-with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-    dice_scores_ProbUnet_BCELoss = json.load(file)
+# import json
+# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
+#     dice_scores_ProbUnet_BCELoss = json.load(file)
 
-#%%
-import matplotlib.pyplot as plt
+# #%%
+# import matplotlib.pyplot as plt
 
-# Plot histogram of dice_scores
-plt.hist(dice_scores_ProbUnet_BCELoss, bins=10, edgecolor='black')
-plt.xlabel('Dice Score')
-plt.ylabel('Frequency')
-plt.title('Histogram of Dice Scores')
-plt.show()
+# # Plot histogram of dice_scores
+# plt.hist(dice_scores_ProbUnet_BCELoss, bins=10, edgecolor='black')
+# plt.xlabel('Dice Score')
+# plt.ylabel('Frequency')
+# plt.title('Histogram of Dice Scores')
+# plt.show()
 
 
 #%% Single image dice evaluation
@@ -123,11 +147,11 @@ from siim_dataset import SIIMDataset
 fold_no = 'testing'
 # Good: 6, 92, 522 Bad: 532, 484, 168
 # large mask: 92, 417, 492, 339, 132, 302
-# large-medium mask: 338, 325
+# large-medium mask: 338, 377
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 417
+img_serial = 377
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -176,25 +200,35 @@ plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
 #%% uncertainty weighted prediction
 
-uncertainty_weighted_prediction = prediction_heatmap*uncertainty_heatmap.cpu()
+# uncertainty_weighted_prediction = prediction_heatmap*uncertainty_heatmap.cpu()
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-plt.imshow(uncertainty_weighted_prediction.detach().numpy().T, 
-           cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Uncertainty weighted prediction: {fold_no}_{img_serial}')
+# plt.imshow(uncertainty_weighted_prediction.detach().numpy().T, 
+#            cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Uncertainty weighted prediction: {fold_no}_{img_serial}')
 
-#%%
+# #%%
 
-uncertainty_weighted_mask = mask.squeeze(0)*uncertainty_heatmap.cpu()
+# uncertainty_weighted_mask = mask.squeeze(0)*uncertainty_heatmap.cpu()
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-plt.imshow(uncertainty_weighted_mask.detach().numpy().T, 
-           cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Uncertainty weighted mask: {fold_no}_{img_serial}')
+# plt.imshow(uncertainty_weighted_mask.detach().numpy().T, 
+#            cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Uncertainty weighted mask: {fold_no}_{img_serial}')
+
+#%% uncertainty mask
+
+input_image = image.unsqueeze(0).to(device)
+Prob_UNet_step1.to(device)
+with torch.no_grad():
+    prediction_outputs, prior_mu, prior_sigma = Prob_UNet_step1.predict_step(input_image)
+    stacked_samples = torch.sigmoid(prediction_outputs['samples'])
+    uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
+    uncertainty_heatmap = uncertainty_heatmap.squeeze(0).squeeze(0)
 
 #%%
 # Thresholding the uncertainty heatmap
@@ -216,22 +250,22 @@ plt.title(f'Uncertainty mask: {fold_no}_{img_serial}')
 
 #%%
 
-import json
+# import json
 
-# 從 JSON 文件中讀取列表
-with open('../results/dice_scores_Unet.json', 'r') as file:
-    dice_scores_Unet = json.load(file)
+# # 從 JSON 文件中讀取列表
+# with open('../results/dice_scores_Unet.json', 'r') as file:
+#     dice_scores_Unet = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-    dice_scores_ProbUnet_BCELoss = json.load(file)
+# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
+#     dice_scores_ProbUnet_BCELoss = json.load(file)
 
-#%%
+# #%%
 
-import numpy as np
-dice_scores_Unet = np.array(dice_scores_Unet)
-dice_scores_ProbUnet_BCELoss = np.array(dice_scores_ProbUnet_BCELoss)
-combined_scores = np.column_stack((dice_scores_Unet, dice_scores_ProbUnet_BCELoss))
-combined_scores[10:20]
+# import numpy as np
+# dice_scores_Unet = np.array(dice_scores_Unet)
+# dice_scores_ProbUnet_BCELoss = np.array(dice_scores_ProbUnet_BCELoss)
+# combined_scores = np.column_stack((dice_scores_Unet, dice_scores_ProbUnet_BCELoss))
+# combined_scores[10:20]
 
 #%%
 # import matplotlib.pyplot as plt
