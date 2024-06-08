@@ -35,23 +35,18 @@ from torch.distributions import kl
 
 from lightning_uq_box.uq_methods import BaseModule
 
-#from lightning_uq_box.models.prob_unet import AxisAlignedConvGaussian, Fcomb
 from lightning_uq_box.uq_methods.utils import default_segmentation_metrics
 from utils import process_segmentation_prediction, l2_regularisation
 from segmentation_models_pytorch.losses import DiceLoss
 from torch.nn import BCEWithLogitsLoss
 from monai.losses import DiceCELoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
-from prob_unet import ProbUNet
-from uncertainty_heatmap import UncertaintyHeatmap
-from segmentation_models_pytorch import Unet
-from functools import partial
-from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
-import os
+from prob_unet_first import ProbUNet_First
 from custom.losses import MaskedBCEWithLogitsLoss
 
 
-class ProbUNet_Proposed(BaseModule):
+
+class ProbUNet_Second(BaseModule):
     """Probabilistic U-Net.
 
     If you use this code, please cite the following paper:
@@ -64,6 +59,7 @@ class ProbUNet_Proposed(BaseModule):
     def __init__(
         self,
         model: nn.Module,
+        prob_unet_first: ProbUNet_First,
         model_name: str = 'Unet',
         loss_fn: str = 'BCEWithLogitsLoss',
         batch_size_train: int = 6,
@@ -112,6 +108,8 @@ class ProbUNet_Proposed(BaseModule):
         self.num_convs_per_block = num_convs_per_block
         self.num_samples = num_samples
         self.version_prev = version_prev
+
+        self.prob_unet_first = prob_unet_first
 
         assert task in self.valid_tasks, f"Task must be one of {self.valid_tasks}."
         self.task = task
@@ -223,44 +221,38 @@ class ProbUNet_Proposed(BaseModule):
             use_posterior_mean=False, z_posterior=z_posterior
         )
 
-        # generate uncertainty map without computing gradients
-        if self.version_prev is not None:
-            mask_uncertainty = UncertaintyHeatmap().__call__(img, seg_mask_target)
-            uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
-            rec_loss = self.criterion(reconstruction, seg_mask_target)
-            uncertainty_loss_sum = torch.sum(uncertainty_loss)
-            uncertainty_loss_mean = torch.mean(uncertainty_loss)
-            rec_loss_sum = torch.sum(rec_loss)
-            rec_loss_mean = torch.mean(rec_loss)
+        # compute uncertainty mask
+        prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_first.predict_step(img)
+        stacked_samples = torch.sigmoid(prediction_outputs['samples'])
+        uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
+        batch_size = uncertainty_heatmap.shape[0]
+        mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
+        for i in range(batch_size):
+            heatmap = uncertainty_heatmap[i, 0]
+            mask_i = seg_mask_target[i, 0]
+            quantile = torch.kthvalue(heatmap.flatten(), int(0.975 * heatmap.numel())).values.item()
+            mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
 
-            elbo = -(rec_loss_sum + self.beta * kl_loss + uncertainty_loss_sum)
-            reg_loss = l2_regularisation(self.posterior) + l2_regularisation(self.prior) + l2_regularisation(self.fcomb.layers)
-            loss = -elbo + 1e-5 * reg_loss
+        uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
+        rec_loss = self.criterion(reconstruction, seg_mask_target)
+        uncertainty_loss_sum = torch.sum(uncertainty_loss)
+        uncertainty_loss_mean = torch.mean(uncertainty_loss)
+        rec_loss_sum = torch.sum(rec_loss)
+        rec_loss_mean = torch.mean(rec_loss)
 
-            return {
-                "loss": loss,
-                "rec_loss_sum": rec_loss_sum,
-                "rec_loss_mean": rec_loss_mean,
-                "uncertainty_loss_sum": uncertainty_loss_sum,
-                "uncertainty_loss_mean": uncertainty_loss_mean,
-                "kl_loss": kl_loss,
-                "reconstruction": reconstruction
-            }
-        else:
-            rec_loss = self.criterion(reconstruction, seg_mask_target)
-            rec_loss_sum = torch.sum(rec_loss)
-            rec_loss_mean = torch.mean(rec_loss)
-            elbo = -(rec_loss_sum + self.beta * kl_loss)
-            reg_loss = l2_regularisation(self.posterior) + l2_regularisation(self.prior) + l2_regularisation(self.fcomb.layers)
-            loss = -elbo + 1e-5 * reg_loss
+        elbo = -(rec_loss_sum + self.beta * kl_loss + uncertainty_loss_sum)
+        reg_loss = l2_regularisation(self.posterior) + l2_regularisation(self.prior) + l2_regularisation(self.fcomb.layers)
+        loss = -elbo + 1e-5 * reg_loss
 
-            return {
-                "loss": loss,
-                "rec_loss_sum": rec_loss_sum,
-                "rec_loss_mean": rec_loss_mean,
-                "kl_loss": kl_loss,
-                "reconstruction": reconstruction
-            }
+        return {
+            "loss": loss,
+            "rec_loss_sum": rec_loss_sum,
+            "rec_loss_mean": rec_loss_mean,
+            "uncertainty_loss_sum": uncertainty_loss_sum,
+            "uncertainty_loss_mean": uncertainty_loss_mean,
+            "kl_loss": kl_loss,
+            "reconstruction": reconstruction
+        }
 
 
 
@@ -341,18 +333,12 @@ class ProbUNet_Proposed(BaseModule):
             training loss
         """
         loss_dict = self.compute_loss(batch)
-        if self.version_prev is not None:
-            self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
-            self.log("train_kl_loss", loss_dict["kl_loss"], sync_dist=True)
-            self.log("train_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
-            self.log("train_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
-        else:
-            self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-            self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
-            self.log("train_kl_loss", loss_dict["kl_loss"], sync_dist=True)
+        self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        self.log("train_kl_loss", loss_dict["kl_loss"], sync_dist=True)
+        self.log("train_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
+        self.log("train_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
 
         # compute metrics with reconstruction
         self.train_metrics(loss_dict["reconstruction"], batch[self.target_key])
@@ -374,18 +360,13 @@ class ProbUNet_Proposed(BaseModule):
             validation loss
         """
         loss_dict = self.compute_loss(batch)
-        if self.version_prev is not None:
-            self.log("val_loss", loss_dict["loss"], sync_dist=True)
-            self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
-            self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
-            self.log("val_kl_loss", loss_dict["kl_loss"], sync_dist=True)
-            self.log("val_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
-            self.log("val_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
-        else:
-            self.log("val_loss", loss_dict["loss"], sync_dist=True)
-            self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
-            self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
-            self.log("val_kl_loss", loss_dict["kl_loss"], sync_dist=True)
+        self.log("val_loss", loss_dict["loss"], sync_dist=True)
+        self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
+        self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        self.log("val_kl_loss", loss_dict["kl_loss"], sync_dist=True)
+        self.log("val_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
+        self.log("val_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
+        
         # compute metrics with reconstruction
         self.val_metrics(loss_dict["reconstruction"], batch[self.target_key])
 
@@ -458,11 +439,3 @@ class ProbUNet_Proposed(BaseModule):
 #%%
 
 
-
-
-#%%
-
-
-
-
-#%%
