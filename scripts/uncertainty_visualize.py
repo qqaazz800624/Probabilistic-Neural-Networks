@@ -1,11 +1,13 @@
 #%%
 
-from segmentation_models_pytorch import DeepLabV3Plus, Unet
+from segmentation_models_pytorch import Unet
 from functools import partial
 import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 #from prob_unet import ProbUNet
-from prob_unet_self_correction import ProbUNet_Proposed
+#from prob_unet_self_correction import ProbUNet_Proposed
+from prob_unet_first import ProbUNet_First
+from prob_unet_second import ProbUNet_Second
 import os
 #from utils import image_preprocessor
 from siim_datamodule import SIIMDataModule
@@ -31,22 +33,15 @@ batch_size_train = 16
 num_samples = 30
 loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss','DiceLoss', 'DiceCELoss']
 
-if model_name == 'Unet':
-    model = Unet(in_channels=1, 
-                classes=1, 
-                encoder_name = 'tu-resnest50d', 
-                encoder_weights = 'imagenet')
-
-elif model_name == 'DeepLabV3Plus':
-    model = DeepLabV3Plus(in_channels=1, 
-                        classes=1, 
-                        encoder_name = 'tu-resnest50d', 
-                        encoder_weights = 'imagenet')
+unet = Unet(in_channels=1, 
+            classes=1, 
+            encoder_name = 'tu-resnest50d', 
+            encoder_weights = 'imagenet')
 
 # =========================================== #
 
-Prob_UNet = ProbUNet_Proposed(
-    model=model,
+ProbUnet_First = ProbUNet_First(
+    model=unet,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -56,71 +51,88 @@ Prob_UNet = ProbUNet_Proposed(
     model_name= model_name,
     batch_size_train=batch_size_train,
     loss_fn=loss_fn,
+    version_prev=None,
     num_samples=num_samples
-    )
+)
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_27'
+version_no = 'version_28'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
-Prob_UNet.load_state_dict(model_weight)
-Prob_UNet.eval()
+ProbUnet_First.load_state_dict(model_weight)
+ProbUnet_First.eval()
+ProbUnet_First.requires_grad_(False)
 
 #%%
 
-from prob_unet import ProbUNet
+unet2 = Unet(in_channels=1, 
+            classes=1, 
+            encoder_name = 'tu-resnest50d', 
+            encoder_weights = 'imagenet')
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(unet_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    unet_weight[k_new] = unet_weight.pop(k)
+unet2.load_state_dict(unet_weight)
 
-Prob_UNet_step1 = ProbUNet(
-            model=model,
-            optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
-            task='binary',
-            lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
-            beta=10,
-            latent_dim=6,
-            max_epochs=128,
-            model_name='Unet',
-            batch_size_train=16,
-            loss_fn='BCEWithLogitsLoss',
-            num_samples=30)
 
-version_no = 'version_24'
+ProbUnet_Second = ProbUNet_Second(
+    model=unet2,
+    prob_unet_first=ProbUnet_First,
+    optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
+    task='binary',
+    lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
+    beta=beta,
+    latent_dim=latent_dim,
+    max_epochs=max_epochs,
+    model_name= model_name,
+    batch_size_train=batch_size_train,
+    loss_fn=loss_fn,
+    version_prev=None
+)
+
+version_no = 'version_30'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
-Prob_UNet_step1.load_state_dict(model_weight)
-Prob_UNet_step1.eval()
+ProbUnet_Second.load_state_dict(model_weight)
+ProbUnet_Second.eval()
+
 
 #%%
 
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
-data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
-test_data_loader = data_module.test_dataloader()
-dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
-discreter = AsDiscrete(threshold=0.5)
+# data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
+# test_data_loader = data_module.test_dataloader()
+# dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
+# discreter = AsDiscrete(threshold=0.5)
 
-Prob_UNet.to(device)
+# Prob_UNet.to(device)
 
-dice_scores = []
+# dice_scores = []
 
-with torch.no_grad():
-    for data in tqdm(test_data_loader):
-        img, label = data['input'].to(device), data['target']
-        prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(img)
-        stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-        stacked_samples = torch.sigmoid(stacked_samples)
-        prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
-        dice_metric(y_pred=discreter(prediction_heatmap.cpu().unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
-        dice_score = dice_metric.aggregate().item()
-        dice_scores.append(dice_score)
-        dice_metric.reset()
+# with torch.no_grad():
+#     for data in tqdm(test_data_loader):
+#         img, label = data['input'].to(device), data['target']
+#         prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(img)
+#         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+#         stacked_samples = torch.sigmoid(stacked_samples)
+#         prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+#         dice_metric(y_pred=discreter(prediction_heatmap.cpu().unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
+#         dice_score = dice_metric.aggregate().item()
+#         dice_scores.append(dice_score)
+#         dice_metric.reset()
 
-print('Dice score: ', sum(dice_scores)/len(dice_scores))
-#%%
+# print('Dice score: ', sum(dice_scores)/len(dice_scores))
+# #%%
 
-with open(f'results/dice_scores_ProbUnet_BCELoss.json', 'w') as file:
-    json.dump(dice_scores, file)
+# with open(f'results/dice_scores_ProbUnet_BCELoss.json', 'w') as file:
+#     json.dump(dice_scores, file)
 
 #%%
 
@@ -151,7 +163,7 @@ fold_no = 'testing'
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 377
+img_serial = 339
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -160,9 +172,9 @@ image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
 mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
 
 input_image = image.unsqueeze(0).to(device)
-Prob_UNet.to(device)
+ProbUnet_Second.to(device)
 with torch.no_grad():
-    prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(input_image)
+    prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
 
 stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
 stacked_samples = torch.sigmoid(stacked_samples)
@@ -223,9 +235,9 @@ plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 #%% uncertainty mask
 
 input_image = image.unsqueeze(0).to(device)
-Prob_UNet_step1.to(device)
+ProbUnet_Second.to(device)
 with torch.no_grad():
-    prediction_outputs, prior_mu, prior_sigma = Prob_UNet_step1.predict_step(input_image)
+    prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
     stacked_samples = torch.sigmoid(prediction_outputs['samples'])
     uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
     uncertainty_heatmap = uncertainty_heatmap.squeeze(0).squeeze(0)
