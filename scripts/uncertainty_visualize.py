@@ -56,13 +56,13 @@ ProbUnet_First = ProbUNet_First(
 )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_28'
+version_no = 'version_31' # version_28
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
 ProbUnet_First.eval()
-ProbUnet_First.requires_grad_(False)
+#ProbUnet_First.requires_grad_(False)
 
 #%%
 
@@ -172,9 +172,11 @@ image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
 mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
 
 input_image = image.unsqueeze(0).to(device)
-ProbUnet_Second.to(device)
+ProbUnet_First.to(device)
+#ProbUnet_Second.to(device)
 with torch.no_grad():
-    prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
+    prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
+    #prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
 
 stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
 stacked_samples = torch.sigmoid(stacked_samples)
@@ -235,9 +237,11 @@ plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 #%% uncertainty mask
 
 input_image = image.unsqueeze(0).to(device)
-ProbUnet_Second.to(device)
+ProbUnet_First.to(device)
+#ProbUnet_Second.to(device)
 with torch.no_grad():
-    prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
+    prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
+    #prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
     stacked_samples = torch.sigmoid(prediction_outputs['samples'])
     uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
     uncertainty_heatmap = uncertainty_heatmap.squeeze(0).squeeze(0)
