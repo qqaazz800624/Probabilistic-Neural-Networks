@@ -37,7 +37,15 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    model_weight[k_new] = model_weight.pop(k)
 
+unet.load_state_dict(model_weight)
 # =========================================== #
 
 ProbUnet_First = ProbUNet_First(
@@ -63,6 +71,15 @@ unet2 = Unet(in_channels=1,
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
 
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    model_weight[k_new] = model_weight.pop(k)
+
+unet2.load_state_dict(model_weight)
 
 ProbUnet_Second = ProbUNet_Second(
     model=unet2,
@@ -93,6 +110,16 @@ unet3 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
+
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    model_weight[k_new] = model_weight.pop(k)
+
+unet3.load_state_dict(model_weight)
 
 ProbUnet_Third = ProbUNet_Third(
     model=unet3,
@@ -223,28 +250,6 @@ plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T,
            cmap='plasma', aspect='auto')
 plt.colorbar()
 plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
-
-#%% uncertainty weighted prediction
-
-# uncertainty_weighted_prediction = prediction_heatmap*uncertainty_heatmap.cpu()
-
-# import matplotlib.pyplot as plt
-
-# plt.imshow(uncertainty_weighted_prediction.detach().numpy().T, 
-#            cmap='plasma', aspect='auto')
-# plt.colorbar()
-# plt.title(f'Uncertainty weighted prediction: {fold_no}_{img_serial}')
-
-# #%%
-
-# uncertainty_weighted_mask = mask.squeeze(0)*uncertainty_heatmap.cpu()
-
-# import matplotlib.pyplot as plt
-
-# plt.imshow(uncertainty_weighted_mask.detach().numpy().T, 
-#            cmap='plasma', aspect='auto')
-# plt.colorbar()
-# plt.title(f'Uncertainty weighted mask: {fold_no}_{img_serial}')
 
 #%% uncertainty mask
 

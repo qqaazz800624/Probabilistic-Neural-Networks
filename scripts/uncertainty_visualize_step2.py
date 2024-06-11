@@ -37,7 +37,15 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    model_weight[k_new] = model_weight.pop(k)
 
+unet.load_state_dict(model_weight)
 # =========================================== #
 
 ProbUnet_First = ProbUNet_First(
@@ -55,6 +63,13 @@ ProbUnet_First = ProbUNet_First(
     num_samples=num_samples
 )
 
+version_no = 'version_33' # version_28
+root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
+weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
+model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
+ProbUnet_First.load_state_dict(model_weight)
+ProbUnet_First.eval()
+ProbUnet_First.requires_grad_(False)
 
 #%%
 
@@ -63,6 +78,14 @@ unet2 = Unet(in_channels=1,
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
 
+model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    model_weight[k_new] = model_weight.pop(k)
+
+unet2.load_state_dict(model_weight)
 
 ProbUnet_Second = ProbUNet_Second(
     model=unet2,
@@ -79,7 +102,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_30'
+version_no = 'version_34'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]

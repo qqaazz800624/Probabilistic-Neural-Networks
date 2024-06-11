@@ -7,7 +7,7 @@ DEFAULT_PYTHON_SCRIPT="./scripts/train_prob_u_net_siim_first.py"
 PYTHON_SCRIPT=${2:-$DEFAULT_PYTHON_SCRIPT}
 
 # Set default CUDA device to use
-DEFAULT_CUDA_DEVICE="1"
+DEFAULT_CUDA_DEVICE="2"
 
 # Allow overriding the default CUDA device with a command-line argument
 CUDA_DEVICE=${1:-$DEFAULT_CUDA_DEVICE}

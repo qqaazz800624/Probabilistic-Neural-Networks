@@ -20,7 +20,7 @@ from tqdm import tqdm
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 192
+max_epochs = 128
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -29,14 +29,22 @@ batch_size_train = 16
 #                       'DeepLabV3Plus': 'version_7'}
 
 # ============ Inference setting ============= #
-num_samples = 30
+num_samples = 100
 loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss','DiceLoss', 'DiceCELoss']
 
 unet = Unet(in_channels=1, 
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+for k in list(model_weight.keys()):
+    k_new = k.replace(
+        "model.", "", 1
+    )  # e.g. "model.conv.weight" => conv.weight"
+    model_weight[k_new] = model_weight.pop(k)
 
+unet.load_state_dict(model_weight)
 # =========================================== #
 
 ProbUnet_First = ProbUNet_First(
@@ -55,7 +63,7 @@ ProbUnet_First = ProbUNet_First(
 )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_31' # version_28
+version_no = 'version_33' # version_28
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
