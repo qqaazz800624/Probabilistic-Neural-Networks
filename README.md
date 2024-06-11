@@ -1,4 +1,5 @@
 # Probabilistic-Neural-Networks
+This repository contains code for training and evaluating Probabilistic Neural Networks (PNNs) for pneumothorax segmentation using the SIIM-ACR Pneumothorax dataset. The code is built using PyTorch and PyTorch Lightning for streamlined training and testing. This project aims to leverage uncertainty produced by Probabilistic U-Net to develop an adaptive self-correction procedure, guiding the segmentation model to improve in areas where the model is uncertain.
 Probabilistic Neural Networks for Segmentation Models with PyTorch, Lightning and Lightning UQ Box
 
 
@@ -21,7 +22,7 @@ This repository contains code for training and evaluating Probabilistic Neural N
 
 ## Introduction
 
-Probabilistic Neural Networks (PNNs) incorporate probabilistic layers and loss functions to provide uncertainty estimates along with predictions. This can be particularly useful in fields where understanding model confidence is crucial, such as medical imaging and autonomous driving.
+Probabilistic Neural Networks (PNNs) incorporate probabilistic layers and loss functions to provide uncertainty estimates along with predictions. This is particularly useful in medical imaging, where understanding model confidence is crucial. In this project, we aim to leverage the uncertainty produced by Probabilistic U-Net to guide the segmentation model to explore and improve in areas where the model finds itself uncertain.
 
 ## Features
 
@@ -56,6 +57,12 @@ Probabilistic Neural Networks (PNNs) incorporate probabilistic layers and loss f
 
 Prepare your datasets and update the configuration files accordingly. Ensure that your data is stored in the correct format as required by the dataset classes.
 
+### Adaptive Self-Correction Procedure
+This procedure leverages the uncertainty produced by the Probabilistic U-Net to guide the model:
+
+- Perform initial segmentation and uncertainty estimation.
+- Identify uncertain regions using the uncertainty heatmap.
+- Guide the model to focus on these regions for further training.
 
 ## Models
 
@@ -77,4 +84,5 @@ This project is licensed under the Apache 2.0 License. See the [LICENSE](LICENSE
 
 - The Probabilistic U-Net implementation is inspired by the original paper by Kohl et al.
 - Special thanks to the PyTorch and PyTorch Lightning communities for their excellent libraries.
+- The SIIM-ACR Pneumothorax dataset was used for model training and evaluation.
 
