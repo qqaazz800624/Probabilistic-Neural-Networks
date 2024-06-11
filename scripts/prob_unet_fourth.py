@@ -41,13 +41,14 @@ from segmentation_models_pytorch.losses import DiceLoss
 from torch.nn import BCEWithLogitsLoss
 from monai.losses import DiceCELoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
-from prob_unet_first import ProbUNet_First
-from prob_unet_second import ProbUNet_Second
+# from prob_unet_first import ProbUNet_First
+# from prob_unet_second import ProbUNet_Second
+from prob_unet_third import ProbUNet_Third
 from custom.losses import MaskedBCEWithLogitsLoss
 
 
 
-class ProbUNet_Third(BaseModule):
+class ProbUNet_Fourth(BaseModule):
     """Probabilistic U-Net.
 
     If you use this code, please cite the following paper:
@@ -60,7 +61,7 @@ class ProbUNet_Third(BaseModule):
     def __init__(
         self,
         model: nn.Module,
-        prob_unet_second: ProbUNet_Second,
+        prob_unet_third: ProbUNet_Third,
         model_name: str = 'Unet',
         loss_fn: str = 'BCEWithLogitsLoss',
         batch_size_train: int = 6,
@@ -110,7 +111,7 @@ class ProbUNet_Third(BaseModule):
         self.num_samples = num_samples
         self.version_prev = version_prev
 
-        self.prob_unet_second = prob_unet_second
+        self.prob_unet_third = prob_unet_third
 
         assert task in self.valid_tasks, f"Task must be one of {self.valid_tasks}."
         self.task = task
@@ -224,7 +225,7 @@ class ProbUNet_Third(BaseModule):
 
         # compute uncertainty mask
         with torch.no_grad():
-            prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_second.predict_step(img)
+            prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_third.predict_step(img)
             stacked_samples = torch.sigmoid(prediction_outputs['samples'])
             uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
             batch_size = uncertainty_heatmap.shape[0]

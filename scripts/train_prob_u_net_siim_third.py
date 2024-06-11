@@ -26,7 +26,7 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 64
+max_epochs = 32
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -68,12 +68,12 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-# version_no = 'version_28'
-# weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
-# model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
-# ProbUnet_First.load_state_dict(model_weight)
-# ProbUnet_First.eval()
-# ProbUnet_First.requires_grad_(False)
+version_no = 'version_34'
+weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
+model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
+ProbUnet_First.load_state_dict(model_weight)
+ProbUnet_First.eval()
+ProbUnet_First.requires_grad_(False)
 
 
 #%%
@@ -107,7 +107,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_30'
+version_no = 'version_36'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second.load_state_dict(model_weight)
@@ -154,8 +154,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_32',
-                           name='ProbUNet_Adaptive_step3_version_32')
+                           version='version_37',
+                           name='ProbUNet_step3_32epochs_v37')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
