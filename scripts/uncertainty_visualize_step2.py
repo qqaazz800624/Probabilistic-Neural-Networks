@@ -7,7 +7,6 @@ from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 from prob_unet_first import ProbUNet_First
 from prob_unet_second import ProbUNet_Second
-from prob_unet_third import ProbUNet_Third
 import os
 
 from siim_datamodule import SIIMDataModule
@@ -63,7 +62,7 @@ ProbUnet_First = ProbUNet_First(
     num_samples=num_samples
 )
 
-version_no = 'version_33' # version_28
+version_no = 'version_35' # version_28
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -77,7 +76,7 @@ unet2 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-
+model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
 model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
 for k in list(model_weight.keys()):
     k_new = k.replace(
@@ -102,7 +101,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_34'
+version_no = 'version_39'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
