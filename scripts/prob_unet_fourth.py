@@ -62,6 +62,9 @@ class ProbUNet_Fourth(BaseModule):
         self,
         model: nn.Module,
         prob_unet_third: ProbUNet_Third,
+        prior_third: AxisAlignedConvGaussian,
+        posterior_third: AxisAlignedConvGaussian,
+        fcomb_third: Fcomb,
         model_name: str = 'Unet',
         loss_fn: str = 'BCEWithLogitsLoss',
         batch_size_train: int = 6,
@@ -96,7 +99,11 @@ class ProbUNet_Fourth(BaseModule):
         """
         super().__init__()
         
-        self.save_hyperparameters(ignore=['model'])
+        self.save_hyperparameters(ignore=['prob_unet_third',
+                                          'model',
+                                          'prior_second',
+                                          'posterior_second',
+                                          'fcomb_second'])
 
         self.batch_size_train = batch_size_train
         self.model_name = model_name
@@ -119,29 +126,32 @@ class ProbUNet_Fourth(BaseModule):
         self.model = model
         self.num_input_channels = self.num_input_features
         self.num_classes = self.num_outputs
-        self.prior = AxisAlignedConvGaussian(
-            self.num_input_channels,
-            self.num_filters,
-            self.num_convs_per_block,
-            self.latent_dim,
-            posterior=False,
-        )
-        self.posterior = AxisAlignedConvGaussian(
-            self.num_input_channels,
-            self.num_filters,
-            self.num_convs_per_block,
-            self.latent_dim,
-            posterior=True,
-        )
+        self.prior = prior_third
+        # self.prior = AxisAlignedConvGaussian(
+        #     self.num_input_channels,
+        #     self.num_filters,
+        #     self.num_convs_per_block,
+        #     self.latent_dim,
+        #     posterior=False,
+        # )
+        self.posterior = posterior_third
+        # self.posterior = AxisAlignedConvGaussian(
+        #     self.num_input_channels,
+        #     self.num_filters,
+        #     self.num_convs_per_block,
+        #     self.latent_dim,
+        #     posterior=True,
+        # )
         self.fcomb_input_channels = self.num_classes + self.latent_dim
-        self.fcomb = Fcomb(
-            self.fcomb_input_channels,
-            self.fcomb_filter_size,
-            self.num_classes,
-            self.num_convs_fcomb,
-            initializers={"w": "orthogonal", "b": "normal"},
-            use_tile=True,
-        )
+        self.fcomb = fcomb_third
+        # self.fcomb = Fcomb(
+        #     self.fcomb_input_channels,
+        #     self.fcomb_filter_size,
+        #     self.num_classes,
+        #     self.num_convs_fcomb,
+        #     initializers={"w": "orthogonal", "b": "normal"},
+        #     use_tile=True,
+        # )
 
         if loss_fn == 'BCEWithLogitsLoss':
             self.criterion = BCEWithLogitsLoss(reduction="mean")  # original setting, version_3
@@ -233,7 +243,8 @@ class ProbUNet_Fourth(BaseModule):
             for i in range(batch_size):
                 heatmap = uncertainty_heatmap[i, 0]
                 mask_i = seg_mask_target[i, 0]
-                quantile = torch.kthvalue(heatmap.flatten(), int(0.975 * heatmap.numel())).values.item()
+                quantile = torch.quantile(heatmap.flatten(), 0.975).item()
+                #quantile = torch.kthvalue(heatmap.flatten(), int(0.975 * heatmap.numel())).values.item()
                 mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
 
         uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
