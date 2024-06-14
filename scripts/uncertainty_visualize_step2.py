@@ -29,7 +29,7 @@ batch_size_train = 16
 #                       'DeepLabV3Plus': 'version_7'}
 
 # ============ Inference setting ============= #
-num_samples = 30
+num_samples = 100
 loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss','DiceLoss', 'DiceCELoss']
 
 unet = Unet(in_channels=1, 
@@ -62,7 +62,7 @@ ProbUnet_First = ProbUNet_First(
     num_samples=num_samples
 )
 
-version_no = 'version_35' # version_28
+version_no = 'version_34' # version_28
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -101,7 +101,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_39'
+version_no = 'version_38'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -117,14 +117,14 @@ ProbUnet_Second.eval()
 # dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
 # discreter = AsDiscrete(threshold=0.5)
 
-# Prob_UNet.to(device)
+# ProbUnet_Second.to(device)
 
 # dice_scores = []
 
 # with torch.no_grad():
 #     for data in tqdm(test_data_loader):
 #         img, label = data['input'].to(device), data['target']
-#         prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(img)
+#         prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(img)
 #         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
 #         stacked_samples = torch.sigmoid(stacked_samples)
 #         prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
@@ -136,20 +136,23 @@ ProbUnet_Second.eval()
 # print('Dice score: ', sum(dice_scores)/len(dice_scores))
 # #%%
 
-# with open(f'results/dice_scores_ProbUnet_BCELoss.json', 'w') as file:
+# with open(f'results/dice_scores_ProbUnet_step2.json', 'w') as file:
 #     json.dump(dice_scores, file)
 
-#%%
+# #%%
 
 # import json
-# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-#     dice_scores_ProbUnet_BCELoss = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
+#     dice_scores_ProbUnet_step2 = json.load(file)
 
-# #%%
+# with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
+#     dice_scores_ProbUnet_step1 = json.load(file)
+
+#%%
 # import matplotlib.pyplot as plt
 
 # # Plot histogram of dice_scores
-# plt.hist(dice_scores_ProbUnet_BCELoss, bins=10, edgecolor='black')
+# plt.hist(dice_scores_ProbUnet_step2, bins=10, edgecolor='black')
 # plt.xlabel('Dice Score')
 # plt.ylabel('Frequency')
 # plt.title('Histogram of Dice Scores')
@@ -168,7 +171,7 @@ fold_no = 'testing'
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 339
+img_serial = 92
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -227,7 +230,8 @@ with torch.no_grad():
 
 #%%
 # Thresholding the uncertainty heatmap
-quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
+#quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
+quantile = torch.quantile(uncertainty_heatmap, 0.975).item()
 #print("97.5th quantile of uncertainty_heatmap:", quantile)
 mask_uncertainty = torch.where(uncertainty_heatmap.cpu() > quantile, 
                                mask.squeeze(0), 
@@ -265,17 +269,12 @@ plt.title(f'Uncertainty mask: {fold_no}_{img_serial}')
 #%%
 # import matplotlib.pyplot as plt
 
-# # Draw histogram for dice_scores_ProbUnet_BCELoss
-# plt.hist(dice_scores_ProbUnet_BCELoss, bins=10, edgecolor='black', alpha=0.4, label='ProbUnet_BCELoss')
+# # Draw histogram for dice_scores_ProbUnet_step1
+# plt.hist(dice_scores_ProbUnet_step1, bins=10, edgecolor='black', alpha=0.4, label='ProbUnet_step1')
 
-# # Draw histogram for dice_scores
-# plt.hist(dice_scores_Unet, bins=10, edgecolor='black', alpha=0.5, label='Unet')
+# # Draw histogram for dice_scores_ProbUnet_step2
+# plt.hist(dice_scores_ProbUnet_step2, bins=10, edgecolor='black', alpha=0.5, label='ProbUnet_step2')
 
-# # Draw histogram for dice_scores_ProbUnet
-# plt.hist(dice_scores_ProbUnet, bins=10, edgecolor='black', alpha=0.4, label='ProbUnet_DiceLoss')
-
-# # # Draw histogram for dice_scores_segformer
-# # plt.hist(dice_scores_segformer, bins=10, edgecolor='black', alpha=0.5, label='Segformer')
 
 # # Add labels and title
 # plt.xlabel('Dice Score')

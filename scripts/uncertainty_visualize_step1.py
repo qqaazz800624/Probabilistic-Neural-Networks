@@ -62,7 +62,7 @@ ProbUnet_First = ProbUNet_First(
 )
 
 #version_no = model_version_dict[model_name]
-version_no = 'version_35' # version_28
+version_no = 'version_34' # version_28
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -79,14 +79,14 @@ ProbUnet_First.eval()
 # dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
 # discreter = AsDiscrete(threshold=0.5)
 
-# Prob_UNet.to(device)
+# ProbUnet_First.to(device)
 
 # dice_scores = []
 
 # with torch.no_grad():
 #     for data in tqdm(test_data_loader):
 #         img, label = data['input'].to(device), data['target']
-#         prediction_outputs, prior_mu, prior_sigma = Prob_UNet.predict_step(img)
+#         prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(img)
 #         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
 #         stacked_samples = torch.sigmoid(stacked_samples)
 #         prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
@@ -98,7 +98,7 @@ ProbUnet_First.eval()
 # print('Dice score: ', sum(dice_scores)/len(dice_scores))
 # #%%
 
-# with open(f'results/dice_scores_ProbUnet_BCELoss.json', 'w') as file:
+# with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 #     json.dump(dice_scores, file)
 
 #%%
@@ -130,7 +130,7 @@ fold_no = 'testing'
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 339
+img_serial = 92
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
