@@ -46,6 +46,8 @@ for k in list(model_weight.keys()):
 unet.load_state_dict(model_weight)
 # =========================================== #
 
+version_prev = None
+
 ProbUnet_First = ProbUNet_First(
     model=unet,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
@@ -57,11 +59,9 @@ ProbUnet_First = ProbUNet_First(
     model_name= model_name,
     batch_size_train=batch_size_train,
     loss_fn=loss_fn,
-    version_prev=None,
-    num_samples=num_samples
+    version_prev=version_prev
 )
 
-#version_no = model_version_dict[model_name]
 version_no = 'version_34' # version_28
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
