@@ -141,7 +141,7 @@ ProbUnet_Second.eval()
 
 #%%
 
-# device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 # data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
 # test_data_loader = data_module.test_dataloader()
@@ -179,6 +179,7 @@ ProbUnet_Second.eval()
 # with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
 #     dice_scores_ProbUnet_step1 = json.load(file)
 
+# dice_scores_ProbUnet_step2
 #%%
 # import matplotlib.pyplot as plt
 
@@ -202,8 +203,8 @@ fold_no = 'testing'
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 92
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+img_serial = 339
+device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 

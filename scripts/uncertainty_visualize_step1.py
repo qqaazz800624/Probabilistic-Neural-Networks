@@ -62,7 +62,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34' # version_28
+version_no = 'version_35' # version_28
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -72,7 +72,7 @@ ProbUnet_First.eval()
 
 #%%
 
-# device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 # data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
 # test_data_loader = data_module.test_dataloader()
@@ -104,10 +104,11 @@ ProbUnet_First.eval()
 #%%
 
 # import json
-# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-#     dice_scores_ProbUnet_BCELoss = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
+#     dice_scores_ProbUnet_step1 = json.load(file)
 
-# #%%
+# dice_scores_ProbUnet_step1
+#%%
 # import matplotlib.pyplot as plt
 
 # # Plot histogram of dice_scores
@@ -130,8 +131,8 @@ fold_no = 'testing'
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 92
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+img_serial = 132
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 

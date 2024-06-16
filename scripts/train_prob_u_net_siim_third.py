@@ -38,7 +38,7 @@ loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss'
 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 
-#%% Load the trained models: ProbUNet_Second
+#%% Load the trained model: ProbUNet_Second
 unet = Unet(in_channels=1, 
             classes=1, 
             encoder_name = 'tu-resnest50d', 
