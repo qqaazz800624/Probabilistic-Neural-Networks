@@ -27,7 +27,7 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 32
+max_epochs = 64
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -70,7 +70,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -104,7 +104,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -132,7 +132,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_43'
+version_no = 'version_42'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second.load_state_dict(model_weight)
@@ -166,7 +166,7 @@ ProbUnet_First_v3 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v3.load_state_dict(model_weight)
@@ -200,7 +200,7 @@ ProbUnet_First_v4 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v4.load_state_dict(model_weight)
@@ -228,7 +228,7 @@ ProbUnet_Second_v2 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_43'
+version_no = 'version_42'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v2.load_state_dict(model_weight)
@@ -257,7 +257,7 @@ ProbUnet_Third = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_44'
+version_no = 'version_47'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -296,7 +296,7 @@ ProbUnet_First_v5 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v5.load_state_dict(model_weight)
@@ -330,7 +330,7 @@ ProbUnet_First_v6 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v6.load_state_dict(model_weight)
@@ -358,7 +358,7 @@ ProbUnet_Second_v3 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_43'
+version_no = 'version_42'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v3.load_state_dict(model_weight)
@@ -392,7 +392,7 @@ ProbUnet_First_v7 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v7.load_state_dict(model_weight)
@@ -426,7 +426,7 @@ ProbUnet_First_v8 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v8.load_state_dict(model_weight)
@@ -454,7 +454,7 @@ ProbUnet_Second_v4 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_43'
+version_no = 'version_42'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v4.load_state_dict(model_weight)
@@ -482,7 +482,7 @@ ProbUnet_Third_v2 = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_44'
+version_no = 'version_47'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -494,7 +494,6 @@ posterior_third = ProbUnet_Third_v2.posterior
 fcomb_third = ProbUnet_Third_v2.fcomb
 
 #%%
-
 
 ProbUnet_Fourth = ProbUNet_Fourth(
     model=model_third,
@@ -523,8 +522,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_45',
-                           name='ProbUNet_step4_32epochs_v45')
+                           version='version_48',
+                           name='ProbUNet_step4_64epochs_v48')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
