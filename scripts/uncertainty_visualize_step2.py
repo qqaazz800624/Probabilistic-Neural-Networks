@@ -170,7 +170,7 @@ ProbUnet_Second.eval()
 # with open(f'results/dice_scores_ProbUnet_step2.json', 'w') as file:
 #     json.dump(dice_scores, file)
 
-# #%%
+#%%
 
 # import json
 # with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
@@ -204,7 +204,7 @@ fold_no = 'testing'
 # medium-small mask: 29, 412
 # small mask: 128, 184
 img_serial = 339
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 
@@ -255,7 +255,8 @@ plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 input_image = image.unsqueeze(0).to(device)
 ProbUnet_First.to(device)
 with torch.no_grad():
-    prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
+    #prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
+    prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
     stacked_samples = torch.sigmoid(prediction_outputs['samples'])
     uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
     uncertainty_heatmap = uncertainty_heatmap.squeeze(0).squeeze(0)

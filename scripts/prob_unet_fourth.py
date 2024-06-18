@@ -101,9 +101,9 @@ class ProbUNet_Fourth(BaseModule):
         
         self.save_hyperparameters(ignore=['prob_unet_third',
                                           'model',
-                                          'prior_second',
-                                          'posterior_second',
-                                          'fcomb_second'])
+                                          'prior_third',
+                                          'posterior_third',
+                                          'fcomb_third'])
 
         self.batch_size_train = batch_size_train
         self.model_name = model_name

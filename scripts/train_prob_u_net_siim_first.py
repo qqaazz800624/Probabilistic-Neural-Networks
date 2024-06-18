@@ -26,7 +26,7 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 128
+max_epochs = 192
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -87,8 +87,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_35',
-                           name='ProbUNet_step1_128epochs_v35')
+                           version='version_46',
+                           name='ProbUNet_step1_192epochs_v46')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
@@ -102,8 +102,8 @@ model_summarizer = ModelSummary(max_depth=2)
 trainer = Trainer(
     accelerator='gpu',
     devices=1,
-    strategy=DDPStrategy(find_unused_parameters=True),
-    precision=16,
+    #strategy=DDPStrategy(find_unused_parameters=True),
+    #precision=16,
     max_epochs=max_epochs,  # number of epochs we want to train
     #logger=logger,  # log training metrics for later evaluation
     logger=wandb_logger,  # log training metrics for later evaluation
