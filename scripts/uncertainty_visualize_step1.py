@@ -114,6 +114,9 @@ with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
 with open('../results/dice_scores_ProbUnet_step3.json', 'r') as file:
     dice_scores_ProbUnet_step3 = json.load(file)
 
+with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
+    dice_scores_ProbUnet_step4 = json.load(file)
+
 with open('../results/dice_scores_Unet.json', 'r') as file:
     dice_scores_Unet = json.load(file)
 
@@ -127,16 +130,19 @@ import numpy as np
 dice_scores_ProbUnet_step1 = np.round(np.array(dice_scores_ProbUnet_step1),3)
 dice_scores_ProbUnet_step2 = np.round(np.array(dice_scores_ProbUnet_step2),3)
 dice_scores_ProbUnet_step3 = np.round(np.array(dice_scores_ProbUnet_step3),3)
+dice_scores_ProbUnet_step4 = np.round(np.array(dice_scores_ProbUnet_step4),3)
 dice_scores_ProbUnet_step1_192epochs_v46 = np.round(np.array(dice_scores_ProbUnet_step1_192epochs_v46),3)
 dice_scores_Unet = np.round(np.array(dice_scores_Unet),3)
 labeled_scores_step1 = dice_scores_ProbUnet_step1[0:535]
 labeled_scores_step2 = dice_scores_ProbUnet_step2[0:535]
 labeled_scores_step3 = dice_scores_ProbUnet_step3[0:535]
+labeled_scores_step4 = dice_scores_ProbUnet_step4[0:535]
 labeled_scores_step1_192epochs_v46 = dice_scores_ProbUnet_step1_192epochs_v46[0:535]
 labeled_scores_Unet = dice_scores_Unet[0:535]
 unlabeled_scores_step1 = dice_scores_ProbUnet_step1[535:]
 unlabeled_scores_step2 = dice_scores_ProbUnet_step2[535:]
 unlabeled_scores_step3 = dice_scores_ProbUnet_step3[535:]
+unlabeled_scores_step4 = dice_scores_ProbUnet_step4[535:]
 unlabeled_scores_step1_192epochs_v46 = dice_scores_ProbUnet_step1_192epochs_v46[535:]
 unlabeled_scores_Unet = dice_scores_Unet[535:]
 #%%
@@ -154,6 +160,12 @@ labeled_scores_step2.mean()
 
 labeled_scores_step3.mean()
 #unlabeled_scores_step3.mean()
+
+#%%
+
+labeled_scores_step4.mean()
+
+
 
 #%%
 
@@ -181,7 +193,10 @@ plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='lab
 #plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
 
 # Draw histogram for labeled_scores_step3
-plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
+#plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
+
+# Draw histogram for labeled_scores_step4
+#plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
 
 
 # Add labels and title
