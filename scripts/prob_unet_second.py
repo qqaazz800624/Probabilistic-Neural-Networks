@@ -242,8 +242,8 @@ class ProbUNet_Second(BaseModule):
                 heatmap = uncertainty_heatmap[i, 0]
                 mask_i = seg_mask_target[i, 0]
                 quantile = torch.quantile(heatmap.flatten(), 0.975).item()
-                #quantile = torch.kthvalue(heatmap.flatten(), int(0.975 * heatmap.numel())).values.item()
-                mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
+                #mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
+                mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
 
         uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
         rec_loss = self.criterion(reconstruction, seg_mask_target)
@@ -252,14 +252,23 @@ class ProbUNet_Second(BaseModule):
         rec_loss_sum = torch.sum(rec_loss)
         rec_loss_mean = torch.mean(rec_loss)
 
-        elbo = -(rec_loss_sum + self.beta * kl_loss + uncertainty_loss_sum)
+        #elbo = -(rec_loss_sum + self.beta * kl_loss + uncertainty_loss_sum)
+        elbo = -(uncertainty_loss_sum + self.beta * kl_loss)
         reg_loss = l2_regularisation(self.posterior) + l2_regularisation(self.prior) + l2_regularisation(self.fcomb.layers)
         loss = -elbo + 1e-5 * reg_loss
 
+        # return {
+        #     "loss": loss,
+        #     "rec_loss_sum": rec_loss_sum,
+        #     "rec_loss_mean": rec_loss_mean,
+        #     "uncertainty_loss_sum": uncertainty_loss_sum,
+        #     "uncertainty_loss_mean": uncertainty_loss_mean,
+        #     "kl_loss": kl_loss,
+        #     "reconstruction": reconstruction
+        # }
+    
         return {
             "loss": loss,
-            "rec_loss_sum": rec_loss_sum,
-            "rec_loss_mean": rec_loss_mean,
             "uncertainty_loss_sum": uncertainty_loss_sum,
             "uncertainty_loss_mean": uncertainty_loss_mean,
             "kl_loss": kl_loss,
@@ -346,8 +355,8 @@ class ProbUNet_Second(BaseModule):
         """
         loss_dict = self.compute_loss(batch)
         self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        # self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        # self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
         self.log("train_kl_loss", loss_dict["kl_loss"], sync_dist=True)
         self.log("train_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
         self.log("train_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
@@ -373,8 +382,8 @@ class ProbUNet_Second(BaseModule):
         """
         loss_dict = self.compute_loss(batch)
         self.log("val_loss", loss_dict["loss"], sync_dist=True)
-        self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
-        self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        # self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
+        # self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
         self.log("val_kl_loss", loss_dict["kl_loss"], sync_dist=True)
         self.log("val_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
         self.log("val_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)

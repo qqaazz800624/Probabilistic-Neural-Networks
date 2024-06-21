@@ -172,8 +172,8 @@ labeled_scores_step3[200:300]
 #%%
 
 #labeled_scores_step4.mean()
-#labeled_scores_step4[200:300]
-labeled_scores_step4[292]
+labeled_scores_step4[200:300]
+#labeled_scores_step4[292]
 
 
 #%%
@@ -210,7 +210,7 @@ import matplotlib.pyplot as plt
 plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
 
 # Draw histogram for labeled_scores_step4
-#plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
+plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
 
 
 # Add labels and title
@@ -266,7 +266,7 @@ print('Dice score: ', dice_score)
 
 import matplotlib.pyplot as plt
 plt.imshow(prediction_heatmap.detach().numpy().T, 
-           cmap='plasma', aspect='auto')
+           cmap='plasma', aspect='auto', vmin=0, vmax=1)
 plt.colorbar()
 plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
 

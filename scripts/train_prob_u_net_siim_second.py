@@ -24,7 +24,7 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 32
+max_epochs = 64
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -40,14 +40,14 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-for k in list(unet_weight.keys()):
-    k_new = k.replace(
-        "model.", "", 1
-    )  # e.g. "model.conv.weight" => conv.weight"
-    unet_weight[k_new] = unet_weight.pop(k)
-unet.load_state_dict(unet_weight)
+# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# for k in list(unet_weight.keys()):
+#     k_new = k.replace(
+#         "model.", "", 1
+#     )  # e.g. "model.conv.weight" => conv.weight"
+#     unet_weight[k_new] = unet_weight.pop(k)
+# unet.load_state_dict(unet_weight)
 
 version_prev = None
 
@@ -65,7 +65,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -78,14 +78,14 @@ unet_v2 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-for k in list(unet_weight.keys()):
-    k_new = k.replace(
-        "model.", "", 1
-    )  # e.g. "model.conv.weight" => conv.weight"
-    unet_weight[k_new] = unet_weight.pop(k)
-unet_v2.load_state_dict(unet_weight)
+# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# for k in list(unet_weight.keys()):
+#     k_new = k.replace(
+#         "model.", "", 1
+#     )  # e.g. "model.conv.weight" => conv.weight"
+#     unet_weight[k_new] = unet_weight.pop(k)
+# unet_v2.load_state_dict(unet_weight)
 
 ProbUnet_First_v2 = ProbUNet_First(
     model=unet_v2,
@@ -101,7 +101,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -140,8 +140,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_43',
-                           name='ProbUNet_step2_32epochs_v43')
+                           version='version_52',
+                           name='step2_64epochs_only_uncertaintyloss_v52')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
