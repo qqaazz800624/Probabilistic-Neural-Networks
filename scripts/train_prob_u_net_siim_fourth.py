@@ -522,8 +522,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_48',
-                           name='ProbUNet_step4_64epochs_v48')
+                           version='version_50',
+                           name='ProbUNet_step4_64epochs_v50')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 

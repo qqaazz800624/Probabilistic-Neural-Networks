@@ -63,7 +63,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -97,7 +97,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -125,7 +125,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_43'
+version_no = 'version_42'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second.load_state_dict(model_weight)
@@ -161,7 +161,7 @@ ProbUnet_First_v3 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v3.load_state_dict(model_weight)
@@ -195,7 +195,7 @@ ProbUnet_First_v4 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34'
+version_no = 'version_35'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v4.load_state_dict(model_weight)
@@ -223,7 +223,7 @@ ProbUnet_Second_v2 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_43'
+version_no = 'version_42'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v2.load_state_dict(model_weight)
@@ -253,7 +253,7 @@ ProbUnet_Third = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_44'
+version_no = 'version_47'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -261,7 +261,7 @@ ProbUnet_Third.load_state_dict(model_weight)
 ProbUnet_Third.eval()
 #%%
 
-# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+# device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 
 # data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
 # test_data_loader = data_module.test_dataloader()
@@ -286,7 +286,7 @@ ProbUnet_Third.eval()
 
 # print('Dice score: ', sum(dice_scores)/len(dice_scores))
 
-# with open(f'results/dice_scores_ProbUnet_step3.json', 'w') as file:
+# with open(f'results/dice_scores_ProbUnet_step3_64epochs_v47.json', 'w') as file:
 #     json.dump(dice_scores, file)
 
 #%%
@@ -312,13 +312,13 @@ import os
 from siim_dataset import SIIMDataset
 
 fold_no = 'testing'
-# Good: 6, 92, 522 Bad: 532, 484, 168
+# Good: 6, 92, 522, 292, 207, 212 Bad: 532, 484, 168
 # large mask: 92, 417, 492, 339, 132, 302
-# large-medium mask: 338, 377
+# large-medium mask: 338, 377, 325
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 339
+img_serial = 212
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -371,7 +371,7 @@ plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
 input_image = image.unsqueeze(0).to(device)
 #ProbUnet_First.to(device)
-ProbUnet_Second.to(device)
+ProbUnet_Third.to(device)
 with torch.no_grad():
     #prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
     prediction_outputs, prior_mu, prior_sigma = ProbUnet_Third.predict_step(input_image)

@@ -62,7 +62,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_34' 
+version_no = 'version_49' 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -70,10 +70,10 @@ ProbUnet_First.load_state_dict(model_weight)
 ProbUnet_First.eval()
 
 #%%
-# # testing dataset
-# ## number of labeled data: 535
-# ## number of unlabeled data: 1876
-# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+# testing dataset
+## number of labeled data: 535
+## number of unlabeled data: 1876
+# device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
 
 # data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
 # test_data_loader = data_module.test_dataloader()
@@ -99,7 +99,7 @@ ProbUnet_First.eval()
 
 # print('Dice score: ', sum(dice_scores)/len(dice_scores))
 
-# with open(f'results/dice_scores_ProbUnet_step1_192epochs_v46.json', 'w') as file:
+# with open(f'results/dice_scores_ProbUnet_step1_256epochs_v49.json', 'w') as file:
 #     json.dump(dice_scores, file)
 
 #%%
@@ -111,7 +111,7 @@ with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
 with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
     dice_scores_ProbUnet_step2 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step3.json', 'r') as file:
+with open('../results/dice_scores_ProbUnet_step3_64epochs_v47.json', 'r') as file:
     dice_scores_ProbUnet_step3 = json.load(file)
 
 with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
@@ -119,6 +119,9 @@ with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
 
 with open('../results/dice_scores_Unet.json', 'r') as file:
     dice_scores_Unet = json.load(file)
+
+with open('../results/dice_scores_ProbUnet_step1_256epochs_v49.json', 'r') as file:
+    dice_scores_ProbUnet_step1_256epochs_v49 = json.load(file)
 
 with open('../results/dice_scores_ProbUnet_step1_192epochs_v46.json', 'r') as file:
     dice_scores_ProbUnet_step1_192epochs_v46 = json.load(file)
@@ -132,22 +135,26 @@ dice_scores_ProbUnet_step2 = np.round(np.array(dice_scores_ProbUnet_step2),3)
 dice_scores_ProbUnet_step3 = np.round(np.array(dice_scores_ProbUnet_step3),3)
 dice_scores_ProbUnet_step4 = np.round(np.array(dice_scores_ProbUnet_step4),3)
 dice_scores_ProbUnet_step1_192epochs_v46 = np.round(np.array(dice_scores_ProbUnet_step1_192epochs_v46),3)
+dice_scores_ProbUnet_step1_256epochs_v49 = np.round(np.array(dice_scores_ProbUnet_step1_256epochs_v49),3)
 dice_scores_Unet = np.round(np.array(dice_scores_Unet),3)
 labeled_scores_step1 = dice_scores_ProbUnet_step1[0:535]
 labeled_scores_step2 = dice_scores_ProbUnet_step2[0:535]
 labeled_scores_step3 = dice_scores_ProbUnet_step3[0:535]
 labeled_scores_step4 = dice_scores_ProbUnet_step4[0:535]
 labeled_scores_step1_192epochs_v46 = dice_scores_ProbUnet_step1_192epochs_v46[0:535]
+labeled_scores_step1_256epochs_v49 = dice_scores_ProbUnet_step1_256epochs_v49[0:535]
 labeled_scores_Unet = dice_scores_Unet[0:535]
 unlabeled_scores_step1 = dice_scores_ProbUnet_step1[535:]
 unlabeled_scores_step2 = dice_scores_ProbUnet_step2[535:]
 unlabeled_scores_step3 = dice_scores_ProbUnet_step3[535:]
 unlabeled_scores_step4 = dice_scores_ProbUnet_step4[535:]
 unlabeled_scores_step1_192epochs_v46 = dice_scores_ProbUnet_step1_192epochs_v46[535:]
+unlabeled_scores_step1_256epochs_v49 = dice_scores_ProbUnet_step1_256epochs_v49[535:]
 unlabeled_scores_Unet = dice_scores_Unet[535:]
+
 #%%
 labeled_scores_step1.mean()
-#labeled_scores_step1[100:200]
+#labeled_scores_step1[200:300]
 #unlabeled_scores_step1.mean()
 
 #%%
@@ -158,19 +165,26 @@ labeled_scores_step2.mean()
 
 #%%
 
-labeled_scores_step3.mean()
+#labeled_scores_step3.mean()
 #unlabeled_scores_step3.mean()
+labeled_scores_step3[200:300]
 
 #%%
 
-labeled_scores_step4.mean()
-
+#labeled_scores_step4.mean()
+#labeled_scores_step4[200:300]
+labeled_scores_step4[292]
 
 
 #%%
 
 labeled_scores_step1_192epochs_v46.mean()
 #labeled_scores_step1_192epochs_v46[100:200]
+
+#%%
+
+#labeled_scores_step1_256epochs_v49.mean()
+labeled_scores_step1_256epochs_v49[200:300]
 
 #%%
 
@@ -184,16 +198,16 @@ import matplotlib.pyplot as plt
 #plt.hist(unlabeled_scores_Unet, bins=10, edgecolor='black', alpha=0.7, label='unlabeled_scores_Unet',color='lightblue')
 
 # Draw histogram for labeled_scores_step1
-plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
+#plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
 
 # Draw histogram for labeled_scores_step1_192epochs_v46
-#plt.hist(unlabeled_scores_step1_192epochs_v46, bins=10, edgecolor='black', alpha=0.3, label='unlabeled_scores_step1_192epochs_v46', color='purple')
+#plt.hist(labeled_scores_step1_256epochs_v49, bins=10, edgecolor='black', alpha=0.3, label='labeled_scores_step1_256epochs_v49', color='purple')
 
 # Draw histogram for labeled_scores_step2
 #plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
 
 # Draw histogram for labeled_scores_step3
-#plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
+plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
 
 # Draw histogram for labeled_scores_step4
 #plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
@@ -216,13 +230,13 @@ import os
 from siim_dataset import SIIMDataset
 
 fold_no = 'testing'
-# Good: 6, 92, 522 Bad: 532, 484, 168
+# Good: 6, 92, 522, 292, 207, 212 Bad: 532, 484, 168
 # large mask: 92, 417, 492, 339, 132, 302
-# large-medium mask: 338, 377
+# large-medium mask: 338, 377, 325
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 339
+img_serial = 212
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -288,31 +302,5 @@ plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 # dice_scores_ProbUnet_BCELoss = np.array(dice_scores_ProbUnet_BCELoss)
 # combined_scores = np.column_stack((dice_scores_Unet, dice_scores_ProbUnet_BCELoss))
 # combined_scores[10:20]
-
-#%%
-# import matplotlib.pyplot as plt
-
-# # Draw histogram for dice_scores_ProbUnet_BCELoss
-# plt.hist(dice_scores_ProbUnet_BCELoss, bins=10, edgecolor='black', alpha=0.4, label='ProbUnet_BCELoss')
-
-# # Draw histogram for dice_scores
-# plt.hist(dice_scores_Unet, bins=10, edgecolor='black', alpha=0.5, label='Unet')
-
-# # Draw histogram for dice_scores_ProbUnet
-# plt.hist(dice_scores_ProbUnet, bins=10, edgecolor='black', alpha=0.4, label='ProbUnet_DiceLoss')
-
-# # # Draw histogram for dice_scores_segformer
-# # plt.hist(dice_scores_segformer, bins=10, edgecolor='black', alpha=0.5, label='Segformer')
-
-# # Add labels and title
-# plt.xlabel('Dice Score')
-# plt.ylabel('Frequency')
-# plt.title('Histogram of Dice Scores')
-
-# # Add legend
-# plt.legend()
-
-# # Show the histogram
-# plt.show()
 
 #%%

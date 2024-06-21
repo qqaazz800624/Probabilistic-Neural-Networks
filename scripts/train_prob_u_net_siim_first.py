@@ -6,15 +6,13 @@ from functools import partial
 
 import os
 import torch
-from torch.optim.lr_scheduler import ReduceLROnPlateau, CosineAnnealingWarmRestarts
+from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 from lightning.pytorch.strategies import DDPStrategy
 
-#from prob_unet import ProbUNet
-#from prob_unet_self_correction import ProbUNet_Proposed
 from prob_unet_first import ProbUNet_First
 
 from siim_ProbNet_datamodule import SIIMDataModule
@@ -26,7 +24,7 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 192
+max_epochs = 128
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -83,12 +81,12 @@ Prob_UNet = ProbUNet_First(
 data_module = SIIMDataModule(batch_size_train=batch_size_train,
                              batch_size_val=batch_size_val)
 
-logger = TensorBoardLogger(my_temp_dir)
+logger = TensorBoardLogger(save_dir=my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_46',
-                           name='ProbUNet_step1_192epochs_v46')
+                           version='version_49',
+                           name='ProbUNet_step1_256epochs_v49')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
