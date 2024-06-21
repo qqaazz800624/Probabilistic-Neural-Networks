@@ -41,67 +41,67 @@
 #     return overlaymask, prediction, label.unsqueeze(0), generator_output, generator_input
 
 
-#%%
-import os, json, torch
-from tqdm import tqdm
-from siim_datamodule import SIIMDataModule
-#from siim_datamodule_balancedSampler import SIIMDataModule
-from segmentation_models_pytorch import Unet, DeepLabV3Plus
-from monai.metrics import DiceMetric
-from monai.transforms import AsDiscrete
-from unet_lightningmodule import UNetModule
+# #%%
+# import os, json, torch
+# from tqdm import tqdm
+# from siim_datamodule import SIIMDataModule
+# #from siim_datamodule_balancedSampler import SIIMDataModule
+# from segmentation_models_pytorch import Unet, DeepLabV3Plus
+# from monai.metrics import DiceMetric
+# from monai.transforms import AsDiscrete
+# from unet_lightningmodule import UNetModule
 
-model_name = 'Unet'
-model_version_dict = {'Unet': 'version_14',
-                      'DeepLabV3Plus': 'version_16'}
-#version_no = model_version_dict[model_name]
-version_no = 'version_22'
-root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
-ckpt_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
-device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
+# model_name = 'Unet'
+# model_version_dict = {'Unet': 'version_14',
+#                       'DeepLabV3Plus': 'version_16'}
+# #version_no = model_version_dict[model_name]
+# version_no = 'version_22'
+# root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
+# ckpt_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
+# device = torch.device("cuda:1" if torch.cuda.is_available() else "cpu")
 
-data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
-test_data_loader = data_module.test_dataloader()
+# data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
+# test_data_loader = data_module.test_dataloader()
 
-model = UNetModule(loss_fn_name='DiceCELoss')
-# if model_name == 'Unet':
-#     model = Unet(in_channels=1, 
-#                  classes=1, 
-#                  encoder_name = 'tu-resnest50d', 
-#                  encoder_weights = 'imagenet')
+# model = UNetModule(loss_fn_name='DiceCELoss')
+# # if model_name == 'Unet':
+# #     model = Unet(in_channels=1, 
+# #                  classes=1, 
+# #                  encoder_name = 'tu-resnest50d', 
+# #                  encoder_weights = 'imagenet')
     
-# elif model_name == 'DeepLabV3Plus':
-#     model = DeepLabV3Plus(in_channels=1, 
-#                           classes=1, 
-#                           encoder_name = 'tu-resnest50d', 
-#                           encoder_weights = 'imagenet')
+# # elif model_name == 'DeepLabV3Plus':
+# #     model = DeepLabV3Plus(in_channels=1, 
+# #                           classes=1, 
+# #                           encoder_name = 'tu-resnest50d', 
+# #                           encoder_weights = 'imagenet')
 
-model_weight = torch.load(os.path.join(root_dir, ckpt_path), map_location="cpu")["state_dict"]
-# for k in list(model_weight.keys()):
-#     k_new = k.replace("model.", "", 1)
-#     model_weight[k_new] = model_weight.pop(k)
-model.load_state_dict(model_weight)
-model.eval()
-model.to(device)
+# model_weight = torch.load(os.path.join(root_dir, ckpt_path), map_location="cpu")["state_dict"]
+# # for k in list(model_weight.keys()):
+# #     k_new = k.replace("model.", "", 1)
+# #     model_weight[k_new] = model_weight.pop(k)
+# model.load_state_dict(model_weight)
+# model.eval()
+# model.to(device)
 
-dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
-discreter = AsDiscrete(threshold=0.5)
-dice_scores = []
+# dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
+# discreter = AsDiscrete(threshold=0.5)
+# dice_scores = []
 
-with torch.no_grad():
-    for data in tqdm(test_data_loader):
-        img, label = data['input'].to(device), data['target'].to(device)
-        prediction = model(img)
-        dice_metric(y_pred=discreter(prediction), y=discreter(label))
-        dice_score = dice_metric.aggregate().item()
-        dice_scores.append(dice_score)
-        dice_metric.reset()
+# with torch.no_grad():
+#     for data in tqdm(test_data_loader):
+#         img, label = data['input'].to(device), data['target'].to(device)
+#         prediction = model(img)
+#         dice_metric(y_pred=discreter(prediction), y=discreter(label))
+#         dice_score = dice_metric.aggregate().item()
+#         dice_scores.append(dice_score)
+#         dice_metric.reset()
 
-print('Mean Dice Score:', sum(dice_scores) / len(dice_scores))
-#%%
+# print('Mean Dice Score:', sum(dice_scores) / len(dice_scores))
+# #%%
 
-with open(f'results/dice_scores_Unet_DiceFocalLoss.json', 'w') as file:
-    json.dump(dice_scores, file)
+# with open(f'results/dice_scores_Unet_DiceFocalLoss.json', 'w') as file:
+#     json.dump(dice_scores, file)
 
 #%%
 # with open(f'results/dice_scores_{model_name}.json', 'w') as file:
@@ -216,14 +216,14 @@ model.to(device)
 
 #%%
 fold_no = 'testing'
-# Good: 6, 92, 522 Bad: 532, 484, 168, 163
+# Good: 6, 92, 522, 292 Bad: 532, 484, 168, 163
 # large mask: 92, 417, 492, 339, 132, 302
-# large-medium mask: 338, 325
+# large-medium mask: 338, 325, 377
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
 
-img_serial = 163
+img_serial = 212
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 image = test_dataset[img_serial]['input']
 mask = test_dataset[img_serial]['target']
@@ -243,35 +243,6 @@ overlay_label = label_preprocessor(fold_no, img_serial, data_root, datalist=json
 overlayMasker = OverlayMask(colors=['#7f007f'])
 overlaymask=overlayMasker(image = overlay_image, masks = overlay_label)
 
-#%%
-
-from tqdm import tqdm 
-import torch, json
-
-fold_no = 'testing'
-test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
-mask_size = []
-
-for img_serial in tqdm(range(535)):
-    mask = test_dataset[img_serial]['target']
-    mask_size.append(mask.sum())
-
-mask_size = torch.tensor(mask_size)
-sorted, indices =  torch.sort(mask_size, descending=True)
-
-with open('../results/mask_size.json', 'w') as file:
-    json.dump(indices.tolist(), file)
-
-#%%
-import json
-
-with open('../results/mask_size.json', 'r') as file:
-    indices = json.load(file)
-#%%
-
-indices[15]
-
-#%%
 
 import matplotlib.pyplot as plt
 # Plot overlay mask
