@@ -165,9 +165,9 @@ labeled_scores_step2.mean()
 
 #%%
 
-#labeled_scores_step3.mean()
+labeled_scores_step3.mean()
 #unlabeled_scores_step3.mean()
-labeled_scores_step3[200:300]
+#labeled_scores_step3[200:300]
 
 #%%
 
@@ -198,7 +198,7 @@ import matplotlib.pyplot as plt
 #plt.hist(unlabeled_scores_Unet, bins=10, edgecolor='black', alpha=0.7, label='unlabeled_scores_Unet',color='lightblue')
 
 # Draw histogram for labeled_scores_step1
-plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
+#plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
 
 # Draw histogram for labeled_scores_step1_192epochs_v46
 #plt.hist(labeled_scores_step1_256epochs_v49, bins=10, edgecolor='black', alpha=0.3, label='labeled_scores_step1_256epochs_v49', color='purple')
@@ -207,7 +207,7 @@ plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='lab
 #plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
 
 # Draw histogram for labeled_scores_step3
-#plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
+plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
 
 # Draw histogram for labeled_scores_step4
 #plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
