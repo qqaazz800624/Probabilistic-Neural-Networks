@@ -141,31 +141,31 @@ ProbUnet_Second.eval()
 
 #%%
 
-# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-# data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
-# test_data_loader = data_module.test_dataloader()
-# dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
-# discreter = AsDiscrete(threshold=0.5)
+data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
+test_data_loader = data_module.test_dataloader()
+dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
+discreter = AsDiscrete(threshold=0.5)
 
-# ProbUnet_Second.to(device)
+ProbUnet_Second.to(device)
 
-# dice_scores = []
+dice_scores = []
 
-# with torch.no_grad():
-#     for data in tqdm(test_data_loader):
-#         img, label = data['input'].to(device), data['target']
-#         prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(img)
-#         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-#         stacked_samples = torch.sigmoid(stacked_samples)
-#         prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
-#         dice_metric(y_pred=discreter(prediction_heatmap.cpu().unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
-#         dice_score = dice_metric.aggregate().item()
-#         dice_scores.append(dice_score)
-#         dice_metric.reset()
+with torch.no_grad():
+    for data in tqdm(test_data_loader):
+        img, label = data['input'].to(device), data['target']
+        prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(img)
+        stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+        stacked_samples = torch.sigmoid(stacked_samples)
+        prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+        dice_metric(y_pred=discreter(prediction_heatmap.cpu().unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
+        dice_score = dice_metric.aggregate().item()
+        dice_scores.append(dice_score)
+        dice_metric.reset()
 
-# print('Dice score: ', sum(dice_scores)/len(dice_scores))
-# #%%
+print('Dice score: ', sum(dice_scores)/len(dice_scores))
+#%%
 
 # with open(f'results/dice_scores_ProbUnet_step2.json', 'w') as file:
 #     json.dump(dice_scores, file)

@@ -11,7 +11,7 @@ from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
-from lightning.pytorch.strategies import DDPStrategy
+# from lightning.pytorch.strategies import DDPStrategy
 
 from prob_unet_first import ProbUNet_First
 from prob_unet_second import ProbUNet_Second
@@ -136,12 +136,12 @@ ProbUnet_Second = ProbUNet_Second(
 data_module = SIIMDataModule(batch_size_train=batch_size_train,
                              batch_size_val=batch_size_val)
 
-logger = TensorBoardLogger(my_temp_dir)
+#logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_52',
-                           name='step2_64epochs_only_uncertaintyloss_v52')
+                           version='version_55',
+                           name='step2_64epochs_reuse_masks_v55')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 

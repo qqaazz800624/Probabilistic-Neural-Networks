@@ -237,36 +237,36 @@ class ProbUNet_Second(BaseModule):
         )
 
         # compute uncertainty masks and reuse them
-        if not self.uncertainty_masks_computed:
-            with torch.no_grad():
-                prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_first.predict_step(img)
-                stacked_samples = torch.sigmoid(prediction_outputs['samples'])
-                uncertainty_heatmap = stacked_samples.var(dim=0, keepdim=False)
-                batch_size = uncertainty_heatmap.shape[0]
-                mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
-                for i in range(batch_size):
-                    heatmap = uncertainty_heatmap[i, 0]
-                    mask_i = seg_mask_target[i, 0]
-                    quantile = torch.quantile(heatmap.flatten(), 0.975).item()
-                    mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
+        # if not self.uncertainty_masks_computed:
+        #     with torch.no_grad():
+        #         prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_first.predict_step(img)
+        #         stacked_samples = torch.sigmoid(prediction_outputs['samples'])
+        #         uncertainty_heatmap = stacked_samples.var(dim=0, keepdim=False)
+        #         batch_size = uncertainty_heatmap.shape[0]
+        #         mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
+        #         for i in range(batch_size):
+        #             heatmap = uncertainty_heatmap[i, 0]
+        #             mask_i = seg_mask_target[i, 0]
+        #             quantile = torch.quantile(heatmap.flatten(), 0.975).item()
+        #             mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
 
-                self.uncertainty_masks = mask_uncertainty
-                self.uncertainty_masks_computed = True
-        else:
-            mask_uncertainty = self.uncertainty_masks
+        #         self.uncertainty_masks = mask_uncertainty
+        #         self.uncertainty_masks_computed = True
+        # else:
+        #     mask_uncertainty = self.uncertainty_masks
 
         # compute uncertainty mask
-        # with torch.no_grad():
-        #     prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_first.predict_step(img)
-        #     stacked_samples = torch.sigmoid(prediction_outputs['samples'])
-        #     uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
-        #     batch_size = uncertainty_heatmap.shape[0]
-        #     mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
-        #     for i in range(batch_size):
-        #         heatmap = uncertainty_heatmap[i, 0]
-        #         mask_i = seg_mask_target[i, 0]
-        #         quantile = torch.quantile(heatmap.flatten(), 0.975).item()
-        #         mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
+        with torch.no_grad():
+            prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_first.predict_step(img)
+            stacked_samples = torch.sigmoid(prediction_outputs['samples'])
+            uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
+            batch_size = uncertainty_heatmap.shape[0]
+            mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
+            for i in range(batch_size):
+                heatmap = uncertainty_heatmap[i, 0]
+                mask_i = seg_mask_target[i, 0]
+                quantile = torch.quantile(heatmap.flatten(), 0.975).item()
+                mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
 
         uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
         rec_loss = self.criterion(reconstruction, seg_mask_target)
