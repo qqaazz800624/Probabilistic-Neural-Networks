@@ -82,3 +82,19 @@ def l2_regularisation(m):
 
 
 #%%
+
+import torch
+from torch.utils.data import Dataset, DataLoader
+
+class MaskDataset(Dataset):
+    def __init__(self, masks_tensor):
+        self.masks = masks_tensor
+
+    def __len__(self):
+        return len(self.masks)
+
+    def __getitem__(self, idx):
+        return self.masks[idx]
+
+
+#%%

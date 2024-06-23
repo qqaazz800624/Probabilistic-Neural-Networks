@@ -43,6 +43,8 @@ from monai.losses import DiceCELoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
 from prob_unet_first import ProbUNet_First
 from custom.losses import MaskedBCEWithLogitsLoss
+from torch.utils.data import DataLoader
+from utils import MaskDataset
 
 
 
@@ -252,23 +254,14 @@ class ProbUNet_Second(BaseModule):
         rec_loss_sum = torch.sum(rec_loss)
         rec_loss_mean = torch.mean(rec_loss)
 
-        #elbo = -(rec_loss_sum + self.beta * kl_loss + uncertainty_loss_sum)
-        elbo = -(uncertainty_loss_sum + self.beta * kl_loss)
+        elbo = -(rec_loss_sum + self.beta * kl_loss + uncertainty_loss_sum)
         reg_loss = l2_regularisation(self.posterior) + l2_regularisation(self.prior) + l2_regularisation(self.fcomb.layers)
         loss = -elbo + 1e-5 * reg_loss
 
-        # return {
-        #     "loss": loss,
-        #     "rec_loss_sum": rec_loss_sum,
-        #     "rec_loss_mean": rec_loss_mean,
-        #     "uncertainty_loss_sum": uncertainty_loss_sum,
-        #     "uncertainty_loss_mean": uncertainty_loss_mean,
-        #     "kl_loss": kl_loss,
-        #     "reconstruction": reconstruction
-        # }
-    
         return {
             "loss": loss,
+            "rec_loss_sum": rec_loss_sum,
+            "rec_loss_mean": rec_loss_mean,
             "uncertainty_loss_sum": uncertainty_loss_sum,
             "uncertainty_loss_mean": uncertainty_loss_mean,
             "kl_loss": kl_loss,

@@ -35,15 +35,15 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-for k in list(model_weight.keys()):
-    k_new = k.replace(
-        "model.", "", 1
-    )  # e.g. "model.conv.weight" => conv.weight"
-    model_weight[k_new] = model_weight.pop(k)
+# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+# model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# for k in list(model_weight.keys()):
+#     k_new = k.replace(
+#         "model.", "", 1
+#     )  # e.g. "model.conv.weight" => conv.weight"
+#     model_weight[k_new] = model_weight.pop(k)
 
-unet.load_state_dict(model_weight)
+# unet.load_state_dict(model_weight)
 # =========================================== #
 
 version_prev = None
@@ -198,7 +198,7 @@ import matplotlib.pyplot as plt
 #plt.hist(unlabeled_scores_Unet, bins=10, edgecolor='black', alpha=0.7, label='unlabeled_scores_Unet',color='lightblue')
 
 # Draw histogram for labeled_scores_step1
-#plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
+plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
 
 # Draw histogram for labeled_scores_step1_192epochs_v46
 #plt.hist(labeled_scores_step1_256epochs_v49, bins=10, edgecolor='black', alpha=0.3, label='labeled_scores_step1_256epochs_v49', color='purple')
@@ -207,10 +207,10 @@ import matplotlib.pyplot as plt
 #plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
 
 # Draw histogram for labeled_scores_step3
-plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
+#plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
 
 # Draw histogram for labeled_scores_step4
-plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
+#plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
 
 
 # Add labels and title

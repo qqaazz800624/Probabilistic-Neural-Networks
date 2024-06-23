@@ -38,14 +38,14 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-for k in list(unet_weight.keys()):
-    k_new = k.replace(
-        "model.", "", 1
-    )  # e.g. "model.conv.weight" => conv.weight"
-    unet_weight[k_new] = unet_weight.pop(k)
-unet.load_state_dict(unet_weight)
+# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# for k in list(unet_weight.keys()):
+#     k_new = k.replace(
+#         "model.", "", 1
+#     )  # e.g. "model.conv.weight" => conv.weight"
+#     unet_weight[k_new] = unet_weight.pop(k)
+# unet.load_state_dict(unet_weight)
 
 # =========================================== #
 
@@ -78,14 +78,14 @@ unet_v2 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-for k in list(unet_weight.keys()):
-    k_new = k.replace(
-        "model.", "", 1
-    )  # e.g. "model.conv.weight" => conv.weight"
-    unet_weight[k_new] = unet_weight.pop(k)
-unet_v2.load_state_dict(unet_weight)
+# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# for k in list(unet_weight.keys()):
+#     k_new = k.replace(
+#         "model.", "", 1
+#     )  # e.g. "model.conv.weight" => conv.weight"
+#     unet_weight[k_new] = unet_weight.pop(k)
+# unet_v2.load_state_dict(unet_weight)
 
 ProbUnet_First_v2 = ProbUNet_First(
     model=unet_v2,
@@ -132,7 +132,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_42'
+version_no = 'version_51'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -197,13 +197,13 @@ import os
 from siim_dataset import SIIMDataset
 
 fold_no = 'testing'
-# Good: 6, 92, 522, 212 Bad: 532, 484, 168
+# Good: 6, 92, 522, 212, 207 Bad: 532, 484, 168
 # large mask: 92, 417, 492, 339, 132, 302
 # large-medium mask: 338, 377
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 212
+img_serial = 168
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -261,17 +261,14 @@ with torch.no_grad():
     uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
     uncertainty_heatmap = uncertainty_heatmap.squeeze(0).squeeze(0)
 
-#%%
+
 # Thresholding the uncertainty heatmap
-#quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
 quantile = torch.quantile(uncertainty_heatmap, 0.975).item()
 #print("97.5th quantile of uncertainty_heatmap:", quantile)
 mask_uncertainty = torch.where(uncertainty_heatmap.cpu() > quantile, 
-                               mask.squeeze(0), 
+                               torch.ones_like(mask.squeeze(0)), 
                                torch.zeros_like(mask.squeeze(0)))
 
-
-#%%
 import torch
 import matplotlib.pyplot as plt
 
@@ -279,45 +276,5 @@ plt.imshow(mask_uncertainty.detach().numpy().T,
            cmap='plasma', aspect='auto')
 plt.colorbar()
 plt.title(f'Uncertainty mask: {fold_no}_{img_serial}')
-
-#%%
-
-# import json
-
-# # 從 JSON 文件中讀取列表
-# with open('../results/dice_scores_Unet.json', 'r') as file:
-#     dice_scores_Unet = json.load(file)
-
-# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-#     dice_scores_ProbUnet_BCELoss = json.load(file)
-
-# #%%
-
-# import numpy as np
-# dice_scores_Unet = np.array(dice_scores_Unet)
-# dice_scores_ProbUnet_BCELoss = np.array(dice_scores_ProbUnet_BCELoss)
-# combined_scores = np.column_stack((dice_scores_Unet, dice_scores_ProbUnet_BCELoss))
-# combined_scores[10:20]
-
-#%%
-# import matplotlib.pyplot as plt
-
-# # Draw histogram for dice_scores_ProbUnet_step1
-# plt.hist(dice_scores_ProbUnet_step1, bins=10, edgecolor='black', alpha=0.4, label='ProbUnet_step1')
-
-# # Draw histogram for dice_scores_ProbUnet_step2
-# plt.hist(dice_scores_ProbUnet_step2, bins=10, edgecolor='black', alpha=0.5, label='ProbUnet_step2')
-
-
-# # Add labels and title
-# plt.xlabel('Dice Score')
-# plt.ylabel('Frequency')
-# plt.title('Histogram of Dice Scores')
-
-# # Add legend
-# plt.legend()
-
-# # Show the histogram
-# plt.show()
 
 #%%

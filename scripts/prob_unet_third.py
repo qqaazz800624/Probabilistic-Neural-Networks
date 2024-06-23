@@ -243,8 +243,8 @@ class ProbUNet_Third(BaseModule):
                 heatmap = uncertainty_heatmap[i, 0]
                 mask_i = seg_mask_target[i, 0]
                 quantile = torch.quantile(heatmap.flatten(), 0.975).item()
-                #quantile = torch.kthvalue(heatmap.flatten(), int(0.975 * heatmap.numel())).values.item()
-                mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
+                #mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
+                mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
 
         uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
         rec_loss = self.criterion(reconstruction, seg_mask_target)
