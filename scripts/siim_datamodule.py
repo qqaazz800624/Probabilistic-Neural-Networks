@@ -4,9 +4,8 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
-from monai.transforms import Compose, RandFlipd
-from monai.transforms import RandAffined, EnsureTyped, NormalizeIntensityd
-from albumentations import HorizontalFlip
+from monai.transforms import Compose
+from monai.transforms import EnsureTyped, NormalizeIntensityd
 from augmentations import XRayAugs
 
 class SIIMDataModule(LightningDataModule):
@@ -63,8 +62,8 @@ class SIIMDataModule(LightningDataModule):
             SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
             batch_size=self.batch_size_train,
             num_workers=self.num_workers_train,
-            shuffle=True,
-            drop_last=True
+            drop_last=True,
+            shuffle=False
         )
 
     def val_dataloader(self):
@@ -72,7 +71,9 @@ class SIIMDataModule(LightningDataModule):
         return DataLoader(
             SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
             batch_size=self.batch_size_val,
-            num_workers=self.num_workers_val
+            num_workers=self.num_workers_val,
+            drop_last=True,
+            shuffle=False
         )
 
     def test_dataloader(self):
@@ -80,7 +81,9 @@ class SIIMDataModule(LightningDataModule):
         return DataLoader(
             SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
             batch_size=self.batch_size_test,
-            num_workers=self.num_workers_test
+            num_workers=self.num_workers_test,
+            drop_last=True,
+            shuffle=False
         )
 
 #%%
