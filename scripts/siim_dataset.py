@@ -15,8 +15,10 @@ class SIIMDataset(Dataset):
     def __init__(self, 
                  folds: List[str],
                  transform = None,
-                 json_file: str = 'datalist.json',
+                 #json_file: str = 'datalist.json',
+                 json_file: str = 'datalist_labeled.json',
                  data_root: str = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax',
+                 personal_root: str = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data',
                  if_test: bool = False
                  ):
         """
@@ -26,7 +28,7 @@ class SIIMDataset(Dataset):
             transform: Optional transform to be applied on a sample.
             data_root: Root directory of the dataset.
         """
-        self.json_path = os.path.join(data_root, json_file)
+        self.json_path = os.path.join(personal_root, json_file)
         with open(self.json_path) as f:
             self.data_list = json.load(f)
 
