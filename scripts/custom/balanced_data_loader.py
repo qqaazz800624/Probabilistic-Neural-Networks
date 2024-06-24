@@ -65,5 +65,6 @@ def balanced_data_loader(
         sampler=data_sampler,
         pin_memory=False,
         num_workers=num_workers,
-        shuffle=False
+        shuffle=False,
+        drop_last=True
     )
