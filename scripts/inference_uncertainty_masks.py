@@ -49,9 +49,9 @@ from tqdm import tqdm
 
 device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 
-data_module = SIIMDataModule(batch_size_train=16,
+data_module = SIIMDataModule(batch_size_train=2,
                              batch_size_val=1,
-                             batch_size_test=1, 
+                             batch_size_test=2, 
                              num_workers_test=2)
 
 train_data_loader = data_module.train_dataloader()
@@ -63,7 +63,7 @@ ProbUnet_First.to(device)
 all_uncertainty_masks = []
 
 with torch.no_grad():
-    for data in tqdm(train_data_loader):
+    for data in tqdm(test_data_loader):
         img, label = data['input'].to(device), data['target']
         prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(img)
         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
@@ -78,21 +78,60 @@ with torch.no_grad():
         all_uncertainty_masks.append(mask_uncertainty)
 
 all_uncertainty_masks = torch.cat(all_uncertainty_masks, dim=0)
+all_uncertainty_masks.detach().cpu()
 #%%
 
-torch.save(all_uncertainty_masks, os.path.join(root_dir, f'results/SIIM_pneumothorax_segmentation/uncertainty_masks_train.pt'))
-
-
-
-
-#%%
-
-
-
-
+torch.save(all_uncertainty_masks, os.path.join(root_dir, 'results/SIIM_pneumothorax_segmentation/uncertainty_masks_test.pt'))
 
 
 #%%
+import torch, os
+
+root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
+uncertainty_masks_test = torch.load(os.path.join(root_dir, 'results/SIIM_pneumothorax_segmentation/uncertainty_masks_test.pt'))
+
+#%%
+
+uncertainty_masks_test.shape
+
+
+#%%
+
+import matplotlib.pyplot as plt
+
+plt.imshow(uncertainty_masks_test[339].cpu().detach().numpy().T, 
+           cmap='plasma', aspect='auto')
+plt.colorbar()
+
+#%%
+
+from siim_dataset import SIIMDataset
+fold_no = 'testing'
+
+test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
+
+
+
+#%%
+
+len(test_dataset)
+
+#%%
+
+
+
+
+
+
+
+
+
+#%%
+
+
+
+
+
 
 
 

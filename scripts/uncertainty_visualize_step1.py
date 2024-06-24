@@ -111,7 +111,7 @@ with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
 with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
     dice_scores_ProbUnet_step2 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step3_64epochs_v47.json', 'r') as file:
+with open('../results/dice_scores_ProbUnet_step3.json', 'r') as file:
     dice_scores_ProbUnet_step3 = json.load(file)
 
 with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
@@ -120,11 +120,7 @@ with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
 with open('../results/dice_scores_Unet.json', 'r') as file:
     dice_scores_Unet = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step1_256epochs_v49.json', 'r') as file:
-    dice_scores_ProbUnet_step1_256epochs_v49 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step1_192epochs_v46.json', 'r') as file:
-    dice_scores_ProbUnet_step1_192epochs_v46 = json.load(file)
 
 #%%
 
@@ -134,57 +130,42 @@ dice_scores_ProbUnet_step1 = np.round(np.array(dice_scores_ProbUnet_step1),3)
 dice_scores_ProbUnet_step2 = np.round(np.array(dice_scores_ProbUnet_step2),3)
 dice_scores_ProbUnet_step3 = np.round(np.array(dice_scores_ProbUnet_step3),3)
 dice_scores_ProbUnet_step4 = np.round(np.array(dice_scores_ProbUnet_step4),3)
-dice_scores_ProbUnet_step1_192epochs_v46 = np.round(np.array(dice_scores_ProbUnet_step1_192epochs_v46),3)
-dice_scores_ProbUnet_step1_256epochs_v49 = np.round(np.array(dice_scores_ProbUnet_step1_256epochs_v49),3)
 dice_scores_Unet = np.round(np.array(dice_scores_Unet),3)
 labeled_scores_step1 = dice_scores_ProbUnet_step1[0:535]
 labeled_scores_step2 = dice_scores_ProbUnet_step2[0:535]
 labeled_scores_step3 = dice_scores_ProbUnet_step3[0:535]
 labeled_scores_step4 = dice_scores_ProbUnet_step4[0:535]
-labeled_scores_step1_192epochs_v46 = dice_scores_ProbUnet_step1_192epochs_v46[0:535]
-labeled_scores_step1_256epochs_v49 = dice_scores_ProbUnet_step1_256epochs_v49[0:535]
 labeled_scores_Unet = dice_scores_Unet[0:535]
 unlabeled_scores_step1 = dice_scores_ProbUnet_step1[535:]
 unlabeled_scores_step2 = dice_scores_ProbUnet_step2[535:]
 unlabeled_scores_step3 = dice_scores_ProbUnet_step3[535:]
 unlabeled_scores_step4 = dice_scores_ProbUnet_step4[535:]
-unlabeled_scores_step1_192epochs_v46 = dice_scores_ProbUnet_step1_192epochs_v46[535:]
-unlabeled_scores_step1_256epochs_v49 = dice_scores_ProbUnet_step1_256epochs_v49[535:]
 unlabeled_scores_Unet = dice_scores_Unet[535:]
 
 #%%
-labeled_scores_step1.mean()
+#labeled_scores_step1.mean()
 #labeled_scores_step1[200:300]
-#unlabeled_scores_step1.mean()
+unlabeled_scores_step1.mean()
 
 #%%
-labeled_scores_step2.mean()
+#labeled_scores_step2.mean()
 #labeled_scores_step2[100:200]
-#unlabeled_scores_step2.mean()
+unlabeled_scores_step2.mean()
 #labeled_scores_step2[163]
 
 #%%
 
-labeled_scores_step3.mean()
-#unlabeled_scores_step3.mean()
+#labeled_scores_step3.mean()
+unlabeled_scores_step3.mean()
 #labeled_scores_step3[200:300]
 
 #%%
 
 #labeled_scores_step4.mean()
-labeled_scores_step4[200:300]
+unlabeled_scores_step4.mean()
+#labeled_scores_step4[200:300]
 #labeled_scores_step4[292]
 
-
-#%%
-
-labeled_scores_step1_192epochs_v46.mean()
-#labeled_scores_step1_192epochs_v46[100:200]
-
-#%%
-
-#labeled_scores_step1_256epochs_v49.mean()
-labeled_scores_step1_256epochs_v49[200:300]
 
 #%%
 
