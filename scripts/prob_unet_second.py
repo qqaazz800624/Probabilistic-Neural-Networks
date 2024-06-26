@@ -43,8 +43,8 @@ from monai.losses import DiceCELoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
 from prob_unet_first import ProbUNet_First
 from custom.losses import MaskedBCEWithLogitsLoss
-from torch.utils.data import DataLoader
-from utils import MaskDataset
+# from torch.utils.data import DataLoader
+# from utils import MaskDataset
 
 
 
@@ -165,8 +165,6 @@ class ProbUNet_Second(BaseModule):
         self.optimizer = optimizer
         self.lr_scheduler = lr_scheduler
 
-        self.uncertainty_masks_computed = False
-        self.uncertainty_masks = None
 
         self.setup_task()
 
@@ -235,25 +233,6 @@ class ProbUNet_Second(BaseModule):
         reconstruction = self.reconstruct(
             use_posterior_mean=False, z_posterior=z_posterior
         )
-
-        # compute uncertainty masks and reuse them
-        # if not self.uncertainty_masks_computed:
-        #     with torch.no_grad():
-        #         prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_first.predict_step(img)
-        #         stacked_samples = torch.sigmoid(prediction_outputs['samples'])
-        #         uncertainty_heatmap = stacked_samples.var(dim=0, keepdim=False)
-        #         batch_size = uncertainty_heatmap.shape[0]
-        #         mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
-        #         for i in range(batch_size):
-        #             heatmap = uncertainty_heatmap[i, 0]
-        #             mask_i = seg_mask_target[i, 0]
-        #             quantile = torch.quantile(heatmap.flatten(), 0.975).item()
-        #             mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
-
-        #         self.uncertainty_masks = mask_uncertainty
-        #         self.uncertainty_masks_computed = True
-        # else:
-        #     mask_uncertainty = self.uncertainty_masks
 
         # compute uncertainty mask
         with torch.no_grad():
@@ -369,8 +348,8 @@ class ProbUNet_Second(BaseModule):
         """
         loss_dict = self.compute_loss(batch)
         self.log("train_loss", loss_dict["loss"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        # self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
-        # self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        self.log("train_rec_loss_sum", loss_dict["rec_loss_sum"], on_step=True, on_epoch=True, prog_bar=True, logger=True, sync_dist=True)
+        self.log("train_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
         self.log("train_kl_loss", loss_dict["kl_loss"], sync_dist=True)
         self.log("train_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
         self.log("train_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
@@ -396,8 +375,8 @@ class ProbUNet_Second(BaseModule):
         """
         loss_dict = self.compute_loss(batch)
         self.log("val_loss", loss_dict["loss"], sync_dist=True)
-        # self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
-        # self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
+        self.log("val_rec_loss_sum", loss_dict["rec_loss_sum"], sync_dist=True)
+        self.log("val_rec_loss_mean", loss_dict["rec_loss_mean"], sync_dist=True)
         self.log("val_kl_loss", loss_dict["kl_loss"], sync_dist=True)
         self.log("val_uncertainty_loss_sum", loss_dict["uncertainty_loss_sum"], sync_dist=True)
         self.log("val_uncertainty_loss_mean", loss_dict["uncertainty_loss_mean"], sync_dist=True)
