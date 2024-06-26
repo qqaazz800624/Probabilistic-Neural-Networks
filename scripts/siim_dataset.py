@@ -4,7 +4,6 @@ import os
 import json
 import torch
 from torch.utils.data import Dataset
-import torchvision.transforms as transforms
 from monai.transforms import Compose, LoadImaged, Resized, MapLabelValued, EnsureChannelFirstd
 from monai.transforms import EnsureTyped, NormalizeIntensityd
 from typing import List, Dict
@@ -17,6 +16,7 @@ class SIIMDataset(Dataset):
                  transform = None,
                  #json_file: str = 'datalist.json',
                  json_file: str = 'datalist_labeled.json',
+                 #json_file: str = 'datalist_masks.json',
                  data_root: str = '/data2/open_dataset/chest_xray/SIIM_TRAIN_TEST/Pneumothorax',
                  personal_root: str = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data',
                  if_test: bool = False
@@ -35,6 +35,7 @@ class SIIMDataset(Dataset):
         self.if_test = if_test
         self.transform = transform
         self.data_root = data_root
+        self.personal_root = personal_root  # personal_root is used to save the uncertainty masks
         self.samples = []
         for fold in folds:
             self.samples.extend(self.data_list[fold])
@@ -49,7 +50,7 @@ class SIIMDataset(Dataset):
                                            target_labels=[0, 1]),
                             Resized(keys=['image', 'target'], 
                                     spatial_size=[512, 512],
-                                    mode = ['bilinear', 'nearest']),
+                                    mode = ['bilinear', 'nearest'],),
                                     ])
         
         self.test_transforms = Compose([
@@ -63,34 +64,40 @@ class SIIMDataset(Dataset):
 
     def __getitem__(self, idx: int) -> Dict[str, torch.Tensor]:
         sample = self.samples[idx]
+        path_basename = os.path.basename(sample['image'])
         image_path = os.path.join(self.data_root, sample['image'])
         target_path = os.path.join(self.data_root, sample['label'])
+        #uncertainty_mask_path = os.path.join(self.personal_root, sample['mask'])
         
         data_list = {
             'image': image_path,
-            'target': target_path
+            'target': target_path,
+            #'mask': uncertainty_mask_path
         }
 
         data = self.image_loader(data_list)
         image = data['image']
         target = data['target']
+        #mask = data['mask']
         
         if self.transform:
             transformed = self.transform(data)
             image = transformed['image']
             target = transformed['target']
+            #mask = transformed['mask']
 
         if self.if_test:
             transformed = self.test_transforms(data)
             image = transformed['image']
             target = transformed['target']
+            #mask = transformed['mask']
 
-        return {'input': image, 'target': target}
+        return {'input': image, 
+                'target': target, 
+                'basename': path_basename,
+                #'mask': mask
+                  }
 
 #%%
 
 
-
-
-
-#%%
