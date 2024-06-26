@@ -26,7 +26,7 @@ Probabilistic Neural Networks (PNNs) incorporate probabilistic layers and loss f
 
 ## Features
 
-- Implementation of Probabilistic U-Net U-Net models
+- Implementation of Probabilistic U-Net models
 - Custom loss functions including BCEWithLogitsLoss and MaskedBCEWithLogitsLoss
 - Support for multi-GPU training with PyTorch Lightning
 - Data augmentation using Albumentations and MONAI
