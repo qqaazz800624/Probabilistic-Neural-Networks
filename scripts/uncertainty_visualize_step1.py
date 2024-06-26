@@ -62,7 +62,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_49' 
+version_no = 'version_56' 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -71,139 +71,138 @@ ProbUnet_First.eval()
 
 #%%
 # testing dataset
-## number of labeled data: 535
-## number of unlabeled data: 1876
-# device = torch.device('cuda:2' if torch.cuda.is_available() else 'cpu')
+# number of labeled data: 535
+# number of unlabeled data: 1876
+device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 
-# data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
-# test_data_loader = data_module.test_dataloader()
-# dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
-# #dice_metric = DiceMetric(include_background=True, reduction='none')
-# discreter = AsDiscrete(threshold=0.5)
+data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
+test_data_loader = data_module.test_dataloader()
+dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
+discreter = AsDiscrete(threshold=0.5)
 
-# ProbUnet_First.to(device)
+ProbUnet_First.to(device)
 
-# dice_scores = []
+dice_scores = []
 
-# with torch.no_grad():
-#     for data in tqdm(test_data_loader):
-#         img, label = data['input'].to(device), data['target']
-#         prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(img)
-#         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-#         stacked_samples = torch.sigmoid(stacked_samples)
-#         prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
-#         dice_metric(y_pred=discreter(prediction_heatmap.cpu().unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
-#         dice_score = dice_metric.aggregate().item()
-#         dice_scores.append(dice_score)
-#         dice_metric.reset()
+with torch.no_grad():
+    for data in tqdm(test_data_loader):
+        img, label = data['input'].to(device), data['target']
+        prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(img)
+        stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+        stacked_samples = torch.sigmoid(stacked_samples)
+        prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+        dice_metric(y_pred=discreter(prediction_heatmap.cpu().unsqueeze(0).unsqueeze(0)), y=discreter(label.unsqueeze(0)))
+        dice_score = dice_metric.aggregate().item()
+        dice_scores.append(dice_score)
+        dice_metric.reset()
 
-# print('Dice score: ', sum(dice_scores)/len(dice_scores))
+print('Dice score: ', sum(dice_scores)/len(dice_scores))
 
-# with open(f'results/dice_scores_ProbUnet_step1_256epochs_v49.json', 'w') as file:
-#     json.dump(dice_scores, file)
-
-#%%
-
-import json
-with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
-    dice_scores_ProbUnet_step1 = json.load(file)
-
-with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
-    dice_scores_ProbUnet_step2 = json.load(file)
-
-with open('../results/dice_scores_ProbUnet_step3.json', 'r') as file:
-    dice_scores_ProbUnet_step3 = json.load(file)
-
-with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
-    dice_scores_ProbUnet_step4 = json.load(file)
-
-with open('../results/dice_scores_Unet.json', 'r') as file:
-    dice_scores_Unet = json.load(file)
-
-
+with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
+    json.dump(dice_scores, file)
 
 #%%
 
-import numpy as np
+# import json
+# with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
+#     dice_scores_ProbUnet_step1 = json.load(file)
 
-dice_scores_ProbUnet_step1 = np.round(np.array(dice_scores_ProbUnet_step1),3)
-dice_scores_ProbUnet_step2 = np.round(np.array(dice_scores_ProbUnet_step2),3)
-dice_scores_ProbUnet_step3 = np.round(np.array(dice_scores_ProbUnet_step3),3)
-dice_scores_ProbUnet_step4 = np.round(np.array(dice_scores_ProbUnet_step4),3)
-dice_scores_Unet = np.round(np.array(dice_scores_Unet),3)
-labeled_scores_step1 = dice_scores_ProbUnet_step1[0:535]
-labeled_scores_step2 = dice_scores_ProbUnet_step2[0:535]
-labeled_scores_step3 = dice_scores_ProbUnet_step3[0:535]
-labeled_scores_step4 = dice_scores_ProbUnet_step4[0:535]
-labeled_scores_Unet = dice_scores_Unet[0:535]
-unlabeled_scores_step1 = dice_scores_ProbUnet_step1[535:]
-unlabeled_scores_step2 = dice_scores_ProbUnet_step2[535:]
-unlabeled_scores_step3 = dice_scores_ProbUnet_step3[535:]
-unlabeled_scores_step4 = dice_scores_ProbUnet_step4[535:]
-unlabeled_scores_Unet = dice_scores_Unet[535:]
+# with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
+#     dice_scores_ProbUnet_step2 = json.load(file)
 
-#%%
-#labeled_scores_step1.mean()
-#labeled_scores_step1[200:300]
-unlabeled_scores_step1.mean()
+# with open('../results/dice_scores_ProbUnet_step3.json', 'r') as file:
+#     dice_scores_ProbUnet_step3 = json.load(file)
 
-#%%
-#labeled_scores_step2.mean()
-#labeled_scores_step2[100:200]
-unlabeled_scores_step2.mean()
-#labeled_scores_step2[163]
+# with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
+#     dice_scores_ProbUnet_step4 = json.load(file)
 
-#%%
-
-#labeled_scores_step3.mean()
-unlabeled_scores_step3.mean()
-#labeled_scores_step3[200:300]
-
-#%%
-
-#labeled_scores_step4.mean()
-unlabeled_scores_step4.mean()
-#labeled_scores_step4[200:300]
-#labeled_scores_step4[292]
+# with open('../results/dice_scores_Unet.json', 'r') as file:
+#     dice_scores_Unet = json.load(file)
 
 
-#%%
 
-#labeled_scores_Unet.mean()
-unlabeled_scores_Unet.mean()
+# #%%
 
-#%%
-import matplotlib.pyplot as plt
+# import numpy as np
 
-# Draw histogram for dice_scores_Unet
-#plt.hist(unlabeled_scores_Unet, bins=10, edgecolor='black', alpha=0.7, label='unlabeled_scores_Unet',color='lightblue')
+# dice_scores_ProbUnet_step1 = np.round(np.array(dice_scores_ProbUnet_step1),3)
+# dice_scores_ProbUnet_step2 = np.round(np.array(dice_scores_ProbUnet_step2),3)
+# dice_scores_ProbUnet_step3 = np.round(np.array(dice_scores_ProbUnet_step3),3)
+# dice_scores_ProbUnet_step4 = np.round(np.array(dice_scores_ProbUnet_step4),3)
+# dice_scores_Unet = np.round(np.array(dice_scores_Unet),3)
+# labeled_scores_step1 = dice_scores_ProbUnet_step1[0:535]
+# labeled_scores_step2 = dice_scores_ProbUnet_step2[0:535]
+# labeled_scores_step3 = dice_scores_ProbUnet_step3[0:535]
+# labeled_scores_step4 = dice_scores_ProbUnet_step4[0:535]
+# labeled_scores_Unet = dice_scores_Unet[0:535]
+# unlabeled_scores_step1 = dice_scores_ProbUnet_step1[535:]
+# unlabeled_scores_step2 = dice_scores_ProbUnet_step2[535:]
+# unlabeled_scores_step3 = dice_scores_ProbUnet_step3[535:]
+# unlabeled_scores_step4 = dice_scores_ProbUnet_step4[535:]
+# unlabeled_scores_Unet = dice_scores_Unet[535:]
 
-# Draw histogram for labeled_scores_step1
-#plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
+# #%%
+# #labeled_scores_step1.mean()
+# #labeled_scores_step1[200:300]
+# unlabeled_scores_step1.mean()
 
-# Draw histogram for labeled_scores_step1_192epochs_v46
-#plt.hist(labeled_scores_step1_256epochs_v49, bins=10, edgecolor='black', alpha=0.3, label='labeled_scores_step1_256epochs_v49', color='purple')
+# #%%
+# #labeled_scores_step2.mean()
+# #labeled_scores_step2[100:200]
+# unlabeled_scores_step2.mean()
+# #labeled_scores_step2[163]
 
-# Draw histogram for labeled_scores_step2
-#plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
+# #%%
 
-# Draw histogram for labeled_scores_step3
-plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
+# #labeled_scores_step3.mean()
+# unlabeled_scores_step3.mean()
+# #labeled_scores_step3[200:300]
 
-# Draw histogram for labeled_scores_step4
-#plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
+# #%%
+
+# #labeled_scores_step4.mean()
+# unlabeled_scores_step4.mean()
+# #labeled_scores_step4[200:300]
+# #labeled_scores_step4[292]
 
 
-# Add labels and title
-plt.xlabel('Dice Score')
-plt.ylabel('Frequency')
-plt.title('Histogram of Dice Scores')
+# #%%
 
-# Add legend
-plt.legend()
+# #labeled_scores_Unet.mean()
+# unlabeled_scores_Unet.mean()
 
-# Show the histogram
-plt.show()
+# #%%
+# import matplotlib.pyplot as plt
+
+# # Draw histogram for dice_scores_Unet
+# #plt.hist(unlabeled_scores_Unet, bins=10, edgecolor='black', alpha=0.7, label='unlabeled_scores_Unet',color='lightblue')
+
+# # Draw histogram for labeled_scores_step1
+# #plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
+
+# # Draw histogram for labeled_scores_step1_192epochs_v46
+# #plt.hist(labeled_scores_step1_256epochs_v49, bins=10, edgecolor='black', alpha=0.3, label='labeled_scores_step1_256epochs_v49', color='purple')
+
+# # Draw histogram for labeled_scores_step2
+# #plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
+
+# # Draw histogram for labeled_scores_step3
+# plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
+
+# # Draw histogram for labeled_scores_step4
+# #plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
+
+
+# # Add labels and title
+# plt.xlabel('Dice Score')
+# plt.ylabel('Frequency')
+# plt.title('Histogram of Dice Scores')
+
+# # Add legend
+# plt.legend()
+
+# # Show the histogram
+# plt.show()
 
 #%% Single image dice evaluation
 
@@ -217,7 +216,7 @@ fold_no = 'testing'
 # medium mask: 107, 136
 # medium-small mask: 29, 412
 # small mask: 128, 184
-img_serial = 212
+img_serial = 339
 device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -245,43 +244,24 @@ print('Dice score: ', dice_score)
 
 #%% Prediction heatmap
 
-import matplotlib.pyplot as plt
-plt.imshow(prediction_heatmap.detach().numpy().T, 
-           cmap='plasma', aspect='auto', vmin=0, vmax=1)
-plt.colorbar()
-plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
+# import matplotlib.pyplot as plt
+# plt.imshow(prediction_heatmap.detach().numpy().T, 
+#            cmap='plasma', aspect='auto', vmin=0, vmax=1)
+# plt.colorbar()
+# plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
 
-#%% Uncertainty heatmap
+# #%% Uncertainty heatmap
 
-stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-stacked_samples = torch.sigmoid(stacked_samples)
-uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
+# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+# stacked_samples = torch.sigmoid(stacked_samples)
+# uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
-           cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
+# plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
+#            cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
-
-#%%
-
-# import json
-
-# # 從 JSON 文件中讀取列表
-# with open('../results/dice_scores_Unet.json', 'r') as file:
-#     dice_scores_Unet = json.load(file)
-
-# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-#     dice_scores_ProbUnet_BCELoss = json.load(file)
-
-# #%%
-
-# import numpy as np
-# dice_scores_Unet = np.array(dice_scores_Unet)
-# dice_scores_ProbUnet_BCELoss = np.array(dice_scores_ProbUnet_BCELoss)
-# combined_scores = np.column_stack((dice_scores_Unet, dice_scores_ProbUnet_BCELoss))
-# combined_scores[10:20]
 
 #%%
