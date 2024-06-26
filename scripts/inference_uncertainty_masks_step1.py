@@ -81,53 +81,73 @@ ProbUnet_First.requires_grad_(False)
 
 #%%
 
-from siim_dataset import SIIMDataset
-from tqdm import tqdm
-import torch
-import matplotlib.pyplot as plt
-from PIL import Image
-import numpy as np
-from monai.transforms import MapLabelValue
+# from siim_dataset import SIIMDataset
+# from tqdm import tqdm
+# import torch
+# import matplotlib.pyplot as plt
+# from PIL import Image
+# import numpy as np
+# from monai.transforms import MapLabelValue
 
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
-root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
+# device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+# root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
 
-ProbUnet_First.to(device)
-val_dataset = SIIMDataset(folds=['validation'], if_test=True)
-mapper = MapLabelValue(orig_labels=[0, 1], target_labels=[0, 255])
+# ProbUnet_First.to(device)
+# val_dataset = SIIMDataset(folds=['validation'], if_test=True)
+# mapper = MapLabelValue(orig_labels=[0, 1], target_labels=[0, 255])
 
-for img_serial in tqdm(range(len(val_dataset))):
-    image = val_dataset[img_serial]['input']  # shape: [1, 512, 512]
-    label = val_dataset[img_serial]['target']  # shape: [1, 512, 512]
-    image_basename = val_dataset[img_serial]['basename']
-    input_image = image.unsqueeze(0).to(device)
+# for img_serial in tqdm(range(len(val_dataset))):
+#     image = val_dataset[img_serial]['input']  # shape: [1, 512, 512]
+#     label = val_dataset[img_serial]['target']  # shape: [1, 512, 512]
+#     image_basename = val_dataset[img_serial]['basename']
+#     input_image = image.unsqueeze(0).to(device)
 
-    with torch.no_grad():
-        prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
-        stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-        stacked_samples = torch.sigmoid(stacked_samples)
-        uncertainty_heatmap = stacked_samples.var(dim=0, keepdim=False)
-        mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
-        quantile = torch.quantile(uncertainty_heatmap.flatten(), 0.975).item()
-        mask_uncertainty = torch.where(uncertainty_heatmap > quantile, torch.ones_like(uncertainty_heatmap), torch.zeros_like(uncertainty_heatmap))
-        mask_uncertainty = mask_uncertainty.detach().cpu().numpy().T
-        mask_uncertainty = mapper(mask_uncertainty).astype(np.uint8)
-        Image.fromarray(mask_uncertainty).save(os.path.join(root_dir, f'{image_basename}'))
+#     with torch.no_grad():
+#         prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
+#         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+#         stacked_samples = torch.sigmoid(stacked_samples)
+#         uncertainty_heatmap = stacked_samples.var(dim=0, keepdim=False)
+#         mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
+#         quantile = torch.quantile(uncertainty_heatmap.flatten(), 0.975).item()
+#         mask_uncertainty = torch.where(uncertainty_heatmap > quantile, torch.ones_like(uncertainty_heatmap), torch.zeros_like(uncertainty_heatmap))
+#         mask_uncertainty = mask_uncertainty.detach().cpu().numpy().T
+#         mask_uncertainty = mapper(mask_uncertainty).astype(np.uint8)
+#         Image.fromarray(mask_uncertainty).save(os.path.join(root_dir, f'{image_basename}'))
 
 
 #%%
 
-# from siim_dataset import SIIMDataset
-# import torch
-# val_dataset = SIIMDataset(folds=['validation'], if_test=True)
+from siim_dataset_masks import SIIMDataset
+import torch
+train_dataset = SIIMDataset(folds=['training'])
 
-# image_serial = 0
+image_serial = 0
+train_dataset[image_serial]
+
+#%%
+
+from custom.augmentations_masks import XRayAugs
+augs = XRayAugs(img_key='input', seg_key='target', mask_key='mask')
+
+augs(train_dataset[image_serial])
+
+
+#%%
+
 # image = val_dataset[image_serial]['input']
 # image_basename = val_dataset[image_serial]['basename']
+# label = val_dataset[image_serial]['target']
+# mask = val_dataset[image_serial]['mask']
 
-# device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+# print(image.shape)
+# print(label.shape)
+# print(mask.shape)
 
 # #%%
+
+# torch.unique(mask)
+
+#%%
 # import matplotlib.pyplot as plt
 # from PIL import Image
 # import numpy as np

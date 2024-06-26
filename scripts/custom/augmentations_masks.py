@@ -27,7 +27,7 @@ class XRayAugs(RandomizableTransform, MapTransform):
         self,
         img_key: str = "image",
         seg_key: str = "label",
-        mask_key: str = "uncertainty_mask",
+        mask_key: str = "mask",
         img_size: Sequence[int] = (512, 512)
     ) -> None:
         MapTransform.__init__(self, [img_key, seg_key, mask_key], False)
