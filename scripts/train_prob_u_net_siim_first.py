@@ -11,7 +11,7 @@ from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 from lightning import Trainer
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
-from lightning.pytorch.strategies import DDPStrategy
+#from lightning.pytorch.strategies import DDPStrategy
 
 from prob_unet_first import ProbUNet_First
 
