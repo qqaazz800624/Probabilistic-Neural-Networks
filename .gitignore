@@ -10,3 +10,4 @@ wandb
 UM_medical_segmentation
 SIIM_pneumothorax_segmentation
 example
+*.png
