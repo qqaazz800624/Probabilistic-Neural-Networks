@@ -14,9 +14,11 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, Mo
 # from lightning.pytorch.strategies import DDPStrategy
 
 from prob_unet_first import ProbUNet_First
-from prob_unet_second import ProbUNet_Second
+#from prob_unet_second import ProbUNet_Second
+from prob_unet_second_masks import ProbUNet_Second
 
-from siim_ProbNet_datamodule import SIIMDataModule
+#from siim_ProbNet_datamodule import SIIMDataModule
+from siim_ProbUNet_datamodule_masks import SIIMDataModule
 import wandb
 
 my_temp_dir = 'results/'
@@ -65,7 +67,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -101,7 +103,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -140,8 +142,8 @@ data_module = SIIMDataModule(batch_size_train=batch_size_train,
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_55',
-                           name='step2_64epochs_reuse_masks_v55')
+                           version='version_57',
+                           name='step2_64epochs_masks_v57')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
