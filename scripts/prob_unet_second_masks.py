@@ -192,6 +192,7 @@ class ProbUNet_Second(BaseModule):
         
         img, seg_mask = batch[self.input_key], batch[self.target_key]
         mask_uncertainty = batch[self.mask_key]
+        
         # check dimensions, add channel dimension to seg_mask under assumption
         # that it is a binary mask
         # print('Part 1')

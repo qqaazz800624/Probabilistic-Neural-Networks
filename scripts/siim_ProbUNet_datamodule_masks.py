@@ -4,10 +4,11 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from siim_dataset_masks import SIIMDataset
 
-from monai.transforms import Compose, RandAffined, RandFlipd, RandAdjustContrastd, RandGridDistortiond, RandRotated
-from monai.transforms import EnsureTyped, AsDiscreted, NormalizeIntensityd
+from monai.transforms import Compose, RandFlipd, RandAdjustContrastd, RandShiftIntensityd, Rand2DElasticd, RandAffined, RandGridDistortiond
+from monai.transforms import EnsureTyped, AsDiscreted, NormalizeIntensityd, Resized
 from custom.augmentations_masks import XRayAugs
 from custom.balanced_data_loader import balanced_data_loader
+from custom.monai_OneOf import OneOf, OneOfd
 
 class SIIMDataModule(LightningDataModule):
     def __init__(
@@ -42,12 +43,28 @@ class SIIMDataModule(LightningDataModule):
         self.test_folds = ['testing']
 
         self.train_transforms = Compose([
-                                RandFlipd(keys=['image', 'target', 'mask'], prob=0.5),
-                                RandRotated(keys=['image', 'target', 'mask'], prob=0.5, range_x=10),
-                                RandAdjustContrastd(keys=['image'], prob=0.5),
-                                RandGridDistortiond(keys=['image', 'target', 'mask'], prob=0.5),
-                                RandAffined(keys=['image', 'target', 'mask'], prob=0.5, rotate_range=10, scale_range=0.1),
-                                #XRayAugs(img_key='image', seg_key='target', mask_key='mask'),
+                                XRayAugs(img_key='image', seg_key='target', mask_key='mask'),
+                                # RandFlipd(keys=['image', 'target', 'mask'], prob=0.5, spatial_axis=1),
+                                # OneOfd(keys=['image'], 
+                                #        transforms=[
+                                #         RandAdjustContrastd(keys=['image'], gamma=(0.5, 1.5), prob=1.0),
+                                #         RandShiftIntensityd(keys=['image'], offsets=0.1, prob=1.0),
+                                #         ], 
+                                #         weights=[0.5, 0.5],
+                                #         prob=0.3),
+                                # OneOfd(keys=['image', 'target', 'mask'],
+                                #         transforms=[
+                                #             Rand2DElasticd(keys=['image', 'target', 'mask'], prob=1.0, magnitude_range=(1, 2), shear_range=(0.03, 0.03), rotate_range=(0.0, 0.0),
+                                #                            spacing=(20, 20), padding_mode='zeros', mode=['bilinear', 'nearest', 'nearest']),
+                                #             RandGridDistortiond(keys=['image', 'target', 'mask'], prob=1.0, distort_limit=(-0.2, 0.2), 
+                                #                                 num_cells=4, mode=['bilinear', 'nearest', 'nearest']),
+                                #             RandAffined(keys=['image', 'target', 'mask'], prob=1.0, shear_range=(0.5, 0.5), translate_range=(0.5, 0.5), scale_range=(0.9, 1.1),
+                                #                         mode=['bilinear', 'nearest', 'nearest'])
+                                #             ],
+                                #         weights=[0.33, 0.33, 0.34],
+                                #         prob=0.3),
+                                # RandAffined(keys=['image', 'target', 'mask'], prob=1, shear_range=(0.5, 0.5), mode=['bilinear', 'nearest', 'nearest'], padding_mode='zeros'),
+                                # Resized(keys=['image', 'target', 'mask'], spatial_size=(512, 512)),
                                 NormalizeIntensityd(keys=['image']),
                                 AsDiscreted(keys=['target', 'mask'], threshold=0.5),
                                 EnsureTyped(keys=['image', 'target', 'mask'], dtype='float32')

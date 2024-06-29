@@ -1,25 +1,13 @@
-from typing import Sequence
+from typing import Sequence, Dict, Any
 
 import torch
 import numpy as np
-import monai
 from monai.data import MetaTensor
 from monai.transforms import MapTransform, RandomizableTransform
-from monai.utils.type_conversion import (
-    convert_to_numpy,
-    convert_to_tensor
-)
+from monai.utils.type_conversion import convert_to_numpy, convert_to_tensor
 from albumentations import (
-    OneOf,
-    Compose,
-    HorizontalFlip,
-    RandomGamma,
-    RandomBrightnessContrast,
-    ElasticTransform,
-    GridDistortion,
-    OpticalDistortion,
-    ShiftScaleRotate,
-    Resize
+    OneOf, Compose, HorizontalFlip, RandomGamma, RandomBrightnessContrast,
+    ElasticTransform, GridDistortion, OpticalDistortion, ShiftScaleRotate, Resize
 )
 
 class XRayAugs(RandomizableTransform, MapTransform):
@@ -27,10 +15,10 @@ class XRayAugs(RandomizableTransform, MapTransform):
         self,
         img_key: str = "image",
         seg_key: str = "label",
-        mask_key: str = "mask",
+        mask_key: str = "uncertainty_mask",
         img_size: Sequence[int] = (512, 512)
     ) -> None:
-        MapTransform.__init__(self, [img_key, seg_key, mask_key], False)
+        MapTransform.__init__(self, [img_key, seg_key, mask_key], allow_missing_keys=False)
         RandomizableTransform.__init__(self, prob=1.0)
 
         self.img_key = img_key
@@ -57,8 +45,15 @@ class XRayAugs(RandomizableTransform, MapTransform):
         ])
         self.call_count = 0
 
-    def __call__(self, data) -> dict:
-        d: dict = dict(data)
+    def __call__(self, data: Dict[str, Any]) -> Dict[str, Any]:
+        d: Dict[str, Any] = dict(data)
+
+        if self.img_key not in d:
+            raise ValueError(f"Key {self.img_key} is not in the available keys.")
+        if self.seg_key not in d:
+            raise ValueError(f"Key {self.seg_key} is not in the available keys.")
+        if self.mask_key not in d:
+            raise ValueError(f"Key {self.mask_key} is not in the available keys.")
 
         img = convert_to_numpy(d[self.img_key])
         seg = convert_to_numpy(d[self.seg_key])
@@ -67,23 +62,29 @@ class XRayAugs(RandomizableTransform, MapTransform):
         img = np.transpose(img, axes=(1, 2, 0))
         seg = np.transpose(seg, axes=(1, 2, 0))
         mask = np.transpose(mask, axes=(1, 2, 0))
-        out = self.transform(image=img, mask=seg, uncertainty_mask=mask)
 
-        img = np.transpose(out["image"], axes=(2, 0, 1))
+        # Apply the same transformations to image, seg, and mask
+        img_seg = np.concatenate((img, seg, mask), axis=2)
+        out = self.transform(image=img_seg, mask=img_seg)
+
+        img_seg = out["image"]
+        img, seg, mask = np.split(img_seg, [img.shape[2], img.shape[2] + seg.shape[2]], axis=2)
+
+        img = np.transpose(img, axes=(2, 0, 1))
         img = convert_to_tensor(img)
         if isinstance(d[self.img_key], MetaTensor):
             d[self.img_key] = MetaTensor(img, meta=d[self.img_key].meta)
         else:
             d[self.img_key] = img
 
-        seg = np.transpose(out["mask"], axes=(2, 0, 1))
+        seg = np.transpose(seg, axes=(2, 0, 1))
         seg = convert_to_tensor(seg)
         if isinstance(d[self.seg_key], MetaTensor):
             d[self.seg_key] = MetaTensor(seg, meta=d[self.seg_key].meta)
         else:
             d[self.seg_key] = seg
 
-        mask = np.transpose(out["uncertainty_mask"], axes=(2, 0, 1))
+        mask = np.transpose(mask, axes=(2, 0, 1))
         mask = convert_to_tensor(mask)
         if isinstance(d[self.mask_key], MetaTensor):
             d[self.mask_key] = MetaTensor(mask, meta=d[self.mask_key].meta)

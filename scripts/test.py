@@ -14,15 +14,17 @@ for data in tqdm(train_data_loader):
     print(data['target'].shape)
     print(data['mask'].shape)
     counter += 1
-    if counter == 1:
+    if counter == 2:
         break
 
 #%%
 
+import matplotlib.pyplot as plt
 
-
-
-
-
+plt.imshow(data['input'][0, 0, :, :].T, cmap='gray')
+#%%
+plt.imshow(data['target'][0, 0, :, :].T, cmap='plasma')
+#%%
+plt.imshow(data['mask'][0, 0, :, :].T, cmap='plasma')
 
 #%%
