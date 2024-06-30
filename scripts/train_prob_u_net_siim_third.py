@@ -14,10 +14,11 @@ from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, Mo
 from lightning.pytorch.strategies import DDPStrategy
 
 from prob_unet_first import ProbUNet_First
-from prob_unet_second import ProbUNet_Second
-from prob_unet_third import ProbUNet_Third
+from prob_unet_second_masks import ProbUNet_Second
+from prob_unet_third_masks import ProbUNet_Third
 
-from siim_ProbNet_datamodule import SIIMDataModule
+#from siim_ProbNet_datamodule import SIIMDataModule
+from siim_ProbUNet_datamodule_masks import SIIMDataModule
 import wandb
 
 my_temp_dir = 'results/'
@@ -43,14 +44,7 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet.load_state_dict(unet_weight)
+
 
 version_prev = None
 
@@ -68,7 +62,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -79,14 +73,7 @@ unet_v2 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v2.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v2 = ProbUNet_First(
     model=unet_v2,
@@ -102,7 +89,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -130,7 +117,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_51'
+version_no = 'version_60'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second.load_state_dict(model_weight)
@@ -143,14 +130,7 @@ unet_v3 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v3.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v3 = ProbUNet_First(
     model=unet_v3,
@@ -166,7 +146,7 @@ ProbUnet_First_v3 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v3.load_state_dict(model_weight)
@@ -177,14 +157,7 @@ unet_v4 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v4.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v4 = ProbUNet_First(
     model=unet_v4,
@@ -200,7 +173,7 @@ ProbUnet_First_v4 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v4.load_state_dict(model_weight)
@@ -228,7 +201,7 @@ ProbUnet_Second_v2 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_51'
+version_no = 'version_60'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v2.load_state_dict(model_weight)
@@ -267,8 +240,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_53',
-                           name='ProbUNet_step3_64epochs_v53')
+                           version='version_62',
+                           name='step3_64epochs_XRayAugs_v62')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 

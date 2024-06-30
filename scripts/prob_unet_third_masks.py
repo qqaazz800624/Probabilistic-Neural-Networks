@@ -41,12 +41,13 @@ from segmentation_models_pytorch.losses import DiceLoss
 from torch.nn import BCEWithLogitsLoss
 from monai.losses import DiceCELoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
-from prob_unet_first import ProbUNet_First
+#from prob_unet_first import ProbUNet_First
+from prob_unet_second import ProbUNet_Second
 from custom.losses import MaskedBCEWithLogitsLoss
 
 
 
-class ProbUNet_Second(BaseModule):
+class ProbUNet_Third(BaseModule):
     """Probabilistic U-Net.
 
     If you use this code, please cite the following paper:
@@ -59,10 +60,10 @@ class ProbUNet_Second(BaseModule):
     def __init__(
         self,
         model: nn.Module,
-        prob_unet_first: ProbUNet_First,
-        prior_first: AxisAlignedConvGaussian,
-        posterior_first: AxisAlignedConvGaussian,
-        fcomb_first: Fcomb,
+        prob_unet_second: ProbUNet_Second,
+        prior_second: AxisAlignedConvGaussian,
+        posterior_second: AxisAlignedConvGaussian,
+        fcomb_second: Fcomb,
         model_name: str = 'Unet',
         loss_fn: str = 'BCEWithLogitsLoss',
         batch_size_train: int = 6,
@@ -97,11 +98,11 @@ class ProbUNet_Second(BaseModule):
         """
         super().__init__()
         
-        self.save_hyperparameters(ignore=['prob_unet_first', 
-                                          'model', 
-                                          'prior_first', 
-                                          'posterior_first', 
-                                          'fcomb_first'])
+        self.save_hyperparameters(ignore=['prob_unet_second',
+                                          'model',
+                                          'prior_second',
+                                          'posterior_second',
+                                          'fcomb_second'])
 
         self.batch_size_train = batch_size_train
         self.model_name = model_name
@@ -116,7 +117,7 @@ class ProbUNet_Second(BaseModule):
         self.num_samples = num_samples
         self.version_prev = version_prev
 
-        self.prob_unet_first = prob_unet_first
+        self.prob_unet_second = prob_unet_second
 
         assert task in self.valid_tasks, f"Task must be one of {self.valid_tasks}."
         self.task = task
@@ -124,7 +125,7 @@ class ProbUNet_Second(BaseModule):
         self.model = model
         self.num_input_channels = self.num_input_features
         self.num_classes = self.num_outputs
-        self.prior = prior_first
+        self.prior = prior_second
         # self.prior = AxisAlignedConvGaussian(
         #     self.num_input_channels,
         #     self.num_filters,
@@ -132,7 +133,7 @@ class ProbUNet_Second(BaseModule):
         #     self.latent_dim,
         #     posterior=False,
         # )
-        self.posterior = posterior_first
+        self.posterior = posterior_second
         # self.posterior = AxisAlignedConvGaussian(
         #     self.num_input_channels,
         #     self.num_filters,
@@ -141,7 +142,7 @@ class ProbUNet_Second(BaseModule):
         #     posterior=True,
         # )
         self.fcomb_input_channels = self.num_classes + self.latent_dim
-        self.fcomb = fcomb_first
+        self.fcomb = fcomb_second
         # self.fcomb = Fcomb(
         #     self.fcomb_input_channels,
         #     self.fcomb_filter_size,
@@ -157,6 +158,7 @@ class ProbUNet_Second(BaseModule):
             self.criterion = DiceLoss(mode='binary')            # experimental setting
         elif loss_fn == 'DiceCELoss':
             self.criterion = DiceCELoss()
+            
         
         self.masked_criterion = MaskedBCEWithLogitsLoss(reduction="mean")
         self.optimizer = optimizer
@@ -189,8 +191,8 @@ class ProbUNet_Second(BaseModule):
         """
         
         img, seg_mask = batch[self.input_key], batch[self.target_key]
-        #mask_uncertainty = batch[self.mask_key]
-        
+        mask_uncertainty = batch[self.mask_key]
+
         # check dimensions, add channel dimension to seg_mask under assumption
         # that it is a binary mask
         # print('Part 1')
@@ -234,17 +236,18 @@ class ProbUNet_Second(BaseModule):
         )
 
         # compute uncertainty mask
-        with torch.no_grad():
-            prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_first.predict_step(img)
-            stacked_samples = torch.sigmoid(prediction_outputs['samples'])
-            uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
-            batch_size = uncertainty_heatmap.shape[0]
-            mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
-            for i in range(batch_size):
-                heatmap = uncertainty_heatmap[i, 0]
-                mask_i = seg_mask_target[i, 0]
-                quantile = torch.quantile(heatmap.flatten(), 0.975).item()
-                mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
+        # with torch.no_grad():
+        #     prediction_outputs, prior_mu_, prior_sigma_ = self.prob_unet_second.predict_step(img)
+        #     stacked_samples = torch.sigmoid(prediction_outputs['samples'])
+        #     uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
+        #     batch_size = uncertainty_heatmap.shape[0]
+        #     mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
+        #     for i in range(batch_size):
+        #         heatmap = uncertainty_heatmap[i, 0]
+        #         mask_i = seg_mask_target[i, 0]
+        #         quantile = torch.quantile(heatmap.flatten(), 0.975).item()
+        #         #mask_uncertainty[i, 0] = torch.where(heatmap > quantile, mask_i, torch.zeros_like(mask_i))
+        #         mask_uncertainty[i, 0] = torch.where(heatmap > quantile, torch.ones_like(mask_i), torch.zeros_like(mask_i))
 
         uncertainty_loss = self.masked_criterion(input=reconstruction, target=seg_mask_target, mask=mask_uncertainty)
         rec_loss = self.criterion(reconstruction, seg_mask_target)

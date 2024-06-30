@@ -73,7 +73,7 @@ ProbUnet_First.eval()
 # testing dataset
 # number of labeled data: 535
 # number of unlabeled data: 1876
-device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
 test_data_loader = data_module.test_dataloader()
@@ -217,7 +217,7 @@ fold_no = 'testing'
 # medium-small mask: 29, 412
 # small mask: 128, 184
 img_serial = 339
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 
@@ -244,24 +244,24 @@ print('Dice score: ', dice_score)
 
 #%% Prediction heatmap
 
-# import matplotlib.pyplot as plt
-# plt.imshow(prediction_heatmap.detach().numpy().T, 
-#            cmap='plasma', aspect='auto', vmin=0, vmax=1)
-# plt.colorbar()
-# plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
+import matplotlib.pyplot as plt
+plt.imshow(prediction_heatmap.detach().numpy().T, 
+           cmap='plasma', aspect='auto', vmin=0, vmax=1)
+plt.colorbar()
+plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
 
-# #%% Uncertainty heatmap
+#%% Uncertainty heatmap
 
-# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-# stacked_samples = torch.sigmoid(stacked_samples)
-# uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
+stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+stacked_samples = torch.sigmoid(stacked_samples)
+uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
 
-# import matplotlib.pyplot as plt
+import matplotlib.pyplot as plt
 
-# plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
-#            cmap='plasma', aspect='auto')
-# plt.colorbar()
-# plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
+plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
+           cmap='plasma', aspect='auto')
+plt.colorbar()
+plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
 
 #%%

@@ -142,8 +142,8 @@ data_module = SIIMDataModule(batch_size_train=batch_size_train,
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_60',
-                           name='step2_64epochs_XRayAugs_v60')
+                           version='version_61',
+                           name='step2_64epochs_XRayAugs_inference_v61')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
