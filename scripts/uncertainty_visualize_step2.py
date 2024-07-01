@@ -6,10 +6,12 @@ import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 from prob_unet_first import ProbUNet_First
-from prob_unet_second import ProbUNet_Second
+#from prob_unet_second import ProbUNet_Second
+from prob_unet_second_masks import ProbUNet_Second
 import os
 
-from siim_datamodule import SIIMDataModule
+#from siim_datamodule import SIIMDataModule
+from siim_ProbUNet_datamodule_masks import SIIMDataModule
 from siim_dataset import SIIMDataset
 from monai.metrics import DiceMetric
 from monai.transforms import AsDiscrete
@@ -132,7 +134,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_61'
+version_no = 'version_60'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -165,9 +167,9 @@ with torch.no_grad():
         dice_metric.reset()
 
 print('Dice score: ', sum(dice_scores)/len(dice_scores))
-#%%
 
-
+with open(f'results/dice_scores_ProbUnet_step2.json', 'w') as file:
+    json.dump(dice_scores, file)
 
 # #%% Single image dice evaluation
 
