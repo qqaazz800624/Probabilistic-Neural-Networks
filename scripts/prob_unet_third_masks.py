@@ -42,7 +42,7 @@ from torch.nn import BCEWithLogitsLoss
 from monai.losses import DiceCELoss
 from axisalignedconvgaussian import AxisAlignedConvGaussian, Fcomb
 #from prob_unet_first import ProbUNet_First
-from prob_unet_second import ProbUNet_Second
+from prob_unet_second_masks import ProbUNet_Second
 from custom.losses import MaskedBCEWithLogitsLoss
 
 
