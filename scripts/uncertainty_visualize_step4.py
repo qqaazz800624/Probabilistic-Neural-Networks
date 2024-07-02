@@ -6,9 +6,9 @@ import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 from prob_unet_first import ProbUNet_First
-from prob_unet_second import ProbUNet_Second
-from prob_unet_third import ProbUNet_Third
-from prob_unet_fourth import ProbUNet_Fourth
+from prob_unet_second_masks import ProbUNet_Second
+from prob_unet_third_masks import ProbUNet_Third
+from prob_unet_fourth_masks import ProbUNet_Fourth
 import os
 
 from siim_datamodule import SIIMDataModule
@@ -22,7 +22,7 @@ from tqdm import tqdm
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 32
+max_epochs = 64
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -38,15 +38,7 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(model_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     model_weight[k_new] = model_weight.pop(k)
 
-# unet.load_state_dict(model_weight)
 
 version_prev = None
 
@@ -66,7 +58,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35' # version_28
+version_no = 'version_56' 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -78,14 +70,7 @@ unet_v2 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v2.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v2 = ProbUNet_First(
     model=unet_v2,
@@ -101,7 +86,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -129,7 +114,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_51'
+version_no = 'version_61'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second.load_state_dict(model_weight)
@@ -140,14 +125,7 @@ unet_v3 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v3.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v3 = ProbUNet_First(
     model=unet_v3,
@@ -163,7 +141,7 @@ ProbUnet_First_v3 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v3.load_state_dict(model_weight)
@@ -174,14 +152,7 @@ unet_v4 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v4.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v4 = ProbUNet_First(
     model=unet_v4,
@@ -197,7 +168,7 @@ ProbUnet_First_v4 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v4.load_state_dict(model_weight)
@@ -225,7 +196,7 @@ ProbUnet_Second_v2 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_51'
+version_no = 'version_61'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v2.load_state_dict(model_weight)
@@ -254,7 +225,7 @@ ProbUnet_Third = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_53'
+version_no = 'version_63'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -268,14 +239,7 @@ unet_v5 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v5.load_state_dict(unet_weight)
+
 
 version_prev = None
 
@@ -293,7 +257,7 @@ ProbUnet_First_v5 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v5.load_state_dict(model_weight)
@@ -304,14 +268,7 @@ unet_v6 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v6.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v6 = ProbUNet_First(
     model=unet_v6,
@@ -327,7 +284,7 @@ ProbUnet_First_v6 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v6.load_state_dict(model_weight)
@@ -355,7 +312,7 @@ ProbUnet_Second_v3 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_51'
+version_no = 'version_61'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v3.load_state_dict(model_weight)
@@ -366,14 +323,7 @@ unet_v7 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v7.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v7 = ProbUNet_First(
     model=unet_v7,
@@ -389,7 +339,7 @@ ProbUnet_First_v7 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v7.load_state_dict(model_weight)
@@ -400,14 +350,7 @@ unet_v8 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v8.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v8 = ProbUNet_First(
     model=unet_v8,
@@ -423,7 +366,7 @@ ProbUnet_First_v8 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_35'
+version_no = 'version_56'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v8.load_state_dict(model_weight)
@@ -451,7 +394,7 @@ ProbUnet_Second_v4 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_51'
+version_no = 'version_61'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v4.load_state_dict(model_weight)
@@ -479,7 +422,7 @@ ProbUnet_Third_v2 = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_53'
+version_no = 'version_63'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -510,7 +453,7 @@ ProbUnet_Fourth = ProbUNet_Fourth(
     version_prev=None
 )
 
-version_no = 'version_54'
+version_no = 'version_65'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Fourth.load_state_dict(model_weight)
@@ -546,36 +489,19 @@ print('Dice score: ', sum(dice_scores)/len(dice_scores))
 with open(f'results/dice_scores_ProbUnet_step4.json', 'w') as file:
     json.dump(dice_scores, file)
 
-#%%
-
-# import json
-# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-#     dice_scores_ProbUnet_BCELoss = json.load(file)
-
-# #%%
-# import matplotlib.pyplot as plt
-
-# # Plot histogram of dice_scores
-# plt.hist(dice_scores_ProbUnet_BCELoss, bins=10, edgecolor='black')
-# plt.xlabel('Dice Score')
-# plt.ylabel('Frequency')
-# plt.title('Histogram of Dice Scores')
-# plt.show()
-
-
-# #%% Single image dice evaluation
+#%% Single image dice evaluation
 
 # import os
 # from siim_dataset import SIIMDataset
 
 # fold_no = 'testing'
-# # Good: 6, 92, 522, 292 Bad: 532, 484, 168
+# # Good: 6, 92, 522, 292 Bad: 532, 484, 168, 207, 212
 # # large mask: 92, 417, 492, 339, 132, 302
 # # large-medium mask: 338, 377
 # # medium mask: 107, 136
 # # medium-small mask: 29, 412
 # # small mask: 128, 184
-# img_serial = 168
+# img_serial = 212
 # device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
 # test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
@@ -634,7 +560,6 @@ with open(f'results/dice_scores_ProbUnet_step4.json', 'w') as file:
 
 
 # # Thresholding the uncertainty heatmap
-# #quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
 # quantile = torch.quantile(uncertainty_heatmap, 0.975).item()
 # #print("97.5th quantile of uncertainty_heatmap:", quantile)
 # mask_uncertainty = torch.where(uncertainty_heatmap.cpu() > quantile, 
@@ -652,20 +577,3 @@ with open(f'results/dice_scores_ProbUnet_step4.json', 'w') as file:
 # plt.title(f'Uncertainty mask: {fold_no}_{img_serial}')
 
 #%%
-
-# import json
-
-# # 從 JSON 文件中讀取列表
-# with open('../results/dice_scores_Unet.json', 'r') as file:
-#     dice_scores_Unet = json.load(file)
-
-# with open('../results/dice_scores_ProbUnet_BCELoss.json', 'r') as file:
-#     dice_scores_ProbUnet_BCELoss = json.load(file)
-
-# #%%
-
-# import numpy as np
-# dice_scores_Unet = np.array(dice_scores_Unet)
-# dice_scores_ProbUnet_BCELoss = np.array(dice_scores_ProbUnet_BCELoss)
-# combined_scores = np.column_stack((dice_scores_Unet, dice_scores_ProbUnet_BCELoss))
-# combined_scores[10:20]

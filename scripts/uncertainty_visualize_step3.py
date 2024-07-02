@@ -6,8 +6,8 @@ import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
 from prob_unet_first import ProbUNet_First
-from prob_unet_second import ProbUNet_Second
-from prob_unet_third import ProbUNet_Third
+from prob_unet_second_masks import ProbUNet_Second
+from prob_unet_third_masks import ProbUNet_Third
 import os
 
 from siim_datamodule import SIIMDataModule
@@ -37,14 +37,7 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(model_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     model_weight[k_new] = model_weight.pop(k)
-# unet.load_state_dict(model_weight)
+
 
 version_prev = None
 # =========================================== #
@@ -74,14 +67,7 @@ unet_v2 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v2.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v2 = ProbUNet_First(
     model=unet_v2,
@@ -138,14 +124,7 @@ unet_v3 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v3.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v3 = ProbUNet_First(
     model=unet_v3,
@@ -172,14 +151,7 @@ unet_v4 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v4.load_state_dict(unet_weight)
+
 
 ProbUnet_First_v4 = ProbUNet_First(
     model=unet_v4,
@@ -292,94 +264,94 @@ with open(f'results/dice_scores_ProbUnet_step3.json', 'w') as file:
 
 #%% Single image dice evaluation
 
-import os
-from siim_dataset import SIIMDataset
+# import os
+# from siim_dataset import SIIMDataset
 
-fold_no = 'testing'
-# Good: 6, 92, 522, 292, 207, 212 Bad: 532, 484, 168
-# large mask: 92, 417, 492, 339, 132, 302
-# large-medium mask: 338, 377, 325
-# medium mask: 107, 136
-# medium-small mask: 29, 412
-# small mask: 128, 184
-img_serial = 168
-device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
+# fold_no = 'testing'
+# # Good: 6, 92, 522, 292, 207, 212 Bad: 532, 484, 168
+# # large mask: 92, 417, 492, 339, 132, 302
+# # large-medium mask: 338, 377, 325
+# # medium mask: 107, 136
+# # medium-small mask: 29, 412
+# # small mask: 128, 184
+# img_serial = 168
+# device = torch.device('cuda:0' if torch.cuda.is_available() else 'cpu')
 
-test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
+# test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 
-image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
-mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
+# image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
+# mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
 
-input_image = image.unsqueeze(0).to(device)
-ProbUnet_Third.to(device)
-#ProbUnet_Second.to(device)
-with torch.no_grad():
-    prediction_outputs, prior_mu, prior_sigma = ProbUnet_Third.predict_step(input_image)
-    #prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
+# input_image = image.unsqueeze(0).to(device)
+# ProbUnet_Third.to(device)
+# #ProbUnet_Second.to(device)
+# with torch.no_grad():
+#     prediction_outputs, prior_mu, prior_sigma = ProbUnet_Third.predict_step(input_image)
+#     #prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
 
-stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-stacked_samples = torch.sigmoid(stacked_samples)
-prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
-prediction_heatmap = prediction_heatmap.cpu()
+# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+# stacked_samples = torch.sigmoid(stacked_samples)
+# prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+# prediction_heatmap = prediction_heatmap.cpu()
 
-discreter = AsDiscrete(threshold=0.5)
-dice_metric = DiceMetric(include_background=True, reduction='mean')
-dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(mask.unsqueeze(0)))
-dice_score = dice_metric.aggregate().item()
-dice_metric.reset()
+# discreter = AsDiscrete(threshold=0.5)
+# dice_metric = DiceMetric(include_background=True, reduction='mean')
+# dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(mask.unsqueeze(0)))
+# dice_score = dice_metric.aggregate().item()
+# dice_metric.reset()
 
-print('Dice score: ', dice_score)
+# print('Dice score: ', dice_score)
 
-#%% Prediction heatmap
+# #%% Prediction heatmap
 
-import matplotlib.pyplot as plt
-plt.imshow(prediction_heatmap.detach().numpy().T, 
-           cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
+# import matplotlib.pyplot as plt
+# plt.imshow(prediction_heatmap.detach().numpy().T, 
+#            cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
 
-#%% Uncertainty heatmap
+# #%% Uncertainty heatmap
 
-stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-stacked_samples = torch.sigmoid(stacked_samples)
-uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
+# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+# stacked_samples = torch.sigmoid(stacked_samples)
+# uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
-           cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
+# plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
+#            cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
-#%% uncertainty mask
+# #%% uncertainty mask
 
-input_image = image.unsqueeze(0).to(device)
-#ProbUnet_First.to(device)
-ProbUnet_Third.to(device)
-with torch.no_grad():
-    #prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
-    prediction_outputs, prior_mu, prior_sigma = ProbUnet_Third.predict_step(input_image)
-    stacked_samples = torch.sigmoid(prediction_outputs['samples'])
-    uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
-    uncertainty_heatmap = uncertainty_heatmap.squeeze(0).squeeze(0)
-
-
-# Thresholding the uncertainty heatmap
-#quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
-quantile = torch.quantile(uncertainty_heatmap.flatten(), 0.975).item()
-#print("97.5th quantile of uncertainty_heatmap:", quantile)
-mask_uncertainty = torch.where(uncertainty_heatmap.cpu() > quantile, 
-                               torch.ones_like(mask.squeeze(0)), 
-                               torch.zeros_like(mask.squeeze(0)))
+# input_image = image.unsqueeze(0).to(device)
+# #ProbUnet_First.to(device)
+# ProbUnet_Third.to(device)
+# with torch.no_grad():
+#     #prediction_outputs, prior_mu, prior_sigma = ProbUnet_Second.predict_step(input_image)
+#     prediction_outputs, prior_mu, prior_sigma = ProbUnet_Third.predict_step(input_image)
+#     stacked_samples = torch.sigmoid(prediction_outputs['samples'])
+#     uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim = False)
+#     uncertainty_heatmap = uncertainty_heatmap.squeeze(0).squeeze(0)
 
 
+# # Thresholding the uncertainty heatmap
+# #quantile = torch.kthvalue(uncertainty_heatmap.flatten(), int(0.975 * uncertainty_heatmap.numel())).values.item()
+# quantile = torch.quantile(uncertainty_heatmap.flatten(), 0.975).item()
+# #print("97.5th quantile of uncertainty_heatmap:", quantile)
+# mask_uncertainty = torch.where(uncertainty_heatmap.cpu() > quantile, 
+#                                torch.ones_like(mask.squeeze(0)), 
+#                                torch.zeros_like(mask.squeeze(0)))
 
-import torch
-import matplotlib.pyplot as plt
 
-plt.imshow(mask_uncertainty.detach().numpy().T, 
-           cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Uncertainty mask: {fold_no}_{img_serial}')
+
+# import torch
+# import matplotlib.pyplot as plt
+
+# plt.imshow(mask_uncertainty.detach().numpy().T, 
+#            cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Uncertainty mask: {fold_no}_{img_serial}')
 
 #%%

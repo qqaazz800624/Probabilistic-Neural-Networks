@@ -216,7 +216,7 @@ model.to(device)
 
 #%%
 fold_no = 'testing'
-# Good: 6, 92, 522, 292 Bad: 532, 484, 168, 163
+# Good: 6, 92, 522, 292 Bad: 532, 484, 168, 163, 207, 212
 # large mask: 92, 417, 492, 339, 132, 302
 # large-medium mask: 338, 325, 377
 # medium mask: 107, 136
