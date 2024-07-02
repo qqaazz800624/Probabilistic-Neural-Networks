@@ -35,15 +35,7 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(model_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     model_weight[k_new] = model_weight.pop(k)
 
-# unet.load_state_dict(model_weight)
 # =========================================== #
 
 version_prev = None
@@ -103,27 +95,45 @@ with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 
 #%%
 
-# import json
-# with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
-#     dice_scores_ProbUnet_step1 = json.load(file)
+import json
 
-# with open('../results/dice_scores_ProbUnet_step2.json', 'r') as file:
-#     dice_scores_ProbUnet_step2 = json.load(file)
+with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
+    dice_scores_ProbUnet_step1 = json.load(file)
 
-# with open('../results/dice_scores_ProbUnet_step3.json', 'r') as file:
-#     dice_scores_ProbUnet_step3 = json.load(file)
+with open('../results/dice_scores_ProbUnet_step2_v60.json', 'r') as file:
+    dice_scores_ProbUnet_step2_v60 = json.load(file)
 
-# with open('../results/dice_scores_ProbUnet_step4.json', 'r') as file:
-#     dice_scores_ProbUnet_step4 = json.load(file)
+with open('../results/dice_scores_ProbUnet_step2_v61.json', 'r') as file:
+    dice_scores_ProbUnet_step2_v61 = json.load(file)
+
+with open('../results/dice_scores_ProbUnet_step3_v62.json', 'r') as file:
+    dice_scores_ProbUnet_step3_v62 = json.load(file)
+
+with open('../results/dice_scores_ProbUnet_step3_v63.json', 'r') as file:
+    dice_scores_ProbUnet_step3_v63 = json.load(file)
+
+with open('../results/dice_scores_ProbUnet_step4_v64.json', 'r') as file:
+    dice_scores_ProbUnet_step4_v64 = json.load(file)
+
+with open('../results/dice_scores_ProbUnet_step4_v65.json', 'r') as file:
+    dice_scores_ProbUnet_step4_v65 = json.load(file)
 
 # with open('../results/dice_scores_Unet.json', 'r') as file:
 #     dice_scores_Unet = json.load(file)
 
 
 
-# #%%
+#%%
 
-# import numpy as np
+import numpy as np
+
+dice_scores_ProbUnet_step1 = np.array(dice_scores_ProbUnet_step1)
+dice_scores_ProbUnet_step2_v60 = np.array(dice_scores_ProbUnet_step2_v60)
+dice_scores_ProbUnet_step2_v61 = np.array(dice_scores_ProbUnet_step2_v61)
+dice_scores_ProbUnet_step3_v62 = np.array(dice_scores_ProbUnet_step3_v62)
+dice_scores_ProbUnet_step3_v63 = np.array(dice_scores_ProbUnet_step3_v63)
+dice_scores_ProbUnet_step4_v64 = np.array(dice_scores_ProbUnet_step4_v64)
+dice_scores_ProbUnet_step4_v65 = np.array(dice_scores_ProbUnet_step4_v65)
 
 # dice_scores_ProbUnet_step1 = np.round(np.array(dice_scores_ProbUnet_step1),3)
 # dice_scores_ProbUnet_step2 = np.round(np.array(dice_scores_ProbUnet_step2),3)
@@ -141,32 +151,27 @@ with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 # unlabeled_scores_step4 = dice_scores_ProbUnet_step4[535:]
 # unlabeled_scores_Unet = dice_scores_Unet[535:]
 
-# #%%
-# #labeled_scores_step1.mean()
-# #labeled_scores_step1[200:300]
-# unlabeled_scores_step1.mean()
+#%%
 
-# #%%
-# #labeled_scores_step2.mean()
-# #labeled_scores_step2[100:200]
-# unlabeled_scores_step2.mean()
-# #labeled_scores_step2[163]
+print('Step 1: ', dice_scores_ProbUnet_step1.mean())
 
-# #%%
-
-# #labeled_scores_step3.mean()
-# unlabeled_scores_step3.mean()
-# #labeled_scores_step3[200:300]
-
-# #%%
-
-# #labeled_scores_step4.mean()
-# unlabeled_scores_step4.mean()
-# #labeled_scores_step4[200:300]
-# #labeled_scores_step4[292]
+#%%
+print('Step 2 v60: ', dice_scores_ProbUnet_step2_v60.mean())
+print('Step 2 v61: ', dice_scores_ProbUnet_step2_v61.mean())
 
 
-# #%%
+#%%
+
+print('Step 3 v62: ', dice_scores_ProbUnet_step3_v62.mean())
+print('Step 3 v63: ', dice_scores_ProbUnet_step3_v63.mean())
+
+#%%
+
+print('Step 4 v64: ', dice_scores_ProbUnet_step4_v64.mean())
+print('Step 4 v65: ', dice_scores_ProbUnet_step4_v65.mean())
+
+
+#%%
 
 # #labeled_scores_Unet.mean()
 # unlabeled_scores_Unet.mean()

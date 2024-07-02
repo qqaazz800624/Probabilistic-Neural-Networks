@@ -10,8 +10,8 @@ from prob_unet_first import ProbUNet_First
 from prob_unet_second_masks import ProbUNet_Second
 import os
 
-#from siim_datamodule import SIIMDataModule
-from siim_ProbUNet_datamodule_masks import SIIMDataModule
+from siim_datamodule import SIIMDataModule
+#from siim_ProbUNet_datamodule_masks import SIIMDataModule
 from siim_dataset import SIIMDataset
 from monai.metrics import DiceMetric
 from monai.transforms import AsDiscrete
@@ -22,7 +22,7 @@ from tqdm import tqdm
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 32
+max_epochs = 64
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -40,14 +40,6 @@ unet = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet.load_state_dict(unet_weight)
 
 # =========================================== #
 
@@ -80,14 +72,6 @@ unet_v2 = Unet(in_channels=1,
             classes=1, 
             encoder_name = 'tu-resnest50d', 
             encoder_weights = 'imagenet')
-# model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
-# unet_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-# for k in list(unet_weight.keys()):
-#     k_new = k.replace(
-#         "model.", "", 1
-#     )  # e.g. "model.conv.weight" => conv.weight"
-#     unet_weight[k_new] = unet_weight.pop(k)
-# unet_v2.load_state_dict(unet_weight)
 
 ProbUnet_First_v2 = ProbUNet_First(
     model=unet_v2,
@@ -134,7 +118,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_60'
+version_no = 'version_61'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -168,7 +152,7 @@ with torch.no_grad():
 
 print('Dice score: ', sum(dice_scores)/len(dice_scores))
 
-with open(f'results/dice_scores_ProbUnet_step2.json', 'w') as file:
+with open(f'results/dice_scores_ProbUnet_step2_v61.json', 'w') as file:
     json.dump(dice_scores, file)
 
 # #%% Single image dice evaluation

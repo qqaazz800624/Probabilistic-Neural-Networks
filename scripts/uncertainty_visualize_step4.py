@@ -486,7 +486,7 @@ with torch.no_grad():
 
 print('Dice score: ', sum(dice_scores)/len(dice_scores))
 
-with open(f'results/dice_scores_ProbUnet_step4.json', 'w') as file:
+with open(f'results/dice_scores_ProbUnet_step4_v65.json', 'w') as file:
     json.dump(dice_scores, file)
 
 #%% Single image dice evaluation
