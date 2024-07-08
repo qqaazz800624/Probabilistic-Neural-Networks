@@ -34,7 +34,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56' 
+version_no = 'version_67' 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -81,38 +81,38 @@ for img_serial in tqdm(range(len(train_dataset))):
 
 #%%
 
-# from siim_dataset import SIIMDataset
-# from tqdm import tqdm
-# import torch
-# import matplotlib.pyplot as plt
-# from PIL import Image
-# import numpy as np
-# from monai.transforms import MapLabelValue
+from siim_dataset import SIIMDataset
+from tqdm import tqdm
+import torch
+import matplotlib.pyplot as plt
+from PIL import Image
+import numpy as np
+from monai.transforms import MapLabelValue
 
-# device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
-# root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
 
-# ProbUnet_First.to(device)
-# val_dataset = SIIMDataset(folds=['validation'], if_test=True)
-# mapper = MapLabelValue(orig_labels=[0, 1], target_labels=[0, 255])
+ProbUnet_First.to(device)
+val_dataset = SIIMDataset(folds=['validation'], if_test=True)
+mapper = MapLabelValue(orig_labels=[0, 1], target_labels=[0, 255])
 
-# for img_serial in tqdm(range(len(val_dataset))):
-#     image = val_dataset[img_serial]['input']  # shape: [1, 512, 512]
-#     label = val_dataset[img_serial]['target']  # shape: [1, 512, 512]
-#     image_basename = val_dataset[img_serial]['basename']
-#     input_image = image.unsqueeze(0).to(device)
+for img_serial in tqdm(range(len(val_dataset))):
+    image = val_dataset[img_serial]['input']  # shape: [1, 512, 512]
+    label = val_dataset[img_serial]['target']  # shape: [1, 512, 512]
+    image_basename = val_dataset[img_serial]['basename']
+    input_image = image.unsqueeze(0).to(device)
 
-#     with torch.no_grad():
-#         prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
-#         stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-#         stacked_samples = torch.sigmoid(stacked_samples)
-#         uncertainty_heatmap = stacked_samples.var(dim=0, keepdim=False)
-#         mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
-#         quantile = torch.quantile(uncertainty_heatmap.flatten(), 0.975).item()
-#         mask_uncertainty = torch.where(uncertainty_heatmap > quantile, torch.ones_like(uncertainty_heatmap), torch.zeros_like(uncertainty_heatmap))
-#         mask_uncertainty = mask_uncertainty.detach().cpu().numpy().T
-#         mask_uncertainty = mapper(mask_uncertainty).astype(np.uint8)
-#         Image.fromarray(mask_uncertainty).save(os.path.join(root_dir, f'{image_basename}'))
+    with torch.no_grad():
+        prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
+        stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+        stacked_samples = torch.sigmoid(stacked_samples)
+        uncertainty_heatmap = stacked_samples.var(dim=0, keepdim=False)
+        mask_uncertainty = torch.zeros_like(uncertainty_heatmap)
+        quantile = torch.quantile(uncertainty_heatmap.flatten(), 0.975).item()
+        mask_uncertainty = torch.where(uncertainty_heatmap > quantile, torch.ones_like(uncertainty_heatmap), torch.zeros_like(uncertainty_heatmap))
+        mask_uncertainty = mask_uncertainty.detach().cpu().numpy().T
+        mask_uncertainty = mapper(mask_uncertainty).astype(np.uint8)
+        Image.fromarray(mask_uncertainty).save(os.path.join(root_dir, f'{image_basename}'))
 
 
 #%%

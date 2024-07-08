@@ -54,7 +54,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56' 
+version_no = 'version_67' 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -95,28 +95,28 @@ with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 
 #%%
 
-import json
+# import json
 
-with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
-    dice_scores_ProbUnet_step1 = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
+#     dice_scores_ProbUnet_step1 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step2_v60.json', 'r') as file:
-    dice_scores_ProbUnet_step2_v60 = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step2_v60.json', 'r') as file:
+#     dice_scores_ProbUnet_step2_v60 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step2_v61.json', 'r') as file:
-    dice_scores_ProbUnet_step2_v61 = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step2_v61.json', 'r') as file:
+#     dice_scores_ProbUnet_step2_v61 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step3_v62.json', 'r') as file:
-    dice_scores_ProbUnet_step3_v62 = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step3_v62.json', 'r') as file:
+#     dice_scores_ProbUnet_step3_v62 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step3_v63.json', 'r') as file:
-    dice_scores_ProbUnet_step3_v63 = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step3_v63.json', 'r') as file:
+#     dice_scores_ProbUnet_step3_v63 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step4_v64.json', 'r') as file:
-    dice_scores_ProbUnet_step4_v64 = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step4_v64.json', 'r') as file:
+#     dice_scores_ProbUnet_step4_v64 = json.load(file)
 
-with open('../results/dice_scores_ProbUnet_step4_v65.json', 'r') as file:
-    dice_scores_ProbUnet_step4_v65 = json.load(file)
+# with open('../results/dice_scores_ProbUnet_step4_v65.json', 'r') as file:
+#     dice_scores_ProbUnet_step4_v65 = json.load(file)
 
 # with open('../results/dice_scores_Unet.json', 'r') as file:
 #     dice_scores_Unet = json.load(file)
@@ -125,15 +125,15 @@ with open('../results/dice_scores_ProbUnet_step4_v65.json', 'r') as file:
 
 #%%
 
-import numpy as np
+# import numpy as np
 
-dice_scores_ProbUnet_step1 = np.array(dice_scores_ProbUnet_step1)
-dice_scores_ProbUnet_step2_v60 = np.array(dice_scores_ProbUnet_step2_v60)
-dice_scores_ProbUnet_step2_v61 = np.array(dice_scores_ProbUnet_step2_v61)
-dice_scores_ProbUnet_step3_v62 = np.array(dice_scores_ProbUnet_step3_v62)
-dice_scores_ProbUnet_step3_v63 = np.array(dice_scores_ProbUnet_step3_v63)
-dice_scores_ProbUnet_step4_v64 = np.array(dice_scores_ProbUnet_step4_v64)
-dice_scores_ProbUnet_step4_v65 = np.array(dice_scores_ProbUnet_step4_v65)
+# dice_scores_ProbUnet_step1 = np.array(dice_scores_ProbUnet_step1)
+# dice_scores_ProbUnet_step2_v60 = np.array(dice_scores_ProbUnet_step2_v60)
+# dice_scores_ProbUnet_step2_v61 = np.array(dice_scores_ProbUnet_step2_v61)
+# dice_scores_ProbUnet_step3_v62 = np.array(dice_scores_ProbUnet_step3_v62)
+# dice_scores_ProbUnet_step3_v63 = np.array(dice_scores_ProbUnet_step3_v63)
+# dice_scores_ProbUnet_step4_v64 = np.array(dice_scores_ProbUnet_step4_v64)
+# dice_scores_ProbUnet_step4_v65 = np.array(dice_scores_ProbUnet_step4_v65)
 
 # dice_scores_ProbUnet_step1 = np.round(np.array(dice_scores_ProbUnet_step1),3)
 # dice_scores_ProbUnet_step2 = np.round(np.array(dice_scores_ProbUnet_step2),3)
@@ -153,22 +153,22 @@ dice_scores_ProbUnet_step4_v65 = np.array(dice_scores_ProbUnet_step4_v65)
 
 #%%
 
-print('Step 1: ', dice_scores_ProbUnet_step1.mean())
+# print('Step 1: ', dice_scores_ProbUnet_step1.mean())
 
-#%%
-print('Step 2 v60: ', dice_scores_ProbUnet_step2_v60.mean())
-print('Step 2 v61: ', dice_scores_ProbUnet_step2_v61.mean())
+# #%%
+# print('Step 2 v60: ', dice_scores_ProbUnet_step2_v60.mean())
+# print('Step 2 v61: ', dice_scores_ProbUnet_step2_v61.mean())
 
 
-#%%
+# #%%
 
-print('Step 3 v62: ', dice_scores_ProbUnet_step3_v62.mean())
-print('Step 3 v63: ', dice_scores_ProbUnet_step3_v63.mean())
+# print('Step 3 v62: ', dice_scores_ProbUnet_step3_v62.mean())
+# print('Step 3 v63: ', dice_scores_ProbUnet_step3_v63.mean())
 
-#%%
+# #%%
 
-print('Step 4 v64: ', dice_scores_ProbUnet_step4_v64.mean())
-print('Step 4 v65: ', dice_scores_ProbUnet_step4_v65.mean())
+# print('Step 4 v64: ', dice_scores_ProbUnet_step4_v64.mean())
+# print('Step 4 v65: ', dice_scores_ProbUnet_step4_v65.mean())
 
 
 #%%
@@ -211,62 +211,62 @@ print('Step 4 v65: ', dice_scores_ProbUnet_step4_v65.mean())
 
 #%% Single image dice evaluation
 
-import os
-from siim_dataset import SIIMDataset
+# import os
+# from siim_dataset import SIIMDataset
 
-fold_no = 'testing'
-# Good: 6, 92, 522, 292, 207, 212 Bad: 532, 484, 168
-# large mask: 92, 417, 492, 339, 132, 302
-# large-medium mask: 338, 377, 325
-# medium mask: 107, 136
-# medium-small mask: 29, 412
-# small mask: 128, 184
-img_serial = 339
-device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
+# fold_no = 'testing'
+# # Good: 6, 92, 522, 292, 207, 212 Bad: 532, 484, 168
+# # large mask: 92, 417, 492, 339, 132, 302
+# # large-medium mask: 338, 377, 325
+# # medium mask: 107, 136
+# # medium-small mask: 29, 412
+# # small mask: 128, 184
+# img_serial = 339
+# device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
-test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
+# test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 
-image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
-mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
+# image = test_dataset[img_serial]['input']  # shape: [1, 512, 512]
+# mask = test_dataset[img_serial]['target']  # shape: [1, 512, 512]
 
-input_image = image.unsqueeze(0).to(device)
-ProbUnet_First.to(device)
-with torch.no_grad():
-    prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
+# input_image = image.unsqueeze(0).to(device)
+# ProbUnet_First.to(device)
+# with torch.no_grad():
+#     prediction_outputs, prior_mu, prior_sigma = ProbUnet_First.predict_step(input_image)
 
-stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-stacked_samples = torch.sigmoid(stacked_samples)
-prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
-prediction_heatmap = prediction_heatmap.cpu()
+# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+# stacked_samples = torch.sigmoid(stacked_samples)
+# prediction_heatmap = stacked_samples.mean(dim = 0, keepdim=False)
+# prediction_heatmap = prediction_heatmap.cpu()
 
-discreter = AsDiscrete(threshold=0.5)
-dice_metric = DiceMetric(include_background=True, reduction='mean')
-dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(mask.unsqueeze(0)))
-dice_score = dice_metric.aggregate().item()
-dice_metric.reset()
+# discreter = AsDiscrete(threshold=0.5)
+# dice_metric = DiceMetric(include_background=True, reduction='mean')
+# dice_metric(y_pred=discreter(prediction_heatmap.unsqueeze(0).unsqueeze(0)), y=discreter(mask.unsqueeze(0)))
+# dice_score = dice_metric.aggregate().item()
+# dice_metric.reset()
 
-print('Dice score: ', dice_score)
+# print('Dice score: ', dice_score)
 
-#%% Prediction heatmap
+# #%% Prediction heatmap
 
-import matplotlib.pyplot as plt
-plt.imshow(prediction_heatmap.detach().numpy().T, 
-           cmap='plasma', aspect='auto', vmin=0, vmax=1)
-plt.colorbar()
-plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
+# import matplotlib.pyplot as plt
+# plt.imshow(prediction_heatmap.detach().numpy().T, 
+#            cmap='plasma', aspect='auto', vmin=0, vmax=1)
+# plt.colorbar()
+# plt.title(f'Prediction heatmap: {fold_no}_{img_serial}')
 
-#%% Uncertainty heatmap
+# #%% Uncertainty heatmap
 
-stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
-stacked_samples = torch.sigmoid(stacked_samples)
-uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
+# stacked_samples = prediction_outputs['samples'].squeeze(1).squeeze(1)
+# stacked_samples = torch.sigmoid(stacked_samples)
+# uncertainty_heatmap = stacked_samples.var(dim = 0, keepdim=False)
 
-import matplotlib.pyplot as plt
+# import matplotlib.pyplot as plt
 
-plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
-           cmap='plasma', aspect='auto')
-plt.colorbar()
-plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
+# plt.imshow(uncertainty_heatmap.cpu().detach().numpy().T, 
+#            cmap='plasma', aspect='auto')
+# plt.colorbar()
+# plt.title(f'Heatmap of Epistemic Uncertainty: {fold_no}_{img_serial}')
 
 
 #%%

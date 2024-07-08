@@ -67,7 +67,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56'
+version_no = 'version_67'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -103,7 +103,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56'
+version_no = 'version_67'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -142,8 +142,8 @@ data_module = SIIMDataModule(batch_size_train=batch_size_train,
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_61',
-                           name='step2_64epochs_XRayAugs_inference_v61')
+                           version='version_69',
+                           name='step2_labeled_64epochs_once_v69')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
