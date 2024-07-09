@@ -224,7 +224,7 @@ ProbUnet_Third = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_62'
+version_no = 'version_71'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -243,7 +243,7 @@ import numpy as np
 from monai.transforms import MapLabelValue
 import matplotlib.pyplot as plt
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
 
 train_dataset = SIIMDataset(folds=['training'], if_test=True)
@@ -280,7 +280,7 @@ from PIL import Image
 import numpy as np
 from monai.transforms import MapLabelValue
 
-device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
 
 ProbUnet_Second.to(device)
