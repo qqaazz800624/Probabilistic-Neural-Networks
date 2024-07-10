@@ -1,7 +1,7 @@
 #%%
 
-#from siim_datamodule import SIIMDataModule
-from siim_datamodule_balancedSampler import SIIMDataModule
+from siim_datamodule import SIIMDataModule
+#from siim_datamodule_balancedSampler import SIIMDataModule
 from lightning.pytorch import Trainer
 from deeplabv3plusmodule import DeepLabV3PlusModule
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
@@ -11,9 +11,9 @@ import wandb
 
 
 # Initialize the model module
-#model = DeepLabV3PlusModule()
+model = DeepLabV3PlusModule()
 #model = SegFormerModule(num_classes=1, in_channels=3)
-model = UNetModule(loss_fn_name='DiceFocalLoss') # valid loss_fn_name: ['DiceLoss', 'BCEWithLogitsLoss', 'DiceCELoss', 'DiceFocalLoss]
+#model = UNetModule(loss_fn_name='DiceFocalLoss') # valid loss_fn_name: ['DiceLoss', 'BCEWithLogitsLoss', 'DiceCELoss', 'DiceFocalLoss]
 siim_data_module = SIIMDataModule()
 #siim_data_module = SIIMDataModuleSegFormer()
 max_epochs = 64
@@ -24,8 +24,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_23',
-                           name='Unet_DiceFocalLoss')
+                           version='version_78',
+                           name='DeepLabV3Plus_v78')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
