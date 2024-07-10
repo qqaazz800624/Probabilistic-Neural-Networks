@@ -24,7 +24,7 @@ my_temp_dir = 'results/'
 # Hyperparameters
 # ============ Training setting ============= #
 
-max_epochs = 256
+max_epochs = 128
 model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
@@ -35,28 +35,31 @@ loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss'
 # =========================================== #
 
 
-if model_name == 'Unet':
-    model = Unet(in_channels=1, 
-                classes=1, 
-                encoder_name = 'tu-resnest50d', 
-                encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+# if model_name == 'Unet':
+#     model = Unet(in_channels=1, 
+#                 classes=1, 
+#                 encoder_name = 'tu-resnest50d', 
+#                 encoder_weights = 'imagenet')
+#     model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
 
-elif model_name == 'DeepLabV3Plus':
-    model = DeepLabV3Plus(in_channels=1, 
-                        classes=1, 
-                        encoder_name = 'tu-resnest50d', 
-                        encoder_weights = 'imagenet')
-    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
+# elif model_name == 'DeepLabV3Plus':
+#     model = DeepLabV3Plus(in_channels=1, 
+#                         classes=1, 
+#                         encoder_name = 'tu-resnest50d', 
+#                         encoder_weights = 'imagenet')
+#     model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/lightning_logs/version_1/checkpoints/best_model.ckpt'
 
-model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-for k in list(model_weight.keys()):
-    k_new = k.replace(
-        "model.", "", 1
-    )  # e.g. "model.conv.weight" => conv.weight"
-    model_weight[k_new] = model_weight.pop(k)
+# model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# for k in list(model_weight.keys()):
+#     k_new = k.replace(
+#         "model.", "", 1
+#     )  # e.g. "model.conv.weight" => conv.weight"
+#     model_weight[k_new] = model_weight.pop(k)
 
-model.load_state_dict(model_weight)
+# model.load_state_dict(model_weight)
+
+#model = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+model = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 
 #%%
 
@@ -85,8 +88,8 @@ logger = TensorBoardLogger(save_dir=my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_70',
-                           name='step1_labeled_256epochs_v70')
+                           version='version_76',
+                           name='step1_labeled_128epochs_DeepLabV3Plus_v76')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
