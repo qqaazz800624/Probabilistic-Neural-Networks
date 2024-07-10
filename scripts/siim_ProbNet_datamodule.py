@@ -61,60 +61,59 @@ class SIIMDataModule(LightningDataModule):
                                 EnsureTyped(keys=['image', 'target'], dtype='float32')
                                 ])
 
-    # def train_dataloader(self) -> DataLoader:
-    #     """Return the train dataloader."""
-    #     return DataLoader(
-    #         SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
-    #         batch_size=self.batch_size_train,
-    #         num_workers=self.num_workers_train,
-    #         shuffle=True,
-    #         drop_last=True
-    #     )
-    
     def train_dataloader(self) -> DataLoader:
         """Return the train dataloader."""
-        return balanced_data_loader(
+        return DataLoader(
             SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
             batch_size=self.batch_size_train,
             num_workers=self.num_workers_train,
+            shuffle=False,
+            drop_last=True
         )
-
-    # def val_dataloader(self):
-    #     """Return the val dataloader."""
-    #     return DataLoader(
-    #         SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
-    #         batch_size=self.batch_size_val,
-    #         num_workers=self.num_workers_val
-    #     )
     
-    def val_dataloader(self) -> DataLoader:
+    # def train_dataloader(self) -> DataLoader:
+    #     """Return the train dataloader."""
+    #     return balanced_data_loader(
+    #         SIIMDataset(folds=self.train_folds, transform=self.train_transforms),
+    #         batch_size=self.batch_size_train,
+    #         num_workers=self.num_workers_train,
+    #     )
+
+    def val_dataloader(self):
         """Return the val dataloader."""
-        return balanced_data_loader(
+        return DataLoader(
             SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
             batch_size=self.batch_size_val,
             num_workers=self.num_workers_val,
+            shuffle=False,
+            drop_last=True
         )
-
-    # def test_dataloader(self):
-    #     """Return the test dataloader."""
-    #     return DataLoader(
-    #         SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
-    #         batch_size=self.batch_size_test,
-    #         num_workers=self.num_workers_test
-    #     )
     
-    def test_dataloader(self) -> DataLoader:
+    # def val_dataloader(self) -> DataLoader:
+    #     """Return the val dataloader."""
+    #     return balanced_data_loader(
+    #         SIIMDataset(folds=self.val_folds, transform=self.val_transforms),
+    #         batch_size=self.batch_size_val,
+    #         num_workers=self.num_workers_val,
+    #     )
+
+    def test_dataloader(self):
         """Return the test dataloader."""
-        return balanced_data_loader(
+        return DataLoader(
             SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
             batch_size=self.batch_size_test,
             num_workers=self.num_workers_test,
+            shuffle=False,
+            drop_last=True
         )
+    
+    # def test_dataloader(self) -> DataLoader:
+    #     """Return the test dataloader."""
+    #     return balanced_data_loader(
+    #         SIIMDataset(folds=self.test_folds, transform=self.test_transforms),
+    #         batch_size=self.batch_size_test,
+    #         num_workers=self.num_workers_test,
+    #     )
 
 #%%
 
-
-
-
-
-#%%
