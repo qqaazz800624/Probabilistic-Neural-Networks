@@ -1,7 +1,7 @@
 #%%
 
 from segmentation_models_pytorch import Unet, DeepLabV3Plus
-
+from custom.mednext import mednext_base
 from functools import partial
 
 import os
@@ -25,7 +25,7 @@ my_temp_dir = 'results/'
 # ============ Training setting ============= #
 
 max_epochs = 128
-model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
+model_name = 'mednext'  # Valid model_name: ['Unet', 'DeepLabV3Plus', 'mednext']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
@@ -36,30 +36,48 @@ loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss', 'DiceLoss'
 
 
 if model_name == 'Unet':
-    model = Unet(in_channels=1, 
-                classes=1, 
-                encoder_name = 'tu-resnest50d', 
-                encoder_weights = 'imagenet')
+    model = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
     model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+    model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+    for k in list(model_weight.keys()):
+        k_new = k.replace(
+            "model.", "", 1
+        )  # e.g. "model.conv.weight" => conv.weight"
+        model_weight[k_new] = model_weight.pop(k)
+    model.load_state_dict(model_weight)
 
 elif model_name == 'DeepLabV3Plus':
-    model = DeepLabV3Plus(in_channels=1, 
-                        classes=1, 
-                        encoder_name = 'tu-resnest50d', 
-                        encoder_weights = 'imagenet')
+    model = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
     model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_78/checkpoints/best_model.ckpt'
+    model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+    for k in list(model_weight.keys()):
+        k_new = k.replace(
+            "model.", "", 1
+        )  # e.g. "model.conv.weight" => conv.weight"
+        model_weight[k_new] = model_weight.pop(k)
+    model.load_state_dict(model_weight)
 
-model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
-for k in list(model_weight.keys()):
-    k_new = k.replace(
-        "model.", "", 1
-    )  # e.g. "model.conv.weight" => conv.weight"
-    model_weight[k_new] = model_weight.pop(k)
+elif model_name == 'mednext':
+    model = mednext_base(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
+    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_86/checkpoints/best_model.ckpt'
+    model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+    for k in list(model_weight.keys()):
+        k_new = k.replace(
+            "model.", "", 1
+        )  # e.g. "model.conv.weight" => conv.weight"
+        model_weight[k_new] = model_weight.pop(k)
+    model.load_state_dict(model_weight)
 
-model.load_state_dict(model_weight)
+# model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# for k in list(model_weight.keys()):
+#     k_new = k.replace(
+#         "model.", "", 1
+#     )  # e.g. "model.conv.weight" => conv.weight"
+#     model_weight[k_new] = model_weight.pop(k)
 
-#model = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
-#model = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+
+# model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
+# model.load_state_dict(model_weight)
 
 #%%
 
@@ -88,8 +106,8 @@ logger = TensorBoardLogger(save_dir=my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_81',
-                           name='step1_labeled_128epochs_unet_v81')
+                           version='version_87',
+                           name='step1_128epochs_mednext_v87')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
