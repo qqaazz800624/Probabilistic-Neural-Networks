@@ -1,5 +1,5 @@
 #%%
-from segmentation_models_pytorch import Unet
+from segmentation_models_pytorch import Unet, DeepLabV3Plus
 from functools import partial
 import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
@@ -21,7 +21,7 @@ from tqdm import tqdm
 # ============ Training setting ============= #
 
 max_epochs = 64
-model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
+model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
@@ -32,17 +32,15 @@ loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss','DiceLoss',
 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 
-unet = Unet(in_channels=1, 
-            classes=1, 
-            encoder_name = 'tu-resnest50d', 
-            encoder_weights = 'imagenet')
-
+unet = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+deeplabv3plus = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 
 version_prev = None
 # =========================================== #
 
 ProbUnet_First = ProbUNet_First(
-    model=unet,
+    #model=unet,
+    model=deeplabv3plus,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -55,21 +53,19 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
 ProbUnet_First.eval()
 ProbUnet_First.requires_grad_(False)
 
-unet_v2 = Unet(in_channels=1, 
-            classes=1, 
-            encoder_name = 'tu-resnest50d', 
-            encoder_weights = 'imagenet')
-
+unet_v2 = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+deeplabv3plus_v2 = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 
 ProbUnet_First_v2 = ProbUNet_First(
-    model=unet_v2,
+    #model=unet_v2,
+    model=deeplabv3plus_v2,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -82,7 +78,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -110,7 +106,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_60'
+version_no = 'version_82'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second.load_state_dict(model_weight)
@@ -119,14 +115,12 @@ ProbUnet_Second.requires_grad_(False)
 
 #%%
 
-unet_v3 = Unet(in_channels=1, 
-            classes=1, 
-            encoder_name = 'tu-resnest50d', 
-            encoder_weights = 'imagenet')
-
+unet_v3 = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+deeplabv3plus_v3 = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 
 ProbUnet_First_v3 = ProbUNet_First(
-    model=unet_v3,
+    #model=unet_v3,
+    model = deeplabv3plus_v3,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -139,21 +133,20 @@ ProbUnet_First_v3 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v3.load_state_dict(model_weight)
 ProbUnet_First_v3.eval()
 ProbUnet_First_v3.requires_grad_(False)
 
-unet_v4 = Unet(in_channels=1, 
-            classes=1, 
-            encoder_name = 'tu-resnest50d', 
-            encoder_weights = 'imagenet')
+unet_v4 = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+deeplabv3plus_v4 = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 
 
 ProbUnet_First_v4 = ProbUNet_First(
-    model=unet_v4,
+    #model=unet_v4,
+    model=deeplabv3plus_v4,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -166,7 +159,7 @@ ProbUnet_First_v4 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_56'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v4.load_state_dict(model_weight)
@@ -194,7 +187,7 @@ ProbUnet_Second_v2 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_60'
+version_no = 'version_82'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v2.load_state_dict(model_weight)
@@ -224,7 +217,7 @@ ProbUnet_Third = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_71'
+version_no = 'version_84'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]

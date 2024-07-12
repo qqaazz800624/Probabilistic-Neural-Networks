@@ -7,11 +7,14 @@ from deeplabv3plusmodule import DeepLabV3PlusModule
 from lightning.pytorch.callbacks import LearningRateMonitor, ModelCheckpoint, ModelSummary
 from lightning.pytorch.loggers import TensorBoardLogger, WandbLogger
 from unet_lightningmodule import UNetModule
+from mednextmodule import MedNeXtModule
 import wandb
+from lightning.pytorch.strategies import DDPStrategy
 
 
 # Initialize the model module
-model = DeepLabV3PlusModule()
+#model = DeepLabV3PlusModule()
+model = MedNeXtModule()
 #model = SegFormerModule(num_classes=1, in_channels=3)
 #model = UNetModule(loss_fn_name='DiceFocalLoss') # valid loss_fn_name: ['DiceLoss', 'BCEWithLogitsLoss', 'DiceCELoss', 'DiceFocalLoss]
 siim_data_module = SIIMDataModule()
@@ -24,8 +27,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_78',
-                           name='DeepLabV3Plus_v78')
+                           version='version_87',
+                           name='MedNeXt_v87')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
@@ -38,7 +41,9 @@ model_summarizer = ModelSummary(max_depth=2)
 # Initialize the trainer
 trainer = Trainer(
     accelerator='gpu',
-    devices=1,
+    devices=2,
+    strategy=DDPStrategy(find_unused_parameters=True),
+    precision=16,
     max_epochs=max_epochs,  # number of epochs we want to train
     #logger=logger,  # log training metrics for later evaluation
     logger=wandb_logger,  # log training metrics for later evaluation
