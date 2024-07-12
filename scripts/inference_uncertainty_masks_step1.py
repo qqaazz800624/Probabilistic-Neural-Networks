@@ -1,7 +1,7 @@
 #%%
 
 import os, torch
-from segmentation_models_pytorch import Unet
+from segmentation_models_pytorch import Unet, DeepLabV3Plus
 from prob_unet_first import ProbUNet_First
 from functools import partial
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
@@ -13,15 +13,14 @@ max_epochs = 128
 model_name = 'Unet' 
 batch_size_train = 16
 
-unet = Unet(in_channels=1, 
-            classes=1, 
-            encoder_name = 'tu-resnest50d', 
-            encoder_weights = 'imagenet')
+unet = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+deeplabv3plus = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 
 version_prev = None
 
 ProbUnet_First = ProbUNet_First(
-    model=unet,
+    #model = unet,
+    model = deeplabv3plus,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -34,7 +33,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_75' 
+version_no = 'version_80' 
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
