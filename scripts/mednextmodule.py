@@ -19,6 +19,7 @@ class MedNeXtModule(LightningModule):
             in_channels=self.in_channels,
             out_channels=self.out_channels,
             spatial_dims=self.spatial_dims,
+            use_grad_checkpoint=True
         )
         self.loss_fn = DiceLoss(mode='binary')
 
