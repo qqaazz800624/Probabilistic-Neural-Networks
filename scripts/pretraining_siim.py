@@ -27,8 +27,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_87',
-                           name='MedNeXt_v87')
+                           version='version_86',
+                           name='MedNeXt_v86')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
@@ -41,9 +41,9 @@ model_summarizer = ModelSummary(max_depth=2)
 # Initialize the trainer
 trainer = Trainer(
     accelerator='gpu',
-    devices=2,
-    strategy=DDPStrategy(find_unused_parameters=True),
-    precision=16,
+    devices=1,
+    # strategy=DDPStrategy(find_unused_parameters=True),
+    # precision=16,
     max_epochs=max_epochs,  # number of epochs we want to train
     #logger=logger,  # log training metrics for later evaluation
     logger=wandb_logger,  # log training metrics for later evaluation
