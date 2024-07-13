@@ -1,6 +1,8 @@
 #%%
 
 from segmentation_models_pytorch import Unet, DeepLabV3Plus
+from custom.mednext import mednext_base
+
 from functools import partial
 import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
@@ -20,7 +22,7 @@ from tqdm import tqdm
 # ============ Training setting ============= #
 
 max_epochs = 128
-model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
+model_name = 'mednext'  # Valid model_name: ['Unet', 'DeepLabV3Plus', 'mednext']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
@@ -30,15 +32,17 @@ num_samples = 100
 loss_fn = 'BCEWithLogitsLoss'  # Valid loss_fn: ['BCEWithLogitsLoss','DiceLoss', 'DiceCELoss']
 
 unet = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
-
 deeplabv3plus = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+mednext = mednext_base(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
+
 # =========================================== #
 
 version_prev = None
 
 ProbUnet_First = ProbUNet_First(
     #model=unet,
-    model=deeplabv3plus,
+    #model=deeplabv3plus,
+    model = mednext,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -51,7 +55,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_80'
+version_no = 'version_87'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -218,7 +222,7 @@ with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 # # medium mask: 107, 136
 # # medium-small mask: 29, 412
 # # small mask: 128, 184
-# img_serial = 532
+# img_serial = 168
 # device = torch.device('cuda:3' if torch.cuda.is_available() else 'cpu')
 
 # test_dataset = SIIMDataset(folds=[fold_no], if_test=True)

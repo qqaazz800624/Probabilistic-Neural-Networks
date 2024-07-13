@@ -1,6 +1,7 @@
 #%%
 
 from segmentation_models_pytorch import Unet, DeepLabV3Plus
+from custom.mednext import mednext_base
 
 from functools import partial
 
@@ -27,7 +28,7 @@ my_temp_dir = 'results/'
 # ============ Training setting ============= #
 
 max_epochs = 64
-model_name = 'Unet'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
+model_name = 'mednext'  # Valid model_name: ['Unet', 'DeepLabV3Plus', 'mednext']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
@@ -40,12 +41,14 @@ root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 
 unet = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 deeplabv3plus = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+mednext = mednext_base(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
 
 version_prev = None
 
 ProbUnet_First = ProbUNet_First(
     #model=unet,
-    model=deeplabv3plus,
+    #model=deeplabv3plus,
+    model = mednext,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -58,7 +61,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_80'
+version_no = 'version_87'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -69,10 +72,13 @@ ProbUnet_First.requires_grad_(False)
 
 unet_v2 = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 deeplabv3plus_v2 = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+mednext_v2 = mednext_base(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
+
 
 ProbUnet_First_v2 = ProbUNet_First(
     #model=unet_v2,
-    model=deeplabv3plus_v2,
+    #model=deeplabv3plus_v2,
+    model=mednext_v2,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -85,7 +91,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_80'
+version_no = 'version_87'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -124,8 +130,8 @@ data_module = SIIMDataModule(batch_size_train=batch_size_train,
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_82',
-                           name='step2_64epochs_once_deeplabv3plus_v82')
+                           version='version_88',
+                           name='step2_64epochs_once_mednext_v88')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
