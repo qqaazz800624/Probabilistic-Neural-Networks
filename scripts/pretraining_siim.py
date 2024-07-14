@@ -17,7 +17,7 @@ from lightning.pytorch.strategies import DDPStrategy
 model = MedNeXtModule()
 #model = SegFormerModule(num_classes=1, in_channels=3)
 #model = UNetModule(loss_fn_name='DiceFocalLoss') # valid loss_fn_name: ['DiceLoss', 'BCEWithLogitsLoss', 'DiceCELoss', 'DiceFocalLoss]
-siim_data_module = SIIMDataModule()
+siim_data_module = SIIMDataModule(batch_size_train=8, batch_size_val=4, batch_size_test=4)
 #siim_data_module = SIIMDataModuleSegFormer()
 max_epochs = 64
 
@@ -27,8 +27,8 @@ logger = TensorBoardLogger(my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_86',
-                           name='MedNeXt_v86')
+                           version='version_90',
+                           name='MedNeXt_large_v90')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 
@@ -41,7 +41,7 @@ model_summarizer = ModelSummary(max_depth=2)
 # Initialize the trainer
 trainer = Trainer(
     accelerator='gpu',
-    devices=1,
+    devices='auto',
     # strategy=DDPStrategy(find_unused_parameters=True),
     # precision=16,
     max_epochs=max_epochs,  # number of epochs we want to train

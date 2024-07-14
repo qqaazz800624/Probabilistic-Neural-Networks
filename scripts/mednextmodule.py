@@ -2,7 +2,7 @@
 
 import torch
 from lightning import LightningModule
-from custom.mednext import mednext_base
+from custom.mednext import mednext_base, mednext_large, mednext_medium
 from segmentation_models_pytorch.losses import DiceLoss
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
 
@@ -15,7 +15,7 @@ class MedNeXtModule(LightningModule):
         self.in_channels = in_channels
         self.spatial_dims = spatial_dims
         self.out_channels = out_channels
-        self.model = mednext_base(
+        self.model = mednext_large(
             in_channels=self.in_channels,
             out_channels=self.out_channels,
             spatial_dims=self.spatial_dims,
