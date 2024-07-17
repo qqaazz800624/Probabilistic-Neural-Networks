@@ -1,7 +1,7 @@
 #%%
 
 from segmentation_models_pytorch import Unet, DeepLabV3Plus
-from custom.mednext import mednext_base
+from custom.mednext import mednext_base, mednext_large
 from functools import partial
 
 import os
@@ -58,8 +58,9 @@ elif model_name == 'DeepLabV3Plus':
     model.load_state_dict(model_weight)
 
 elif model_name == 'mednext':
-    model = mednext_base(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
-    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_86/checkpoints/best_model.ckpt'
+    #model = mednext_base(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
+    model = mednext_large(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
+    model_weight = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/results/SIIM_pneumothorax_segmentation/version_90/checkpoints/best_model.ckpt'
     model_weight = torch.load(model_weight, map_location="cpu")["state_dict"]
     for k in list(model_weight.keys()):
         k_new = k.replace(
@@ -106,8 +107,8 @@ logger = TensorBoardLogger(save_dir=my_temp_dir)
 wandb_logger = WandbLogger(log_model=True, 
                            project="SIIM_pneumothorax_segmentation",
                            save_dir=my_temp_dir,
-                           version='version_87',
-                           name='step1_128epochs_mednext_v87')
+                           version='version_91',
+                           name='step1_128epochs_mednext_large_v91')
 
 lr_monitor = LearningRateMonitor(logging_interval='step')
 checkpoint_callback = ModelCheckpoint(filename='best_model', 

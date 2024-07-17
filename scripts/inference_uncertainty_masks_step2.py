@@ -1,6 +1,8 @@
 #%%
 
 from segmentation_models_pytorch import Unet, DeepLabV3Plus
+from custom.mednext import mednext_base, mednext_large
+
 from functools import partial
 import torch
 from torch.optim.lr_scheduler import CosineAnnealingWarmRestarts
@@ -21,7 +23,7 @@ from tqdm import tqdm
 # ============ Training setting ============= #
 
 max_epochs = 64
-model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus']
+model_name = 'mednext'  # Valid model_name: ['Unet', 'DeepLabV3Plus', 'mednext']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
@@ -36,12 +38,15 @@ root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 
 unet = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 deeplabv3plus = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+mednext = mednext_large(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
+
 
 version_prev = None
 
 ProbUnet_First = ProbUNet_First(
     #model=unet,
-    model=deeplabv3plus,
+    #model=deeplabv3plus,
+    model = mednext,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -54,7 +59,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_80'
+version_no = 'version_91'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -65,11 +70,14 @@ ProbUnet_First.requires_grad_(False)
 
 unet_v2 = Unet(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
 deeplabv3plus_v2 = DeepLabV3Plus(in_channels=1, classes=1, encoder_name = 'tu-resnest50d', encoder_weights = 'imagenet')
+#mednext_v2 = mednext_base(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
+mednext_v2 = mednext_large(in_channels=1, out_channels=1, spatial_dims=2, use_grad_checkpoint=True)
 
 
 ProbUnet_First_v2 = ProbUNet_First(
     #model=unet_v2,
-    model=deeplabv3plus_v2,
+    #model=deeplabv3plus_v2,
+    model=mednext_v2,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -82,7 +90,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_80'
+version_no = 'version_91'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -113,7 +121,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_82'
+version_no = 'version_92'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -131,7 +139,7 @@ import numpy as np
 from monai.transforms import MapLabelValue
 import matplotlib.pyplot as plt
 
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
 
 train_dataset = SIIMDataset(folds=['training'], if_test=True)
@@ -167,7 +175,7 @@ from PIL import Image
 import numpy as np
 from monai.transforms import MapLabelValue
 
-device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
+device = torch.device("cuda:2" if torch.cuda.is_available() else "cpu")
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks/data/masks'
 
 ProbUnet_Second.to(device)
