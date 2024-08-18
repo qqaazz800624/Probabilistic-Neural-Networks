@@ -24,7 +24,7 @@ from tqdm import tqdm
 # ============ Training setting ============= #
 
 max_epochs = 64
-model_name = 'mednext'  # Valid model_name: ['Unet', 'DeepLabV3Plus', 'mednext']
+model_name = 'DeepLabV3Plus'  # Valid model_name: ['Unet', 'DeepLabV3Plus', 'mednext']
 latent_dim = 6
 beta = 10
 batch_size_train = 16
@@ -47,8 +47,8 @@ version_prev = None
 
 ProbUnet_First = ProbUNet_First(
     #model=unet,
-    #model=deeplabv3plus,
-    model = mednext,
+    model=deeplabv3plus,
+    #model = mednext,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -61,7 +61,7 @@ ProbUnet_First = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_91'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First.load_state_dict(model_weight)
@@ -75,8 +75,8 @@ mednext_v2 = mednext_large(in_channels=1, out_channels=1, spatial_dims=2, use_gr
 
 ProbUnet_First_v2 = ProbUNet_First(
     #model=unet_v2,
-    #model=deeplabv3plus_v2,
-    model=mednext_v2,
+    model=deeplabv3plus_v2,
+    #model=mednext_v2,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -89,7 +89,7 @@ ProbUnet_First_v2 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_91'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v2.load_state_dict(model_weight)
@@ -117,7 +117,7 @@ ProbUnet_Second = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_92'
+version_no = 'version_82'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second.load_state_dict(model_weight)
@@ -132,8 +132,8 @@ mednext_v3 = mednext_large(in_channels=1, out_channels=1, spatial_dims=2, use_gr
 
 ProbUnet_First_v3 = ProbUNet_First(
     #model=unet_v3,
-    #model = deeplabv3plus_v3,
-    model = mednext_v3,
+    model = deeplabv3plus_v3,
+    #model = mednext_v3,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -146,7 +146,7 @@ ProbUnet_First_v3 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_91'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v3.load_state_dict(model_weight)
@@ -159,8 +159,8 @@ mednext_v4 = mednext_large(in_channels=1, out_channels=1, spatial_dims=2, use_gr
 
 ProbUnet_First_v4 = ProbUNet_First(
     #model=unet_v4,
-    #model=deeplabv3plus_v4,
-    model=mednext_v4,
+    model=deeplabv3plus_v4,
+    #model=mednext_v4,
     optimizer=partial(torch.optim.Adam, lr=1.0e-4, weight_decay=1e-5),
     task='binary',
     lr_scheduler=partial(CosineAnnealingWarmRestarts, T_0=4, T_mult=1),
@@ -173,7 +173,7 @@ ProbUnet_First_v4 = ProbUNet_First(
     version_prev=version_prev
 )
 
-version_no = 'version_91'
+version_no = 'version_80'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_First_v4.load_state_dict(model_weight)
@@ -201,7 +201,7 @@ ProbUnet_Second_v2 = ProbUNet_Second(
     version_prev=None
 )
 
-version_no = 'version_92'
+version_no = 'version_82'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
 ProbUnet_Second_v2.load_state_dict(model_weight)
@@ -231,7 +231,7 @@ ProbUnet_Third = ProbUNet_Third(
     version_prev=None
 )
 
-version_no = 'version_93'
+version_no = 'version_84'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
 weight_path = f'results/SIIM_pneumothorax_segmentation/{version_no}/checkpoints/best_model.ckpt'
 model_weight = torch.load(os.path.join(root_dir, weight_path), map_location="cpu")["state_dict"]
@@ -242,8 +242,10 @@ ProbUnet_Third.eval()
 
 device = torch.device('cuda:1' if torch.cuda.is_available() else 'cpu')
 
-data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
+data_module = SIIMDataModule(batch_size_train=1, num_workers_train=2, batch_size_val=1, num_workers_val=2, batch_size_test=1, num_workers_test=2)
 test_data_loader = data_module.test_dataloader()
+val_data_loader = data_module.val_dataloader()
+train_data_loader = data_module.train_dataloader()
 dice_metric = DiceMetric(include_background=True, reduction='none', ignore_empty=False)
 discreter = AsDiscrete(threshold=0.5)
 
@@ -252,6 +254,8 @@ ProbUnet_Third.to(device)
 dice_scores = []
 
 with torch.no_grad():
+    #for data in tqdm(train_data_loader):
+    #for data in tqdm(val_data_loader):
     for data in tqdm(test_data_loader):
         img, label = data['input'].to(device), data['target']
         prediction_outputs, prior_mu, prior_sigma = ProbUnet_Third.predict_step(img)
@@ -265,7 +269,7 @@ with torch.no_grad():
 
 print('Dice score: ', sum(dice_scores)/len(dice_scores))
 
-with open(f'results/dice_scores_ProbUnet_step3.json', 'w') as file:
+with open(f'results/dice_scores_ProbUnet_step3_test.json', 'w') as file:
     json.dump(dice_scores, file)
 
 
