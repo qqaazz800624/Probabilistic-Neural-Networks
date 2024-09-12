@@ -52,7 +52,7 @@ from monai.metrics import DiceMetric
 from monai.transforms import AsDiscrete
 from unet_lightningmodule import UNetModule
 
-model_name = 'mednext'
+model_name = 'DeepLabV3Plus'
 device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
 data_module = SIIMDataModule(batch_size_test=1, num_workers_test=2)
@@ -134,9 +134,9 @@ from manafaln.transforms import OverlayMask
 from utils import image_preprocessor, label_preprocessor
 
 
-model_name = 'mednext'
+model_name = 'DeepLabV3Plus'
 root_dir = '/home/u/qqaazz800624/Probabilistic-Neural-Networks'
-ckpt_path = 'results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
+#ckpt_path = 'results/SIIM_pneumothorax_segmentation/version_14/checkpoints/best_model.ckpt'
 device = torch.device("cuda:3" if torch.cuda.is_available() else "cpu")
 
 if model_name == 'Unet':
@@ -182,7 +182,8 @@ model.eval()
 model.to(device)
 
 #%%
-fold_no = 'testing'
+#fold_no = 'testing'
+fold_no = 'training'
 # Good: 6, 92, 522, 292 Bad: 532, 484, 168, 163, 207, 212
 # large mask: 92, 417, 492, 339, 132, 302
 # large-medium mask: 338, 325, 377
@@ -190,7 +191,7 @@ fold_no = 'testing'
 # medium-small mask: 29, 412
 # small mask: 128, 184
 
-img_serial = 163
+img_serial = 9
 test_dataset = SIIMDataset(folds=[fold_no], if_test=True)
 image = test_dataset[img_serial]['input']
 mask = test_dataset[img_serial]['target']

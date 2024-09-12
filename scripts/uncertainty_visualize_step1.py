@@ -97,16 +97,16 @@ with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 
 #%%
 
-# import json
+import json
 
-# with open('../results/dice_scores_ProbUnet_step1.json', 'r') as file:
-#     dice_scores_ProbUnet_step1 = json.load(file)
+with open('../results/dice_scores_ProbUnet_step3_train.json', 'r') as file:
+    dice_scores_ProbUnet_step3_train = json.load(file)
 
-# with open('../results/dice_scores_ProbUnet_step2_v60.json', 'r') as file:
-#     dice_scores_ProbUnet_step2_v60 = json.load(file)
+with open('../results/dice_scores_ProbUnet_step3_val.json', 'r') as file:
+    dice_scores_ProbUnet_step3_val = json.load(file)
 
-# with open('../results/dice_scores_ProbUnet_step2_v61.json', 'r') as file:
-#     dice_scores_ProbUnet_step2_v61 = json.load(file)
+with open('../results/dice_scores_ProbUnet_step3_test.json', 'r') as file:
+    dice_scores_ProbUnet_step3_test = json.load(file)
 
 # with open('../results/dice_scores_ProbUnet_step3_v62.json', 'r') as file:
 #     dice_scores_ProbUnet_step3_v62 = json.load(file)
@@ -127,7 +127,17 @@ with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 
 #%%
 
-# import numpy as np
+import numpy as np
+
+dice_scores_ProbUnet_step3_train = np.array(dice_scores_ProbUnet_step3_train)
+dice_scores_ProbUnet_step3_val = np.array(dice_scores_ProbUnet_step3_val)
+dice_scores_ProbUnet_step3_test = np.array(dice_scores_ProbUnet_step3_test)
+
+print(dice_scores_ProbUnet_step3_train.shape)
+print(dice_scores_ProbUnet_step3_val.shape)
+print(dice_scores_ProbUnet_step3_test.shape)
+
+#%%
 
 # dice_scores_ProbUnet_step1 = np.array(dice_scores_ProbUnet_step1)
 # dice_scores_ProbUnet_step2_v60 = np.array(dice_scores_ProbUnet_step2_v60)
@@ -155,61 +165,47 @@ with open(f'results/dice_scores_ProbUnet_step1.json', 'w') as file:
 
 #%%
 
-# print('Step 1: ', dice_scores_ProbUnet_step1.mean())
-
-# #%%
-# print('Step 2 v60: ', dice_scores_ProbUnet_step2_v60.mean())
-# print('Step 2 v61: ', dice_scores_ProbUnet_step2_v61.mean())
-
-
-# #%%
-
-# print('Step 3 v62: ', dice_scores_ProbUnet_step3_v62.mean())
-# print('Step 3 v63: ', dice_scores_ProbUnet_step3_v63.mean())
-
-# #%%
-
-# print('Step 4 v64: ', dice_scores_ProbUnet_step4_v64.mean())
-# print('Step 4 v65: ', dice_scores_ProbUnet_step4_v65.mean())
+dice_scores_ProbUnet_step3_train[0:50]
 
 
 #%%
 
-# #labeled_scores_Unet.mean()
+dice_scores_ProbUnet_step3_train.mean()
 # unlabeled_scores_Unet.mean()
 
-# #%%
-# import matplotlib.pyplot as plt
+#%%
+import matplotlib.pyplot as plt
 
-# # Draw histogram for dice_scores_Unet
-# #plt.hist(unlabeled_scores_Unet, bins=10, edgecolor='black', alpha=0.7, label='unlabeled_scores_Unet',color='lightblue')
+# Draw histogram for dice_scores_Unet
+plt.hist(dice_scores_ProbUnet_step3_train, bins=10, edgecolor='black', alpha=0.7, label='dice_scores_ProbUnet_step3_train',color='lightblue')
 
-# # Draw histogram for labeled_scores_step1
-# #plt.hist(labeled_scores_step1, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step1',color='orange')
+# Draw histogram for labeled_scores_step1
+plt.hist(dice_scores_ProbUnet_step3_val, bins=10, edgecolor='black', alpha=0.5, label='dice_scores_ProbUnet_step3_val',color='orange')
 
-# # Draw histogram for labeled_scores_step1_192epochs_v46
-# #plt.hist(labeled_scores_step1_256epochs_v49, bins=10, edgecolor='black', alpha=0.3, label='labeled_scores_step1_256epochs_v49', color='purple')
-
-# # Draw histogram for labeled_scores_step2
-# #plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
-
-# # Draw histogram for labeled_scores_step3
-# plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
-
-# # Draw histogram for labeled_scores_step4
-# #plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
+# Draw histogram for labeled_scores_step1_192epochs_v46
+plt.hist(dice_scores_ProbUnet_step3_test, bins=10, edgecolor='black', alpha=0.3, label='dice_scores_ProbUnet_step3_test', color='yellow')
 
 
-# # Add labels and title
-# plt.xlabel('Dice Score')
-# plt.ylabel('Frequency')
-# plt.title('Histogram of Dice Scores')
+# Draw histogram for labeled_scores_step2
+#plt.hist(labeled_scores_step2, bins=10, edgecolor='black', alpha=0.4, label='labeled_scores_step2', color='green')
 
-# # Add legend
-# plt.legend()
+# Draw histogram for labeled_scores_step3
+#plt.hist(labeled_scores_step3, bins=10, edgecolor='black', alpha=0.5, label='labeled_scores_step3', color='yellow')
 
-# # Show the histogram
-# plt.show()
+# Draw histogram for labeled_scores_step4
+#plt.hist(labeled_scores_step4, bins=10, edgecolor='black', alpha=0.6, label='labeled_scores_step4', color='gray')
+
+
+# Add labels and title
+plt.xlabel('Dice Score')
+plt.ylabel('Frequency')
+plt.title('Histogram of Dice Scores')
+
+# Add legend
+plt.legend()
+
+# Show the histogram
+plt.show()
 
 #%% Single image dice evaluation
 
