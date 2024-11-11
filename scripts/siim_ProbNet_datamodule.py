@@ -4,7 +4,7 @@ from lightning import LightningDataModule
 from torch.utils.data import DataLoader
 from siim_dataset import SIIMDataset
 
-from monai.transforms import Compose,LoadImaged, Resized, ScaleIntensityd, RandAffined
+from monai.transforms import Compose, LoadImaged, Resized, ScaleIntensityd, RandAffined
 from monai.transforms import EnsureTyped, AsDiscreted, NormalizeIntensityd
 from custom.augmentations import XRayAugs
 from custom.balanced_data_loader import balanced_data_loader
